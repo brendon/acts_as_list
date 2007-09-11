@@ -1,10 +1,9 @@
-$:.unshift File.dirname(__FILE__) + '/../lib'
-
 require 'test/unit'
 
 require 'rubygems'
 require 'active_record'
 
+$:.unshift File.dirname(__FILE__) + '/../lib'
 require File.dirname(__FILE__) + '/../init'
 
 ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :dbfile => ":memory:")
