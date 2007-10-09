@@ -187,7 +187,40 @@ class ListTest < Test::Unit::TestCase
     new2.move_higher
     assert_equal [new2, new1, new3], ListMixin.find(:all, :conditions => 'parent_id IS NULL', :order => 'pos')
   end
-
+  
+  
+  def test_remove_from_list_should_then_fail_in_list? 
+    assert_equal true, ListMixin.find(1).in_list?
+    ListMixin.find(1).remove_from_list
+    assert_equal false, ListMixin.find(1).in_list?
+  end 
+  
+  def test_remove_from_list_should_set_position_to_nil 
+    assert_equal [1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
+  
+    ListMixin.find(2).remove_from_list 
+  
+    assert_equal [2, 1, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
+  
+    assert_equal 1,   ListMixin.find(1).pos
+    assert_equal nil, ListMixin.find(2).pos
+    assert_equal 2,   ListMixin.find(3).pos
+    assert_equal 3,   ListMixin.find(4).pos
+  end 
+  
+  def test_remove_before_destroy_does_not_shift_lower_items_twice 
+    assert_equal [1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
+  
+    ListMixin.find(2).remove_from_list 
+    ListMixin.find(2).destroy 
+  
+    assert_equal [1, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
+  
+    assert_equal 1, ListMixin.find(1).pos
+    assert_equal 2, ListMixin.find(3).pos
+    assert_equal 3, ListMixin.find(4).pos
+  end 
+  
 end
 
 class ListSubTest < Test::Unit::TestCase
