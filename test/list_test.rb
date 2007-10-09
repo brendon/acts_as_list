@@ -1,10 +1,10 @@
 require 'test/unit'
 
 require 'rubygems'
+gem 'activerecord', '>= 1.15.4.7794'
 require 'active_record'
 
-$:.unshift File.dirname(__FILE__) + '/../lib'
-require File.dirname(__FILE__) + '/../init'
+require "#{File.dirname(__FILE__)}/../init"
 
 ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :dbfile => ":memory:")
 
