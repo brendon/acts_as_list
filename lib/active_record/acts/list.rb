@@ -39,11 +39,16 @@ module ActiveRecord
           if configuration[:scope].is_a?(Symbol)
             scope_condition_method = %(
               def scope_condition
-                if #{configuration[:scope].to_s}.nil?
-                  "#{configuration[:scope].to_s} IS NULL"
-                else
-                  "#{configuration[:scope].to_s} = \#{#{configuration[:scope].to_s}}"
+                self.class.send(:sanitize_sql_hash_for_conditions, { :#{configuration[:scope].to_s} => send(:#{configuration[:scope].to_s}) })
+              end
+            )
+          elsif configuration[:scope].is_a?(Array)
+            scope_condition_method = %(
+              def scope_condition
+                attrs = %w(#{configuration[:scope].join(" ")}).inject({}) do |memo,column| 
+                  memo[column.intern] = send(column.intern); memo
                 end
+                self.class.send(:sanitize_sql_hash_for_conditions, attrs)
               end
             )
           else
