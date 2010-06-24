@@ -221,6 +221,27 @@ class ListTest < Test::Unit::TestCase
     assert_equal 3, ListMixin.find(4).pos
   end 
   
+  def test_before_destroy_callbacks_do_not_update_position_to_nil_before_deleting_the_record
+    assert_equal [1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
+
+    # We need to trigger all the before_destroy callbacks without actually
+    # destroying the record so we can see the affect the callbacks have on
+    # the record.
+    list = ListMixin.find(2)
+    if list.respond_to?(:run_callbacks)
+      list.run_callbacks(:destroy)
+    else
+      list.send(:callback, :before_destroy)
+    end
+
+    assert_equal [1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
+
+    assert_equal 1, ListMixin.find(1).pos
+    assert_equal 2, ListMixin.find(2).pos
+    assert_equal 2, ListMixin.find(3).pos
+    assert_equal 3, ListMixin.find(4).pos
+  end
+
 end
 
 class ListSubTest < Test::Unit::TestCase
