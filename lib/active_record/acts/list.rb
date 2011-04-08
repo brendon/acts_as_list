@@ -183,7 +183,11 @@ module ActiveRecord
           end
 
           def add_to_list_bottom
-            self[position_column] = bottom_position_in_list.to_i + 1
+            if self[position_column].nil?
+              self[position_column] = bottom_position_in_list.to_i + 1 
+            else
+              increment_positions_on_lower_items(self[position_column])
+            end
           end
 
           # Overwrite this method to define the scope of the list changes
