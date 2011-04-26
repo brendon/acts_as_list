@@ -30,8 +30,10 @@ module ActiveRecord
         #   (if it hasn't already been added) and use that as the foreign key restriction. It's also possible 
         #   to give it an entire string that is interpolated if you need a tighter scope than just a foreign key.
         #   Example: <tt>acts_as_list :scope => 'todo_list_id = #{todo_list_id} AND completed = 0'</tt>
+        # * +top_of_list+ - defines the integer used for the top of the list. Defaults to 1. Use 0 to make the collection
+        #   act more line an array in it's indexing.
         def acts_as_list(options = {})
-          configuration = { :column => "position", :scope => "1 = 1" }
+          configuration = { :column => "position", :scope => "1 = 1", :top_of_list => 1}
           configuration.update(options) if options.is_a?(Hash)
 
           configuration[:scope] = "#{configuration[:scope]}_id".intern if configuration[:scope].is_a?(Symbol) && configuration[:scope].to_s !~ /_id$/
@@ -58,6 +60,10 @@ module ActiveRecord
           class_eval <<-EOV
             include ActiveRecord::Acts::List::InstanceMethods
 
+            def acts_as_list_top
+              #{configuration[:top_of_list]}.to_i
+            end
+
             def acts_as_list_class
               ::#{self.name}
             end
@@ -80,7 +86,7 @@ module ActiveRecord
       # the first in the list of all chapters.
       module InstanceMethods
         # Insert the item at the given position (defaults to the top position of 1).
-        def insert_at(position = 1)
+        def insert_at(position = acts_as_list_top)
           insert_at_position(position)
         end
 
@@ -147,7 +153,7 @@ module ActiveRecord
         # Return +true+ if this object is the first in the list.
         def first?
           return false unless in_list?
-          self.send(position_column) == 1
+          self.send(position_column) == acts_as_list_top
         end
 
         # Return +true+ if this object is the last in the list.
@@ -184,7 +190,7 @@ module ActiveRecord
 
           def add_to_list_bottom
             if self[position_column].nil?
-              self[position_column] = bottom_position_in_list.to_i + 1 
+              self[position_column] = bottom_position_in_list.to_i + 1
             else
               increment_positions_on_lower_items(self[position_column])
             end
@@ -197,7 +203,7 @@ module ActiveRecord
           #   bottom_position_in_list    # => 2
           def bottom_position_in_list(except = nil)
             item = bottom_item(except)
-            item ? item.send(position_column) : 0
+            item ? item.send(position_column) : acts_as_list_top - 1
           end
 
           # Returns the bottom item
@@ -214,7 +220,7 @@ module ActiveRecord
 
           # Forces item to assume the top position in the list.
           def assume_top_position
-            update_attribute(position_column, 1)
+            update_attribute(position_column, acts_as_list_top)
           end
 
           # This has the effect of moving all the higher items up one.
