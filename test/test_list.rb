@@ -1,10 +1,11 @@
-require 'test/unit'
+# NOTE: following now done in helper.rb (better Readability)
+#require 'test/unit'
+#require 'rubygems'
+#gem 'activerecord', '>= 1.15.4.7794' 
+#require 'active_record'
+#require "#{File.dirname(__FILE__)}/../init"
+require 'helper.rb'
 
-require 'rubygems'
-gem 'activerecord', '>= 1.15.4.7794'
-require 'active_record'
-
-require "#{File.dirname(__FILE__)}/../init"
 
 ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
 
@@ -18,6 +19,11 @@ def setup_db
       t.column :updated_at, :datetime
     end
   end
+end
+
+# Returns true if ActiveRecord is rails3 version
+def rails_3
+  defined?(ActiveRecord::VERSION) && ActiveRecord::VERSION::MAJOR >= 3
 end
 
 def teardown_db
@@ -331,10 +337,13 @@ class ListTest < Test::Unit::TestCase
 
     # We need to trigger all the before_destroy callbacks without actually
     # destroying the record so we can see the affect the callbacks have on
-    # the record.
+    # the record. 
+    # NOTE: Hotfix for rails3 ActiveRecord
     list = ListMixin.find(2)
     if list.respond_to?(:run_callbacks)
-      list.run_callbacks(:before_destroy)
+      # Refactored to work according to Rails3 ActiveRSupport Callbacks <http://api.rubyonrails.org/classes/ActiveSupport/Callbacks.html>
+      list.run_callbacks :destroy, :before if rails_3 
+      list.run_callbacks(:before_destroy) if !rails_3
     else
       list.send(:callback, :before_destroy)
     end
@@ -534,7 +543,7 @@ class ArrayScopeListTest < Test::Unit::TestCase
 
   def test_injection
     item = ArrayScopeListMixin.new(:parent_id => 1, :parent_type => 'ParentClass')
-    assert_equal '"mixins"."parent_type" = \'ParentClass\' AND "mixins"."parent_id" = 1', item.scope_condition
+    assert_equal '"mixins"."parent_id" = 1 AND "mixins"."parent_type" = \'ParentClass\'', item.scope_condition
     assert_equal "pos", item.position_column
   end
 
