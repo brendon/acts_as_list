@@ -1,9 +1,4 @@
 # NOTE: following now done in helper.rb (better Readability)
-#require 'test/unit'
-#require 'rubygems'
-#gem 'activerecord', '>= 1.15.4.7794' 
-#require 'active_record'
-#require "#{File.dirname(__FILE__)}/../init"
 require 'helper.rb'
 
 
@@ -15,7 +10,7 @@ def setup_db
       t.column :pos, :integer
       t.column :parent_id, :integer
       t.column :parent_type, :string
-      t.column :created_at, :datetime      
+      t.column :created_at, :datetime
       t.column :updated_at, :datetime
     end
   end
@@ -97,7 +92,6 @@ class ZeroBasedTest < Test::Unit::TestCase
     assert new.first?
     assert new.last?
   end
-
 
   def test_reordering
     assert_equal [1, 2, 3, 4], ZeroBasedMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
@@ -300,49 +294,49 @@ class ListTest < Test::Unit::TestCase
     assert_equal [new2, new1, new3], ListMixin.find(:all, :conditions => 'parent_id IS NULL', :order => 'pos')
   end
 
-  def test_remove_from_list_should_then_fail_in_list? 
+  def test_remove_from_list_should_then_fail_in_list?
     assert_equal true, ListMixin.find(1).in_list?
     ListMixin.find(1).remove_from_list
     assert_equal false, ListMixin.find(1).in_list?
-  end 
-  
-  def test_remove_from_list_should_set_position_to_nil 
+  end
+
+  def test_remove_from_list_should_set_position_to_nil
     assert_equal [1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
-  
-    ListMixin.find(2).remove_from_list 
-  
+
+    ListMixin.find(2).remove_from_list
+
     assert_equal [2, 1, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
-  
+
     assert_equal 1,   ListMixin.find(1).pos
     assert_equal nil, ListMixin.find(2).pos
     assert_equal 2,   ListMixin.find(3).pos
     assert_equal 3,   ListMixin.find(4).pos
-  end 
-  
-  def test_remove_before_destroy_does_not_shift_lower_items_twice 
+  end
+
+  def test_remove_before_destroy_does_not_shift_lower_items_twice
     assert_equal [1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
-  
-    ListMixin.find(2).remove_from_list 
-    ListMixin.find(2).destroy 
-  
+
+    ListMixin.find(2).remove_from_list
+    ListMixin.find(2).destroy
+
     assert_equal [1, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
-  
+
     assert_equal 1, ListMixin.find(1).pos
     assert_equal 2, ListMixin.find(3).pos
     assert_equal 3, ListMixin.find(4).pos
-  end 
-  
+  end
+
   def test_before_destroy_callbacks_do_not_update_position_to_nil_before_deleting_the_record
     assert_equal [1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
 
     # We need to trigger all the before_destroy callbacks without actually
     # destroying the record so we can see the affect the callbacks have on
-    # the record. 
+    # the record.
     # NOTE: Hotfix for rails3 ActiveRecord
     list = ListMixin.find(2)
     if list.respond_to?(:run_callbacks)
       # Refactored to work according to Rails3 ActiveRSupport Callbacks <http://api.rubyonrails.org/classes/ActiveSupport/Callbacks.html>
-      list.run_callbacks :destroy, :before if rails_3 
+      list.run_callbacks :destroy, :before if rails_3
       list.run_callbacks(:before_destroy) if !rails_3
     else
       list.send(:callback, :before_destroy)
@@ -355,7 +349,7 @@ class ListTest < Test::Unit::TestCase
     assert_equal 2, ListMixin.find(3).pos
     assert_equal 3, ListMixin.find(4).pos
   end
-  
+
   def test_before_create_callback_adds_to_bottom
     assert_equal [1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
 
@@ -363,9 +357,9 @@ class ListTest < Test::Unit::TestCase
     assert_equal 5, new.pos
     assert !new.first?
     assert new.last?
-  
+
     assert_equal [1, 2, 3, 4, 5], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
-  end 
+  end
 
   def test_before_create_callback_adds_to_given_position
     assert_equal [1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
@@ -374,7 +368,7 @@ class ListTest < Test::Unit::TestCase
     assert_equal 1, new.pos
     assert new.first?
     assert !new.last?
-  
+
     assert_equal [5, 1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
 
     new = ListMixin.create(:pos => 3, :parent_id => 5)
@@ -383,7 +377,7 @@ class ListTest < Test::Unit::TestCase
     assert !new.last?
 
     assert_equal [5, 1, 6, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
-  end 
+  end
 
 end
 
@@ -622,38 +616,38 @@ class ArrayScopeListTest < Test::Unit::TestCase
     assert_equal 1, ArrayScopeListMixin.find(3).pos
     assert_equal 2, ArrayScopeListMixin.find(4).pos
   end
-  
-  def test_remove_from_list_should_then_fail_in_list? 
+
+  def test_remove_from_list_should_then_fail_in_list?
     assert_equal true, ArrayScopeListMixin.find(1).in_list?
     ArrayScopeListMixin.find(1).remove_from_list
     assert_equal false, ArrayScopeListMixin.find(1).in_list?
-  end 
-  
-  def test_remove_from_list_should_set_position_to_nil 
+  end
+
+  def test_remove_from_list_should_set_position_to_nil
     assert_equal [1, 2, 3, 4], ArrayScopeListMixin.find(:all, :conditions => "parent_id = 5 AND parent_type = 'ParentClass'", :order => 'pos').map(&:id)
-  
-    ArrayScopeListMixin.find(2).remove_from_list 
-  
+
+    ArrayScopeListMixin.find(2).remove_from_list
+
     assert_equal [2, 1, 3, 4], ArrayScopeListMixin.find(:all, :conditions => "parent_id = 5 AND parent_type = 'ParentClass'", :order => 'pos').map(&:id)
-  
+
     assert_equal 1,   ArrayScopeListMixin.find(1).pos
     assert_equal nil, ArrayScopeListMixin.find(2).pos
     assert_equal 2,   ArrayScopeListMixin.find(3).pos
     assert_equal 3,   ArrayScopeListMixin.find(4).pos
-  end 
-  
-  def test_remove_before_destroy_does_not_shift_lower_items_twice 
+  end
+
+  def test_remove_before_destroy_does_not_shift_lower_items_twice
     assert_equal [1, 2, 3, 4], ArrayScopeListMixin.find(:all, :conditions => "parent_id = 5 AND parent_type = 'ParentClass'", :order => 'pos').map(&:id)
-  
-    ArrayScopeListMixin.find(2).remove_from_list 
-    ArrayScopeListMixin.find(2).destroy 
-  
+
+    ArrayScopeListMixin.find(2).remove_from_list
+    ArrayScopeListMixin.find(2).destroy
+
     assert_equal [1, 3, 4], ArrayScopeListMixin.find(:all, :conditions => "parent_id = 5 AND parent_type = 'ParentClass'", :order => 'pos').map(&:id)
-  
+
     assert_equal 1, ArrayScopeListMixin.find(1).pos
     assert_equal 2, ArrayScopeListMixin.find(3).pos
     assert_equal 3, ArrayScopeListMixin.find(4).pos
-  end 
-  
+  end
+
 end
 
