@@ -21,11 +21,11 @@ Gem::Specification.new do |s|
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ['lib']
-  
-  
+
+
   # Dependencies (installed via 'bundle install')...
   s.add_development_dependency("bundler", ["~> 1.0.0"])
   s.add_development_dependency("activerecord", [">= 1.15.4.7794"])
   s.add_development_dependency("rdoc")
-  s.add_development_dependency("sqlite3-ruby")
+  s.add_development_dependency("sqlite3")
 end

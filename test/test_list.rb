@@ -1,11 +1,5 @@
 # NOTE: following now done in helper.rb (better Readability)
-#require 'test/unit'
-#require 'rubygems'
-#gem 'activerecord', '>= 1.15.4.7794'
-#require 'active_record'
-#require "#{File.dirname(__FILE__)}/../init"
 require 'helper.rb'
-
 
 ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
 
@@ -97,7 +91,6 @@ class ZeroBasedTest < Test::Unit::TestCase
     assert new.first?
     assert new.last?
   end
-
 
   def test_reordering
     assert_equal [1, 2, 3, 4], ZeroBasedMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
@@ -384,7 +377,6 @@ class ListTest < Test::Unit::TestCase
 
     assert_equal [5, 1, 6, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
   end
-  
 end
 
 class ListSubTest < Test::Unit::TestCase
@@ -656,4 +648,3 @@ class ArrayScopeListTest < Test::Unit::TestCase
   end
 
 end
-
