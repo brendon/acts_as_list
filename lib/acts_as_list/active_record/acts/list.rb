@@ -273,9 +273,17 @@ module ActiveRecord
           end
 
           def insert_at_position(position)
-            remove_from_list
+            store_at_0
             increment_positions_on_lower_items(position)
             self.update_attribute(position_column, position)
+          end
+
+          # used by insert_at_position instead of remove_from_list, as postgresql raises error if position_column has non-null constraint
+          def store_at_0
+            if in_list?
+              decrement_positions_on_lower_items
+              update_attribute(position_column, 0)
+            end
           end
       end 
     end
