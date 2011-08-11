@@ -180,7 +180,19 @@ module ActiveRecord
 
         # Test if this record is in a list
         def in_list?
-          !send(position_column).nil?
+          !not_in_list?
+        end
+        
+        def not_in_list?
+          send(position_column).nil?
+        end
+        
+        def default_position
+          acts_as_list_class.columns_hash[position_column.to_s].default
+        end
+
+        def default_position?
+          default_position == send(position_column)
         end
 
         private
@@ -189,7 +201,7 @@ module ActiveRecord
           end
 
           def add_to_list_bottom
-            if self[position_column].nil?
+            if not_in_list? || default_position?
               self[position_column] = bottom_position_in_list.to_i + 1
             else
               increment_positions_on_lower_items(self[position_column])
