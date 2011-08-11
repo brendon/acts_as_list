@@ -18,8 +18,11 @@ This `acts_as extension` provides the capabilities for sorting and reordering a 
     
     todo_list.first.move_to_bottom
     todo_list.last.move_higher
+    
+## Notes
+If the `position` column has a default value, then there is a slight change in behavior, i.e if you have 4 items in the list, and you insert 1, with a default position 0, it would be pushed to the bottom of the list. Please look at the tests for this and some recent pull requests for discussions related to this.
 
-## Contributing to acts_as_list
+## Contributing to `acts_as_list`
  
 - Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
 - Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
