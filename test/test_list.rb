@@ -71,6 +71,12 @@ class ZeroBasedMixin < ActiveRecord::Base
   def self.table_name() "mixins" end
 end
 
+class DefaultScopedMixin < ActiveRecord::Base
+  set_table_name 'mixins'
+  acts_as_list :column => "pos"
+  default_scope order('pos ASC')
+end
+
 class ZeroBasedTest < Test::Unit::TestCase
    def setup
     setup_db
@@ -1245,6 +1251,92 @@ class ArrayScopeListTestWithDefault < Test::Unit::TestCase
     assert_equal 1, ArrayScopeListMixin.find(1).pos
     assert_equal 2, ArrayScopeListMixin.find(3).pos
     assert_equal 3, ArrayScopeListMixin.find(4).pos
+  end
+
+end
+
+class DefaultScopedTest < Test::Unit::TestCase
+  def setup
+    setup_db
+    (1..4).each { |counter| DefaultScopedMixin.create! :pos => counter }
+  end
+
+  def teardown
+    teardown_db
+  end
+
+  def test_insert
+    new = DefaultScopedMixin.create
+    assert_equal 5, new.pos
+    assert !new.first?
+    assert new.last?
+
+    new = DefaultScopedMixin.create
+    assert_equal 6, new.pos
+    assert !new.first?
+    assert new.last?
+
+    new = DefaultScopedMixin.create
+    assert_equal 7, new.pos
+    assert !new.first?
+    assert new.last?
+  end
+
+  def test_reordering
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.find(:all).map(&:id)
+
+    DefaultScopedMixin.find(2).move_lower
+    assert_equal [1, 3, 2, 4], DefaultScopedMixin.find(:all).map(&:id)
+
+    DefaultScopedMixin.find(2).move_higher
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.find(:all).map(&:id)
+
+    DefaultScopedMixin.find(1).move_to_bottom
+    assert_equal [2, 3, 4, 1], DefaultScopedMixin.find(:all).map(&:id)
+
+    DefaultScopedMixin.find(1).move_to_top
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.find(:all).map(&:id)
+
+    DefaultScopedMixin.find(2).move_to_bottom
+    assert_equal [1, 3, 4, 2], DefaultScopedMixin.find(:all).map(&:id)
+
+    DefaultScopedMixin.find(4).move_to_top
+    assert_equal [4, 1, 3, 2], DefaultScopedMixin.find(:all).map(&:id)
+  end
+
+  def test_insert_at
+    new = DefaultScopedMixin.create
+    assert_equal 5, new.pos
+
+    new = DefaultScopedMixin.create
+    assert_equal 6, new.pos
+
+    new = DefaultScopedMixin.create
+    assert_equal 7, new.pos
+
+    new4 = DefaultScopedMixin.create
+    assert_equal 8, new4.pos
+
+    new4.insert_at(2)
+    assert_equal 2, new4.pos
+
+    new.reload
+    assert_equal 8, new.pos
+
+    new.insert_at(2)
+    assert_equal 2, new.pos
+
+    new4.reload
+    assert_equal 3, new4.pos
+
+    new5 = DefaultScopedMixin.create
+    assert_equal 9, new5.pos
+
+    new5.insert_at(1)
+    assert_equal 1, new5.pos
+
+    new4.reload
+    assert_equal 4, new4.pos
   end
 
 end
