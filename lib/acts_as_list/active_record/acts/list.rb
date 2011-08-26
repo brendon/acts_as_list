@@ -243,10 +243,11 @@ module ActiveRecord
           end
 
           # This has the effect of moving all the lower items up one.
-          def decrement_positions_on_lower_items
+          def decrement_positions_on_lower_items(position=nil)
             return unless in_list?
+            position ||= send(position_column).to_i
             acts_as_list_class.update_all(
-              "#{position_column} = (#{position_column} - 1)", "#{scope_condition} AND #{position_column} > #{send(position_column).to_i}"
+              "#{position_column} = (#{position_column} - 1)", "#{scope_condition} AND #{position_column} > #{position}"
             )
           end
 
@@ -281,8 +282,9 @@ module ActiveRecord
           # used by insert_at_position instead of remove_from_list, as postgresql raises error if position_column has non-null constraint
           def store_at_0
             if in_list?
-              decrement_positions_on_lower_items
+              old_position = send(position_column).to_i
               update_attribute(position_column, 0)
+              decrement_positions_on_lower_items(old_position)
             end
           end
       end 
