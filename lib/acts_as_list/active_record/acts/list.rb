@@ -31,7 +31,7 @@ module ActiveRecord
         #   to give it an entire string that is interpolated if you need a tighter scope than just a foreign key.
         #   Example: <tt>acts_as_list :scope => 'todo_list_id = #{todo_list_id} AND completed = 0'</tt>
         # * +top_of_list+ - defines the integer used for the top of the list. Defaults to 1. Use 0 to make the collection
-        #   act more line an array in it's indexing.
+        #   act more like an array in its indexing.
         def acts_as_list(options = {})
           configuration = { :column => "position", :scope => "1 = 1", :top_of_list => 1}
           configuration.update(options) if options.is_a?(Hash)
