@@ -4,10 +4,10 @@ require 'helper'
 ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
 ActiveRecord::Schema.verbose = false
 
-def setup_db
+def setup_db(position_options = {})
   ActiveRecord::Schema.define(:version => 1) do
     create_table :mixins do |t|
-      t.column :pos, :integer
+      t.column :pos, :integer, position_options
       t.column :parent_id, :integer
       t.column :parent_type, :string
       t.column :created_at, :datetime
@@ -17,15 +17,7 @@ def setup_db
 end
 
 def setup_db_with_default
-  ActiveRecord::Schema.define(:version => 1) do
-    create_table :mixins do |t|
-      t.column :pos, :integer, :default => 0
-      t.column :parent_id, :integer
-      t.column :parent_type, :string
-      t.column :created_at, :datetime
-      t.column :updated_at, :datetime
-    end
-  end
+  setup_db :default => 0
 end
 
 # Returns true if ActiveRecord is rails3 version
