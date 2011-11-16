@@ -2,6 +2,7 @@
 require 'helper.rb'
 
 ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
+ActiveRecord::Schema.verbose = false
 
 def setup_db
   ActiveRecord::Schema.define(:version => 1) do
