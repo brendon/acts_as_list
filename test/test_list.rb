@@ -66,16 +66,16 @@ class ActsAsListTestCase < Test::Unit::TestCase
   # No default test required a this class is abstract.
   # Need for test/unit.
   undef_method :default_test if method_defined?(:default_test)
+
+  def teardown
+    teardown_db
+  end
 end
 
 class ZeroBasedTest < ActsAsListTestCase
    def setup
     setup_db
      (1..4).each { |counter| ZeroBasedMixin.create! :pos => counter, :parent_id => 5 }
-  end
-
-  def teardown
-    teardown_db
   end
 
   def test_insert
@@ -165,10 +165,6 @@ class ListTest < ActsAsListTestCase
   def setup
     setup_db
     (1..4).each { |counter| ListMixin.create! :pos => counter, :parent_id => 5 }
-  end
-
-  def teardown
-    teardown_db
   end
 
   def test_reordering
@@ -394,10 +390,6 @@ class ListSubTest < ActsAsListTestCase
     (1..4).each { |i| ((i % 2 == 1) ? ListMixinSub1 : ListMixinSub2).create! :pos => i, :parent_id => 5000 }
   end
 
-  def teardown
-    teardown_db
-  end
-
   def test_reordering
     assert_equal [1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5000', :order => 'pos').map(&:id)
 
@@ -500,10 +492,6 @@ class ArrayScopeListTest < ActsAsListTestCase
   def setup
     setup_db
     (1..4).each { |counter| ArrayScopeListMixin.create! :pos => counter, :parent_id => 5, :parent_type => 'ParentClass' }
-  end
-
-  def teardown
-    teardown_db
   end
 
   def test_reordering
@@ -663,10 +651,6 @@ class ZeroBasedTestWithDefault < ActsAsListTestCase
      (1..4).each { |counter| ZeroBasedMixin.create! :pos => counter, :parent_id => 5 }
   end
 
-  def teardown
-    teardown_db
-  end
-
   def test_insert
     new = ZeroBasedMixin.create(:parent_id => 20)
     assert_equal 0, new.pos
@@ -754,10 +738,6 @@ class ListTestWithDefault < ActsAsListTestCase
   def setup
     setup_db_with_default
     (1..4).each { |counter| ListMixin.create! :pos => counter, :parent_id => 5 }
-  end
-
-  def teardown
-    teardown_db
   end
 
   def test_reordering
@@ -983,10 +963,6 @@ class ListSubTestWithDefault < ActsAsListTestCase
     (1..4).each { |i| ((i % 2 == 1) ? ListMixinSub1 : ListMixinSub2).create! :pos => i, :parent_id => 5000 }
   end
 
-  def teardown
-    teardown_db
-  end
-
   def test_reordering
     assert_equal [1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5000', :order => 'pos').map(&:id)
 
@@ -1089,10 +1065,6 @@ class ArrayScopeListTestWithDefault < ActsAsListTestCase
   def setup
     setup_db_with_default
     (1..4).each { |counter| ArrayScopeListMixin.create! :pos => counter, :parent_id => 5, :parent_type => 'ParentClass' }
-  end
-
-  def teardown
-    teardown_db
   end
 
   def test_reordering
@@ -1250,10 +1222,6 @@ class DefaultScopedTest < ActsAsListTestCase
   def setup
     setup_db
     (1..4).each { |counter| DefaultScopedMixin.create! :pos => counter }
-  end
-
-  def teardown
-    teardown_db
   end
 
   def test_insert
