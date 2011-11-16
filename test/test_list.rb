@@ -62,7 +62,13 @@ class DefaultScopedMixin < Mixin
   default_scope { order('pos ASC') }
 end
 
-class ZeroBasedTest < Test::Unit::TestCase
+class ActsAsListTestCase < Test::Unit::TestCase
+  # No default test required a this class is abstract.
+  # Need for test/unit.
+  undef_method :default_test if method_defined?(:default_test)
+end
+
+class ZeroBasedTest < ActsAsListTestCase
    def setup
     setup_db
      (1..4).each { |counter| ZeroBasedMixin.create! :pos => counter, :parent_id => 5 }
@@ -154,7 +160,7 @@ class ZeroBasedTest < Test::Unit::TestCase
 end
 
 
-class ListTest < Test::Unit::TestCase
+class ListTest < ActsAsListTestCase
 
   def setup
     setup_db
@@ -381,7 +387,7 @@ class ListTest < Test::Unit::TestCase
   end
 end
 
-class ListSubTest < Test::Unit::TestCase
+class ListSubTest < ActsAsListTestCase
 
   def setup
     setup_db
@@ -489,7 +495,7 @@ class ListSubTest < Test::Unit::TestCase
 
 end
 
-class ArrayScopeListTest < Test::Unit::TestCase
+class ArrayScopeListTest < ActsAsListTestCase
 
   def setup
     setup_db
@@ -651,7 +657,7 @@ class ArrayScopeListTest < Test::Unit::TestCase
 
 end
 
-class ZeroBasedTestWithDefault < Test::Unit::TestCase
+class ZeroBasedTestWithDefault < ActsAsListTestCase
    def setup
     setup_db_with_default
      (1..4).each { |counter| ZeroBasedMixin.create! :pos => counter, :parent_id => 5 }
@@ -743,7 +749,7 @@ class ZeroBasedTestWithDefault < Test::Unit::TestCase
 end
 
 
-class ListTestWithDefault < Test::Unit::TestCase
+class ListTestWithDefault < ActsAsListTestCase
 
   def setup
     setup_db_with_default
@@ -970,7 +976,7 @@ class ListTestWithDefault < Test::Unit::TestCase
   end
 end
 
-class ListSubTestWithDefault < Test::Unit::TestCase
+class ListSubTestWithDefault < ActsAsListTestCase
 
   def setup
     setup_db_with_default
@@ -1078,7 +1084,7 @@ class ListSubTestWithDefault < Test::Unit::TestCase
 
 end
 
-class ArrayScopeListTestWithDefault < Test::Unit::TestCase
+class ArrayScopeListTestWithDefault < ActsAsListTestCase
 
   def setup
     setup_db_with_default
@@ -1240,7 +1246,7 @@ class ArrayScopeListTestWithDefault < Test::Unit::TestCase
 
 end
 
-class DefaultScopedTest < Test::Unit::TestCase
+class DefaultScopedTest < ActsAsListTestCase
   def setup
     setup_db
     (1..4).each { |counter| DefaultScopedMixin.create! :pos => counter }
