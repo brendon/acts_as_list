@@ -1,5 +1,5 @@
 # NOTE: following now done in helper.rb (better Readability)
-require 'helper.rb'
+require 'helper'
 
 ActiveRecord::Base.establish_connection(:adapter => "sqlite3", :database => ":memory:")
 ActiveRecord::Schema.verbose = false
