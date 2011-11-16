@@ -40,12 +40,11 @@ def teardown_db
 end
 
 class Mixin < ActiveRecord::Base
+  set_table_name 'mixins'
 end
 
 class ListMixin < Mixin
   acts_as_list :column => "pos", :scope => :parent
-
-  def self.table_name() "mixins" end
 end
 
 class ListMixinSub1 < ListMixin
@@ -54,28 +53,21 @@ end
 class ListMixinSub2 < ListMixin
 end
 
-class ListWithStringScopeMixin < ActiveRecord::Base
+class ListWithStringScopeMixin < Mixin
   acts_as_list :column => "pos", :scope => 'parent_id = #{parent_id}'
-
-  def self.table_name() "mixins" end
 end
 
 class ArrayScopeListMixin < Mixin
   acts_as_list :column => "pos", :scope => [:parent_id, :parent_type]
-
-  def self.table_name() "mixins" end
 end
 
-class ZeroBasedMixin < ActiveRecord::Base
+class ZeroBasedMixin < Mixin
   acts_as_list :column => "pos", :top_of_list => 0, :scope => [:parent_id]
-
-  def self.table_name() "mixins" end
 end
 
-class DefaultScopedMixin < ActiveRecord::Base
-  set_table_name 'mixins'
+class DefaultScopedMixin < Mixin
   acts_as_list :column => "pos"
-  default_scope order('pos ASC')
+  default_scope { order('pos ASC') }
 end
 
 class ZeroBasedTest < Test::Unit::TestCase
