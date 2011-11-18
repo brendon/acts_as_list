@@ -52,6 +52,11 @@ class ListMixinSub1 < ListMixin
 end
 
 class ListMixinSub2 < ListMixin
+  if rails_3
+    validates :pos, :presence => true
+  else
+    validates_presence_of :pos
+  end
 end
 
 class ListWithStringScopeMixin < ActiveRecord::Base
