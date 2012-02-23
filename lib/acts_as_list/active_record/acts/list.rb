@@ -273,9 +273,37 @@ module ActiveRecord
             )
           end
 
+          # Reorders intermediate items to support moving an item from old_position to new_position.
+          def shuffle_positions_on_intermediate_items(old_position, new_position)
+            return if old_position == new_position
+
+            if old_position < new_position
+              # Decrement position of intermediate items
+              #
+              # e.g., if moving an item from 2 to 5,
+              # move [3, 4, 5] to [2, 3, 4]
+              acts_as_list_class.update_all(
+                "#{position_column} = (#{position_column} - 1)", "#{scope_condition} AND #{position_column} > #{old_position} AND #{position_column} <= #{new_position}"
+              )
+            else
+              # Increment position of intermediate items
+              #
+              # e.g., if moving an item from 5 to 2,
+              # move [2, 3, 4] to [3, 4, 5]
+              acts_as_list_class.update_all(
+                "#{position_column} = (#{position_column} + 1)", "#{scope_condition} AND #{position_column} >= #{new_position} AND #{position_column} < #{old_position}"
+              )
+            end
+          end
+
           def insert_at_position(position)
-            store_at_0
-            increment_positions_on_lower_items(position)
+            if in_list?
+              old_position = send(position_column).to_i
+              return if position == old_position
+              shuffle_positions_on_intermediate_items(old_position, position)
+            else
+              increment_positions_on_lower_items(position)
+            end
             self.update_attribute(position_column, position)
           end
 
