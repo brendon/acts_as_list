@@ -6,7 +6,7 @@ ActiveRecord::Schema.verbose = false
 
 def setup_db(position_options = {})
   # AR caches columns options like defaults etc. Clear them!
-  ActiveRecord::Base.connection_pool.clear_cache!
+  ActiveRecord::Base.connection.schema_cache.clear!
   ActiveRecord::Schema.define(:version => 1) do
     create_table :mixins do |t|
       t.column :pos, :integer, position_options
@@ -34,7 +34,7 @@ def teardown_db
 end
 
 class Mixin < ActiveRecord::Base
-  set_table_name 'mixins'
+  self.table_name = 'mixins'
 end
 
 class ListMixin < Mixin
