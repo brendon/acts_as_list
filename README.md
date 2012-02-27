@@ -25,6 +25,9 @@ If the `position` column has a default value, then there is a slight change in b
 ## Versions
 All versions `0.1.5` onwards require Rails 3.0.x and higher.
 
+## Build Status
+[![Build Status](https://secure.travis-ci.org/swanandp/acts_as_list.png)](https://secure.travis-ci.org/swanandp/acts_as_list)
+
 ## Roadmap
 
 1. Sort based feature
