@@ -2,7 +2,7 @@
 
 ## Description
 
-This `acts_as extension` provides the capabilities for sorting and reordering a number of objects in a list. The class that has this specified needs to have a `position` column defined as an integer on the mapped database table.
+This `acts_as` extension provides the capabilities for sorting and reordering a number of objects in a list. The class that has this specified needs to have a `position` column defined as an integer on the mapped database table.
 
 
 ## Example
@@ -22,6 +22,14 @@ This `acts_as extension` provides the capabilities for sorting and reordering a 
 ## Notes
 If the `position` column has a default value, then there is a slight change in behavior, i.e if you have 4 items in the list, and you insert 1, with a default position 0, it would be pushed to the bottom of the list. Please look at the tests for this and some recent pull requests for discussions related to this.
 
+## Versions
+All versions `0.1.5` onwards require Rails 3.0.x and higher.
+
+## Roadmap
+
+1. Sort based feature
+2. Rails 4 compatibility and bye bye Rails 2! Older versions would of course continue to work with Rails 2, but there won't be any support on those.
+
 ## Contributing to `acts_as_list`
  
 - Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
@@ -31,6 +39,7 @@ If the `position` column has a default value, then there is a slight change in b
 - Commit and push until you are happy with your contribution
 - Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.
 - Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.
+- I would recommend using Rails 3.1.x and higher for testing the build before a pull request. The current test harness does not quite work with 3.0.x. The plugin itself works, but the issue lies with testing infrastructure.
 
 ## Copyright
 
