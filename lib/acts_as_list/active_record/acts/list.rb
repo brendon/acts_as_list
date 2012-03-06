@@ -199,7 +199,7 @@ module ActiveRecord
         private
           def add_to_list_top
             increment_positions_on_all_items
-            assume_top_position
+            self[position_column] = acts_as_list_top
           end
 
           def add_to_list_bottom
