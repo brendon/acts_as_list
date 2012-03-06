@@ -4,4 +4,5 @@ module Shared
   autoload :ListSub,        'shared_list_sub'
   autoload :ZeroBased,      'shared_zero_based'
   autoload :ArrayScopeList, 'shared_array_scope_list'
+  autoload :TopAddition,    'shared_top_addition'
 end
