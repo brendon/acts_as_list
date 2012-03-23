@@ -1,2 +1,22 @@
 require 'acts_as_list/active_record/acts/list'
-ActiveRecord::Base.class_eval { include ActiveRecord::Acts::List }
+
+module ActsAsList
+  if defined? Rails::Railtie
+    require 'rails'
+    class Railtie < Rails::Railtie
+      initializer 'acts_as_list.insert_into_active_record' do
+        ActiveSupport.on_load :active_record do
+          ActsAsList::Railtie.insert
+        end
+      end
+    end
+  end
+
+  class Railtie
+    def self.insert
+      if defined?(ActiveRecord)
+        ActiveRecord::Base.send(:include, ActiveRecord::Acts::List)
+      end
+    end
+  end
+end
