@@ -32,8 +32,9 @@ module ActiveRecord
         #   Example: <tt>acts_as_list :scope => 'todo_list_id = #{todo_list_id} AND completed = 0'</tt>
         # * +top_of_list+ - defines the integer used for the top of the list. Defaults to 1. Use 0 to make the collection
         #   act more like an array in its indexing.
+        # * +add_new_at+ - specifies whether objects get added to the :top or :bottom of the list. (default: +bottom+)
         def acts_as_list(options = {})
-          configuration = { :column => "position", :scope => "1 = 1", :top_of_list => 1}
+          configuration = { :column => "position", :scope => "1 = 1", :top_of_list => 1, :add_new_at => :bottom}
           configuration.update(options) if options.is_a?(Hash)
 
           configuration[:scope] = "#{configuration[:scope]}_id".intern if configuration[:scope].is_a?(Symbol) && configuration[:scope].to_s !~ /_id$/
@@ -75,7 +76,7 @@ module ActiveRecord
             #{scope_condition_method}
 
             after_destroy :decrement_positions_on_lower_items
-            before_validation :add_to_list_bottom, :on => :create
+            before_validation :add_to_list_#{configuration[:add_new_at]}, :on => :create
           EOV
         end
       end
@@ -198,6 +199,7 @@ module ActiveRecord
         private
           def add_to_list_top
             increment_positions_on_all_items
+            self[position_column] = acts_as_list_top
           end
 
           def add_to_list_bottom
