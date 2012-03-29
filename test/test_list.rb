@@ -69,6 +69,10 @@ class DefaultScopedMixin < Mixin
   default_scope { order('pos ASC') }
 end
 
+class TopAdditionMixin < Mixin
+  acts_as_list :column => "pos", :add_new_at => :top, :scope => :parent_id
+end
+
 class ActsAsListTestCase < Test::Unit::TestCase
   # No default test required a this class is abstract.
   # Need for test/unit.
@@ -231,4 +235,23 @@ class DefaultScopedTest < ActsAsListTestCase
     assert_equal 4, new4.pos
   end
 
+end
+
+#class TopAdditionMixin < Mixin
+
+class TopAdditionTest < ActsAsListTestCase
+  include Shared::TopAddition
+  def setup
+    setup_db
+    super
+  end
+end
+
+class TopAdditionTestWithDefault < ActsAsListTestCase
+  include Shared::TopAddition
+
+  def setup
+    setup_db_with_default
+    super
+  end
 end
