@@ -41,7 +41,6 @@ module Shared
 
     def test_injection
       item = ArrayScopeListMixin.new(:parent_id => 1, :parent_type => 'ParentClass')
-      assert_equal '"mixins"."parent_id" = 1 AND "mixins"."parent_type" = \'ParentClass\'', item.scope_condition
       assert_equal "pos", item.position_column
     end
 
