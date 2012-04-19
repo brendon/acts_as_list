@@ -76,7 +76,7 @@ module ActiveRecord
             #{scope_condition_method}
 
             after_destroy :decrement_positions_on_lower_items
-            before_validation :add_to_list_#{configuration[:add_new_at]}, :on => :create
+            before_create :add_to_list_#{configuration[:add_new_at]}
           EOV
         end
       end

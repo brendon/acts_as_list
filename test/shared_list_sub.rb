@@ -52,7 +52,7 @@ module Shared
       new = ListMixinSub1.create("parent_id" => 20)
       assert_equal 2, new.pos
 
-      new = ListMixinSub2.create("parent_id" => 20)
+      new = ListMixinSub1.create("parent_id" => 20)
       assert_equal 3, new.pos
 
       new4 = ListMixin.create("parent_id" => 20)

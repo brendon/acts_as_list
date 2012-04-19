@@ -71,17 +71,6 @@ module Shared
       assert_equal 3, new4.pos
     end
 
-    def test_insert_middle_with_unsaved_item
-      assert_equal [4, 3, 2, 1], TopAdditionMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
-
-      # new item, not saved yet
-      insert_this = TopAdditionMixin.new(:parent_id => 5)
-      insert_this.insert_at(2)
-
-      assert_equal [1, 2, 3, 4, 5], TopAdditionMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:pos)
-      assert_equal [4, 5, 3, 2, 1], TopAdditionMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
-    end
-
     def test_delete_middle
       assert_equal [4, 3, 2, 1], TopAdditionMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
 

@@ -102,17 +102,6 @@ module Shared
       assert_equal 5, new4.pos
     end
 
-    def test_insert_middle_with_unsaved_item
-      assert_equal [1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
-
-      # new item, not saved yet
-      insert_this = ListMixin.new(:parent_id => 5)
-      insert_this.insert_at(2)
-
-      assert_equal [1, 2, 3, 4, 5], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:pos)
-      assert_equal [1, 5, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
-    end
-
     def test_delete_middle
       assert_equal [1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
 
