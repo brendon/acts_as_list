@@ -4,6 +4,19 @@
 
 This `acts_as` extension provides the capabilities for sorting and reordering a number of objects in a list. The class that has this specified needs to have a `position` column defined as an integer on the mapped database table.
 
+## Installation
+
+In your Gemfile:
+
+    gem 'acts_as_list'
+
+Or, from the command line:
+
+    gem install acts_as_list
+
+Then, as necessary in your source file(s):
+
+    require 'acts_as_list'
 
 ## Example
 
