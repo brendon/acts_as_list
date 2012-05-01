@@ -14,10 +14,6 @@ Or, from the command line:
 
     gem install acts_as_list
 
-Then, as necessary in your source file(s):
-
-    require 'acts_as_list'
-
 ## Example
 
     class TodoList < ActiveRecord::Base
