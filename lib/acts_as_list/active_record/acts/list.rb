@@ -91,6 +91,13 @@ module ActiveRecord
           insert_at_position(position)
         end
 
+        # Delete the item and reorder positions
+        def delete
+          position = self.send(position_column).to_i
+          super
+          decrement_positions_on_lower_items position
+        end
+
         # Swap positions with the next lower item, if one exists.
         def move_lower
           return unless lower_item
