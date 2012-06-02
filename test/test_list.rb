@@ -234,6 +234,18 @@ class DefaultScopedTest < ActsAsListTestCase
     new4.reload
     assert_equal 4, new4.pos
   end
+  
+  def test_update_position
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.find(:all).map(&:id)
+    DefaultScopedMixin.find(2).update_attribute(:pos, 4)
+    assert_equal [1, 3, 4, 2], DefaultScopedMixin.find(:all).map(&:id)
+    DefaultScopedMixin.find(2).update_attribute(:pos, 2)
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.find(:all).map(&:id)
+    DefaultScopedMixin.find(1).update_attribute(:pos, 4)
+    assert_equal [2, 3, 4, 1], DefaultScopedMixin.find(:all).map(&:id)
+    DefaultScopedMixin.find(1).update_attribute(:pos, 1)
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.find(:all).map(&:id)
+  end
 
 end
 
