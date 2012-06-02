@@ -77,7 +77,7 @@ module ActiveRecord
 
             after_destroy :decrement_positions_on_lower_items
             before_create :add_to_list_#{configuration[:add_new_at]}
-            after_update :update_positions_after_update
+            after_update :update_positions
           EOV
         end
       end
@@ -319,7 +319,7 @@ module ActiveRecord
             end
           end
           
-          def update_positions_after_update
+          def update_positions
             old_position = send("#{position_column}_was").to_i
             new_position = send(position_column).to_i
             shuffle_positions_on_intermediate_items old_position, new_position, id
