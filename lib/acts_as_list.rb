@@ -20,3 +20,5 @@ module ActsAsList
     end
   end
 end
+
+ActsAsList::Railtie.insert unless defined?(Rails)
