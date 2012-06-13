@@ -235,6 +235,20 @@ class DefaultScopedTest < ActsAsListTestCase
     assert_equal 4, new4.pos
   end
 
+  def test_delete
+    DefaultScopedMixin.find(1).delete
+    assert_equal [1, 2, 3], DefaultScopedMixin.find(:all).map(&:pos)
+    
+    DefaultScopedMixin.find(3).delete
+    assert_equal [1, 2], DefaultScopedMixin.find(:all).map(&:pos)
+    
+    DefaultScopedMixin.find(4).delete
+    assert_equal [1], DefaultScopedMixin.find(:all).map(&:pos)
+    
+    DefaultScopedMixin.find(2).delete
+    assert_equal [], DefaultScopedMixin.find(:all).map(&:pos)
+  end
+
 end
 
 #class TopAdditionMixin < Mixin
