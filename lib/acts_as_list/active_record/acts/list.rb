@@ -77,6 +77,7 @@ module ActiveRecord
 
             after_destroy :decrement_positions_on_lower_items
             before_create :add_to_list_#{configuration[:add_new_at]}
+            after_update :update_positions
           EOV
         end
       end
@@ -276,16 +277,16 @@ module ActiveRecord
           end
 
           # Reorders intermediate items to support moving an item from old_position to new_position.
-          def shuffle_positions_on_intermediate_items(old_position, new_position)
+          def shuffle_positions_on_intermediate_items(old_position, new_position, avoid_id = nil)
             return if old_position == new_position
-
+            avoid_id_condition = avoid_id ? " AND id != #{avoid_id}" : ''
             if old_position < new_position
               # Decrement position of intermediate items
               #
               # e.g., if moving an item from 2 to 5,
               # move [3, 4, 5] to [2, 3, 4]
               acts_as_list_class.update_all(
-                "#{position_column} = (#{position_column} - 1)", "#{scope_condition} AND #{position_column} > #{old_position} AND #{position_column} <= #{new_position}"
+                "#{position_column} = (#{position_column} - 1)", "#{scope_condition} AND #{position_column} > #{old_position} AND #{position_column} <= #{new_position}#{avoid_id_condition}"
               )
             else
               # Increment position of intermediate items
@@ -293,7 +294,7 @@ module ActiveRecord
               # e.g., if moving an item from 5 to 2,
               # move [2, 3, 4] to [3, 4, 5]
               acts_as_list_class.update_all(
-                "#{position_column} = (#{position_column} + 1)", "#{scope_condition} AND #{position_column} >= #{new_position} AND #{position_column} < #{old_position}"
+                "#{position_column} = (#{position_column} + 1)", "#{scope_condition} AND #{position_column} >= #{new_position} AND #{position_column} < #{old_position}#{avoid_id_condition}"
               )
             end
           end
@@ -316,6 +317,13 @@ module ActiveRecord
               update_attribute(position_column, 0)
               decrement_positions_on_lower_items(old_position)
             end
+          end
+          
+          def update_positions
+            old_position = send("#{position_column}_was").to_i
+            new_position = send(position_column).to_i
+            return unless acts_as_list_class.where("#{position_column} = #{new_position}").count > 1
+            shuffle_positions_on_intermediate_items old_position, new_position, id
           end
       end 
     end
