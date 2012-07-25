@@ -10,6 +10,7 @@ def setup_db(position_options = {})
   ActiveRecord::Schema.define(:version => 1) do
     create_table :mixins do |t|
       t.column :pos, :integer, position_options
+      t.column :active, :boolean, :default => true
       t.column :parent_id, :integer
       t.column :parent_type, :string
       t.column :created_at, :datetime
@@ -67,6 +68,11 @@ end
 class DefaultScopedMixin < Mixin
   acts_as_list :column => "pos"
   default_scope { order('pos ASC') }
+end
+
+class DefaultScopedWhereMixin < Mixin
+  acts_as_list :column => "pos"
+  default_scope { order('pos ASC').where(active: true) }
 end
 
 class TopAdditionMixin < Mixin
@@ -234,7 +240,7 @@ class DefaultScopedTest < ActsAsListTestCase
     new4.reload
     assert_equal 4, new4.pos
   end
-  
+
   def test_update_position
     assert_equal [1, 2, 3, 4], DefaultScopedMixin.find(:all).map(&:id)
     DefaultScopedMixin.find(2).update_attribute(:pos, 4)
@@ -249,10 +255,105 @@ class DefaultScopedTest < ActsAsListTestCase
 
 end
 
+class DefaultScopedWhereTest < ActsAsListTestCase
+  def setup
+    setup_db
+    (1..4).each { |counter| DefaultScopedWhereMixin.create! :pos => counter, :active => false }
+  end
+
+  def test_insert
+    new = DefaultScopedWhereMixin.create
+    assert_equal 5, new.pos
+    assert !new.first?
+    assert new.last?
+
+    new = DefaultScopedWhereMixin.create
+    assert_equal 6, new.pos
+    assert !new.first?
+    assert new.last?
+
+    new = DefaultScopedWhereMixin.create
+    assert_equal 7, new.pos
+    assert !new.first?
+    assert new.last?
+  end
+
+  def test_reordering
+    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(active: false).map(&:id)
+
+    DefaultScopedWhereMixin.where(active: false).find(2).move_lower
+    assert_equal [1, 3, 2, 4], DefaultScopedWhereMixin.where(active: false).find(:all).map(&:id)
+
+    DefaultScopedWhereMixin.where(active: false).find(2).move_higher
+    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(active: false).find(:all).map(&:id)
+
+    DefaultScopedWhereMixin.where(active: false).find(1).move_to_bottom
+    assert_equal [2, 3, 4, 1], DefaultScopedWhereMixin.where(active: false).find(:all).map(&:id)
+
+    DefaultScopedWhereMixin.where(active: false).find(1).move_to_top
+    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(active: false).find(:all).map(&:id)
+
+    DefaultScopedWhereMixin.where(active: false).find(2).move_to_bottom
+    assert_equal [1, 3, 4, 2], DefaultScopedWhereMixin.where(active: false).find(:all).map(&:id)
+
+    DefaultScopedWhereMixin.where(active: false).find(4).move_to_top
+    assert_equal [4, 1, 3, 2], DefaultScopedWhereMixin.where(active: false).find(:all).map(&:id)
+  end
+
+  def test_insert_at
+    new = DefaultScopedWhereMixin.create
+    assert_equal 5, new.pos
+
+    new = DefaultScopedWhereMixin.create
+    assert_equal 6, new.pos
+
+    new = DefaultScopedWhereMixin.create
+    assert_equal 7, new.pos
+
+    new4 = DefaultScopedWhereMixin.create
+    assert_equal 8, new4.pos
+
+    new4.insert_at(2)
+    assert_equal 2, new4.pos
+
+    new.reload
+    assert_equal 8, new.pos
+
+    new.insert_at(2)
+    assert_equal 2, new.pos
+
+    new4.reload
+    assert_equal 3, new4.pos
+
+    new5 = DefaultScopedWhereMixin.create
+    assert_equal 9, new5.pos
+
+    new5.insert_at(1)
+    assert_equal 1, new5.pos
+
+    new4.reload
+    assert_equal 4, new4.pos
+  end
+
+  def test_update_position
+    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(active: false).find(:all).map(&:id)
+    DefaultScopedWhereMixin.where(active: false).find(2).update_attribute(:pos, 4)
+    assert_equal [1, 3, 4, 2], DefaultScopedWhereMixin.where(active: false).find(:all).map(&:id)
+    DefaultScopedWhereMixin.where(active: false).find(2).update_attribute(:pos, 2)
+    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(active: false).find(:all).map(&:id)
+    DefaultScopedWhereMixin.where(active: false).find(1).update_attribute(:pos, 4)
+    assert_equal [2, 3, 4, 1], DefaultScopedWhereMixin.where(active: false).find(:all).map(&:id)
+    DefaultScopedWhereMixin.where(active: false).find(1).update_attribute(:pos, 1)
+    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(active: false).find(:all).map(&:id)
+  end
+
+end
+
 #class TopAdditionMixin < Mixin
 
 class TopAdditionTest < ActsAsListTestCase
   include Shared::TopAddition
+
   def setup
     setup_db
     super

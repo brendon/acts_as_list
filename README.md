@@ -31,6 +31,8 @@ Or, from the command line:
 ## Notes
 If the `position` column has a default value, then there is a slight change in behavior, i.e if you have 4 items in the list, and you insert 1, with a default position 0, it would be pushed to the bottom of the list. Please look at the tests for this and some recent pull requests for discussions related to this.
 
+All `position` queries (select, update, etc.) inside gem methods are executed without the default scope (i.e. `Model.unscoped`), this will prevent nasty issues when the default scope is different from `acts_as_list` scope.
+
 ## Versions
 All versions `0.1.5` onwards require Rails 3.0.x and higher.
 
