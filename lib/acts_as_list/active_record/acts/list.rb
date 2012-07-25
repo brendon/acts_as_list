@@ -167,7 +167,7 @@ module ActiveRecord
         # Return the next higher item in the list.
         def higher_item
           return nil unless in_list?
-          acts_as_list_class.find(:first, :conditions =>
+          acts_as_list_class.unscoped.find(:first, :conditions =>
             "#{scope_condition} AND #{position_column} = #{(send(position_column).to_i - 1).to_s}"
           )
         end
@@ -175,7 +175,7 @@ module ActiveRecord
         # Return the next lower item in the list.
         def lower_item
           return nil unless in_list?
-          acts_as_list_class.find(:first, :conditions =>
+          acts_as_list_class.unscoped.find(:first, :conditions =>
             "#{scope_condition} AND #{position_column} = #{(send(position_column).to_i + 1).to_s}"
           )
         end
@@ -240,7 +240,7 @@ module ActiveRecord
 
           # This has the effect of moving all the higher items up one.
           def decrement_positions_on_higher_items(position)
-            acts_as_list_class.update_all(
+            acts_as_list_class.unscoped.update_all(
               "#{position_column} = (#{position_column} - 1)", "#{scope_condition} AND #{position_column} <= #{position}"
             )
           end
@@ -249,7 +249,7 @@ module ActiveRecord
           def decrement_positions_on_lower_items(position=nil)
             return unless in_list?
             position ||= send(position_column).to_i
-            acts_as_list_class.update_all(
+            acts_as_list_class.unscoped.update_all(
               "#{position_column} = (#{position_column} - 1)", "#{scope_condition} AND #{position_column} > #{position}"
             )
           end
@@ -257,21 +257,21 @@ module ActiveRecord
           # This has the effect of moving all the higher items down one.
           def increment_positions_on_higher_items
             return unless in_list?
-            acts_as_list_class.update_all(
+            acts_as_list_class.unscoped.update_all(
               "#{position_column} = (#{position_column} + 1)", "#{scope_condition} AND #{position_column} < #{send(position_column).to_i}"
             )
           end
 
           # This has the effect of moving all the lower items down one.
           def increment_positions_on_lower_items(position)
-            acts_as_list_class.update_all(
+            acts_as_list_class.unscoped.update_all(
               "#{position_column} = (#{position_column} + 1)", "#{scope_condition} AND #{position_column} >= #{position}"
            )
           end
 
           # Increments position (<tt>position_column</tt>) of all items in the list.
           def increment_positions_on_all_items
-            acts_as_list_class.update_all(
+            acts_as_list_class.unscoped.update_all(
               "#{position_column} = (#{position_column} + 1)",  "#{scope_condition}"
             )
           end
@@ -285,7 +285,7 @@ module ActiveRecord
               #
               # e.g., if moving an item from 2 to 5,
               # move [3, 4, 5] to [2, 3, 4]
-              acts_as_list_class.update_all(
+              acts_as_list_class.unscoped.update_all(
                 "#{position_column} = (#{position_column} - 1)", "#{scope_condition} AND #{position_column} > #{old_position} AND #{position_column} <= #{new_position}#{avoid_id_condition}"
               )
             else
@@ -293,7 +293,7 @@ module ActiveRecord
               #
               # e.g., if moving an item from 5 to 2,
               # move [2, 3, 4] to [3, 4, 5]
-              acts_as_list_class.update_all(
+              acts_as_list_class.unscoped.update_all(
                 "#{position_column} = (#{position_column} + 1)", "#{scope_condition} AND #{position_column} >= #{new_position} AND #{position_column} < #{old_position}#{avoid_id_condition}"
               )
             end
@@ -322,7 +322,7 @@ module ActiveRecord
           def update_positions
             old_position = send("#{position_column}_was").to_i
             new_position = send(position_column).to_i
-            return unless acts_as_list_class.where("#{position_column} = #{new_position}").count > 1
+            return unless acts_as_list_class.unscoped.where("#{position_column} = #{new_position}").count > 1
             shuffle_positions_on_intermediate_items old_position, new_position, id
           end
       end 
