@@ -26,8 +26,8 @@ module ActiveRecord
         # Configuration options are:
         #
         # * +column+ - specifies the column name to use for keeping the position integer (default: +position+)
-        # * +scope+ - restricts what is to be considered a list. Given a symbol, it'll attach <tt>_id</tt> 
-        #   (if it hasn't already been added) and use that as the foreign key restriction. It's also possible 
+        # * +scope+ - restricts what is to be considered a list. Given a symbol, it'll attach <tt>_id</tt>
+        #   (if it hasn't already been added) and use that as the foreign key restriction. It's also possible
         #   to give it an entire string that is interpolated if you need a tighter scope than just a foreign key.
         #   Example: <tt>acts_as_list :scope => 'todo_list_id = #{todo_list_id} AND completed = 0'</tt>
         # * +top_of_list+ - defines the integer used for the top of the list. Defaults to 1. Use 0 to make the collection
@@ -48,7 +48,7 @@ module ActiveRecord
           elsif configuration[:scope].is_a?(Array)
             scope_condition_method = %(
               def scope_condition
-                attrs = %w(#{configuration[:scope].join(" ")}).inject({}) do |memo,column| 
+                attrs = %w(#{configuration[:scope].join(" ")}).inject({}) do |memo,column|
                   memo[column.intern] = send(column.intern); memo
                 end
                 self.class.send(:sanitize_sql_hash_for_conditions, attrs)
@@ -184,11 +184,11 @@ module ActiveRecord
         def in_list?
           !not_in_list?
         end
-        
+
         def not_in_list?
           send(position_column).nil?
         end
-        
+
         def default_position
           acts_as_list_class.columns_hash[position_column.to_s].default
         end
@@ -318,14 +318,14 @@ module ActiveRecord
               decrement_positions_on_lower_items(old_position)
             end
           end
-          
+
           def update_positions
             old_position = send("#{position_column}_was").to_i
             new_position = send(position_column).to_i
             return unless acts_as_list_class.unscoped.where("#{position_column} = #{new_position}").count > 1
             shuffle_positions_on_intermediate_items old_position, new_position, id
           end
-      end 
+      end
     end
   end
 end
