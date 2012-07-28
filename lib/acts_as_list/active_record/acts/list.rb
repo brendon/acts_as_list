@@ -75,6 +75,7 @@ module ActiveRecord
 
             #{scope_condition_method}
 
+            before_destroy :reload_position
             after_destroy :decrement_positions_on_lower_items
             before_create :add_to_list_#{configuration[:add_new_at]}
             after_update :update_positions
@@ -324,6 +325,10 @@ module ActiveRecord
             new_position = send(position_column).to_i
             return unless acts_as_list_class.unscoped.where("#{position_column} = #{new_position}").count > 1
             shuffle_positions_on_intermediate_items old_position, new_position, id
+          end
+
+          def reload_position
+            self.reload
           end
       end
     end
