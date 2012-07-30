@@ -2,6 +2,7 @@ module Shared
   module ArrayScopeList
     def setup
       (1..4).each { |counter| ArrayScopeListMixin.create! :pos => counter, :parent_id => 5, :parent_type => 'ParentClass' }
+      (1..4).each { |counter| ArrayScopeListMixin.create! :pos => counter, :parent_id => 6, :parent_type => 'ParentClass' }
     end
 
     def test_reordering
@@ -24,6 +25,10 @@ module Shared
 
       ArrayScopeListMixin.find(4).move_to_top
       assert_equal [4, 1, 3, 2], ArrayScopeListMixin.find(:all, :conditions => "parent_id = 5 AND parent_type = 'ParentClass'", :order => 'pos').map(&:id)
+      
+      ArrayScopeListMixin.find(4).insert_at(4)
+      assert_equal [1, 3, 2, 4], ArrayScopeListMixin.find(:all, :conditions => "parent_id = 5 AND parent_type = 'ParentClass'", :order => 'pos').map(&:id)
+      assert_equal [1, 2, 3, 4], ArrayScopeListMixin.find(:all, :conditions => "parent_id = 5 AND parent_type = 'ParentClass'", :order => 'pos').map(&:pos)
     end
 
     def test_move_to_bottom_with_next_to_last_item

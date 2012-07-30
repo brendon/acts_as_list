@@ -322,7 +322,7 @@ module ActiveRecord
           def update_positions
             old_position = send("#{position_column}_was").to_i
             new_position = send(position_column).to_i
-            return unless acts_as_list_class.unscoped.where("#{position_column} = #{new_position}").count > 1
+            return unless acts_as_list_class.unscoped.where("#{scope_condition} AND #{position_column} = #{new_position}").count > 1
             shuffle_positions_on_intermediate_items old_position, new_position, id
           end
       end
