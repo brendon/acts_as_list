@@ -349,6 +349,51 @@ class DefaultScopedWhereTest < ActsAsListTestCase
 
 end
 
+class MultiDestroyTest < ActsAsListTestCase
+
+  def setup
+    setup_db
+  end
+
+  # example:
+  #
+  #   class TodoList < ActiveRecord::Base
+  #     has_many :todo_items, :order => "position"
+  #     accepts_nested_attributes_for :todo_items, :allow_destroy => true
+  #   end
+  #
+  #   class TodoItem < ActiveRecord::Base
+  #     belongs_to :todo_list
+  #     acts_as_list :scope => :todo_list
+  #   end
+  #
+  # Assume that there are three items.
+  # The user mark two items as deleted, click save button, form will be post:
+  #
+  # todo_list.todo_items_attributes = [
+  #   {id: 1, _destroy: true},
+  #   {id: 2, _destroy: true}
+  # ]
+  #
+  # Save toto_list, the position of item #3 should eql 1.
+  #
+  def test_destroy
+    new1 = DefaultScopedMixin.create
+    assert_equal 1, new1.pos
+
+    new2 = DefaultScopedMixin.create
+    assert_equal 2, new2.pos
+
+    new3 = DefaultScopedMixin.create
+    assert_equal 3, new3.pos
+
+    new1.destroy
+    new2.destroy
+    new3.reload
+    assert_equal 1, new3.pos
+  end
+end
+
 #class TopAdditionMixin < Mixin
 
 class TopAdditionTest < ActsAsListTestCase
