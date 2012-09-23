@@ -36,6 +36,7 @@ end
 
 class Mixin < ActiveRecord::Base
   self.table_name = 'mixins'
+  attr_accessible :active, :parent_id, :parent_type
 end
 
 class ListMixin < Mixin
