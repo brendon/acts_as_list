@@ -1,7 +1,7 @@
 module Shared
   module ListSub
     def setup
-      (1..4).each { |i| ((i % 2 == 1) ? ListMixinSub1 : ListMixinSub2).create! :pos => i, :parent_id => 5000 }
+      (1..4).each { |i| ((i % 2 == 1) ? ListMixinSub1 : ListMixinSub2).create!(:parent_id => 5000) {|list_item| list_item.pos = i } }
     end
 
     def test_reordering

@@ -40,6 +40,8 @@ end
 
 class ListMixin < Mixin
   acts_as_list :column => "pos", :scope => :parent
+
+  attr_accessible :parent_id
 end
 
 class ListMixinSub1 < ListMixin
@@ -243,13 +245,13 @@ class DefaultScopedTest < ActsAsListTestCase
 
   def test_update_position
     assert_equal [1, 2, 3, 4], DefaultScopedMixin.find(:all).map(&:id)
-    DefaultScopedMixin.find(2).update_attributes!(:pos => 4)
+    DefaultScopedMixin.find(2).set_list_position(4)
     assert_equal [1, 3, 4, 2], DefaultScopedMixin.find(:all).map(&:id)
-    DefaultScopedMixin.find(2).update_attributes!(:pos => 2)
+    DefaultScopedMixin.find(2).set_list_position(2)
     assert_equal [1, 2, 3, 4], DefaultScopedMixin.find(:all).map(&:id)
-    DefaultScopedMixin.find(1).update_attributes!(:pos => 4)
+    DefaultScopedMixin.find(1).set_list_position(4)
     assert_equal [2, 3, 4, 1], DefaultScopedMixin.find(:all).map(&:id)
-    DefaultScopedMixin.find(1).update_attributes!(:pos => 1)
+    DefaultScopedMixin.find(1).set_list_position(1)
     assert_equal [1, 2, 3, 4], DefaultScopedMixin.find(:all).map(&:id)
   end
 
@@ -337,7 +339,7 @@ class DefaultScopedWhereTest < ActsAsListTestCase
 
   def test_update_position
     assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(:active => false).find(:all).map(&:id)
-    DefaultScopedWhereMixin.where(:active => false).find(2).update_attributes!(:pos => 4)
+    DefaultScopedWhereMixin.where(:active => false).find(2).set_list_position(4)
     assert_equal [1, 3, 4, 2], DefaultScopedWhereMixin.where(:active => false).find(:all).map(&:id)
     DefaultScopedWhereMixin.where(:active => false).find(2).update_attributes!(:pos => 2)
     assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(:active => false).find(:all).map(&:id)
