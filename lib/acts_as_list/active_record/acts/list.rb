@@ -30,6 +30,9 @@ module ActiveRecord
         #   (if it hasn't already been added) and use that as the foreign key restriction. It's also possible
         #   to give it an entire string that is interpolated if you need a tighter scope than just a foreign key.
         #   Example: <tt>acts_as_list :scope => 'todo_list_id = #{todo_list_id} AND completed = 0'</tt>
+        #   The scope also accepts an array of column names. Note that if using an array, <tt>_id</tt> will not be
+        #   attached to the symbol.
+        #   Example: <tt>acts_as_list :scope => [:todo_list_id, :category_id]</tt>
         # * +top_of_list+ - defines the integer used for the top of the list. Defaults to 1. Use 0 to make the collection
         #   act more like an array in its indexing.
         # * +add_new_at+ - specifies whether objects get added to the :top or :bottom of the list. (default: +bottom+)
