@@ -78,6 +78,8 @@ module ActiveRecord
 
             #{scope_condition_method}
 
+            attr_accessible :#{configuration[:column]}, :as => :acts_as_list
+
             before_destroy :reload_position
             after_destroy :decrement_positions_on_lower_items
             before_create :add_to_list_#{configuration[:add_new_at]}
@@ -140,20 +142,20 @@ module ActiveRecord
         def remove_from_list
           if in_list?
             decrement_positions_on_lower_items
-            update_attributes! position_column => nil
+            update_attributes!({position_column => nil}, :as => :acts_as_list)
           end
         end
 
         # Increase the position of this item without adjusting the rest of the list.
         def increment_position
           return unless in_list?
-          update_attributes! position_column => self.send(position_column).to_i + 1
+          update_attributes!({position_column => self.send(position_column).to_i + 1}, :as => :acts_as_list)
         end
 
         # Decrease the position of this item without adjusting the rest of the list.
         def decrement_position
           return unless in_list?
-          update_attributes! position_column => self.send(position_column).to_i - 1
+          update_attributes!({position_column => self.send(position_column).to_i - 1}, :as => :acts_as_list)
         end
 
         # Return +true+ if this object is the first in the list.
@@ -234,12 +236,12 @@ module ActiveRecord
 
           # Forces item to assume the bottom position in the list.
           def assume_bottom_position
-            update_attributes!(position_column => bottom_position_in_list(self).to_i + 1)
+            update_attributes!({position_column => bottom_position_in_list(self).to_i + 1}, :as => :acts_as_list)
           end
 
           # Forces item to assume the top position in the list.
           def assume_top_position
-            update_attributes!(position_column => acts_as_list_top)
+            update_attributes!({position_column => acts_as_list_top}, :as => :acts_as_list)
           end
 
           # This has the effect of moving all the higher items up one.
@@ -311,14 +313,14 @@ module ActiveRecord
             else
               increment_positions_on_lower_items(position)
             end
-            self.update_attributes!(position_column => position)
+            self.update_attributes!({position_column => position}, :as => :acts_as_list)
           end
 
           # used by insert_at_position instead of remove_from_list, as postgresql raises error if position_column has non-null constraint
           def store_at_0
             if in_list?
               old_position = send(position_column).to_i
-              update_attributes!(position_column => 0)
+              update_attributes!({position_column => 0}, :as => :acts_as_list)
               decrement_positions_on_lower_items(old_position)
             end
           end

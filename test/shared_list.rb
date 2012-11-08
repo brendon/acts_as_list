@@ -1,7 +1,11 @@
 module Shared
   module List
     def setup
-      (1..4).each { |counter| ListMixin.create! :pos => counter, :parent_id => 5 }
+      (1..4).each do |counter|
+        node = ListMixin.new :parent_id => 5
+        node.pos = counter
+        node.save!
+      end
     end
 
     def test_reordering
@@ -204,14 +208,18 @@ module Shared
     def test_before_create_callback_adds_to_given_position
       assert_equal [1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
 
-      new = ListMixin.create(:pos => 1, :parent_id => 5)
+      new = ListMixin.new(:parent_id => 5)
+      new.pos = 1
+      new.save!
       assert_equal 1, new.pos
       assert new.first?
       assert !new.last?
 
       assert_equal [5, 1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
 
-      new = ListMixin.create(:pos => 3, :parent_id => 5)
+      new = ListMixin.new(:parent_id => 5)
+      new.pos = 3
+      new.save!
       assert_equal 3, new.pos
       assert !new.first?
       assert !new.last?
