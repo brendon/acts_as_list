@@ -144,20 +144,20 @@ module ActiveRecord
         def remove_from_list
           if in_list?
             decrement_positions_on_lower_items
-            update_attribute(position_column, nil)
+            set_list_position(nil)
           end
         end
 
         # Increase the position of this item without adjusting the rest of the list.
         def increment_position
           return unless in_list?
-          update_attribute(position_column, self.send(position_column).to_i + 1)
+          set_list_position(self.send(position_column).to_i + 1)
         end
 
         # Decrease the position of this item without adjusting the rest of the list.
         def decrement_position
           return unless in_list?
-          update_attribute(position_column, self.send(position_column).to_i - 1)
+          set_list_position(self.send(position_column).to_i - 1)
         end
 
         # Return +true+ if this object is the first in the list.
@@ -205,6 +205,12 @@ module ActiveRecord
           default_position == send(position_column)
         end
 
+        # Sets the new position and saves it
+        def set_list_position(new_position)
+          send("#{position_column}=", new_position)
+          save!
+        end
+
         private
           def add_to_list_top
             increment_positions_on_all_items
@@ -238,12 +244,12 @@ module ActiveRecord
 
           # Forces item to assume the bottom position in the list.
           def assume_bottom_position
-            update_attribute(position_column, bottom_position_in_list(self).to_i + 1)
+            set_list_position(bottom_position_in_list(self).to_i + 1)
           end
 
           # Forces item to assume the top position in the list.
           def assume_top_position
-            update_attribute(position_column, acts_as_list_top)
+            set_list_position(acts_as_list_top)
           end
 
           # This has the effect of moving all the higher items up one.
@@ -315,14 +321,14 @@ module ActiveRecord
             else
               increment_positions_on_lower_items(position)
             end
-            self.update_attribute(position_column, position)
+            set_list_position(position)
           end
 
           # used by insert_at_position instead of remove_from_list, as postgresql raises error if position_column has non-null constraint
           def store_at_0
             if in_list?
               old_position = send(position_column).to_i
-              update_attribute(position_column,  0)
+              set_list_position(0)
               decrement_positions_on_lower_items(old_position)
             end
           end
