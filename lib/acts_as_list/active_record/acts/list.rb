@@ -176,7 +176,8 @@ module ActiveRecord
         def higher_item
           return nil unless in_list?
           acts_as_list_class.unscoped.find(:first, :conditions =>
-            "#{scope_condition} AND #{position_column} = #{(send(position_column).to_i - 1).to_s}"
+            "#{scope_condition} AND #{position_column} < #{(send(position_column).to_i).to_s}",
+            :order => "#{acts_as_list_class.table_name}.#{position_column} DESC"
           )
         end
 
@@ -184,7 +185,8 @@ module ActiveRecord
         def lower_item
           return nil unless in_list?
           acts_as_list_class.unscoped.find(:first, :conditions =>
-            "#{scope_condition} AND #{position_column} = #{(send(position_column).to_i + 1).to_s}"
+            "#{scope_condition} AND #{position_column} > #{(send(position_column).to_i).to_s}",
+            :order => "#{acts_as_list_class.table_name}.#{position_column} ASC"
           )
         end
 
