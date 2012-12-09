@@ -16,14 +16,25 @@ Or, from the command line:
 
 ## Example
 
+At first, you need to add a `position` column to desired table:
+
+    rails g migration AddPositionToTodoItem position:integer
+    rake db:migrate
+    
+After that you can use `acts_as_list` method in the model: 
+
+    class TodoList < ActiveRecord::Base
+      has_many :todo_items, order: :position
+    end
+
 ```ruby
 class TodoList < ActiveRecord::Base
-  has_many :todo_items, :order => "position"
+  has_many :todo_items, order: :position
 end
     
 class TodoItem < ActiveRecord::Base
   belongs_to :todo_list
-  acts_as_list :scope => :todo_list
+  acts_as_list scope: :todo_list
 end
     
 todo_list.first.move_to_bottom
