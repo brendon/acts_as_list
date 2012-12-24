@@ -16,18 +16,20 @@ Or, from the command line:
 
 ## Example
 
-    class TodoList < ActiveRecord::Base
-      has_many :todo_items, :order => "position"
-    end
+```ruby
+class TodoList < ActiveRecord::Base
+  has_many :todo_items, :order => "position"
+end
     
-    class TodoItem < ActiveRecord::Base
-      belongs_to :todo_list
-      acts_as_list :scope => :todo_list
-    end
+class TodoItem < ActiveRecord::Base
+  belongs_to :todo_list
+  acts_as_list :scope => :todo_list
+end
     
-    todo_list.first.move_to_bottom
-    todo_list.last.move_higher
-    
+todo_list.first.move_to_bottom
+todo_list.last.move_higher
+```
+
 ## Notes
 If the `position` column has a default value, then there is a slight change in behavior, i.e if you have 4 items in the list, and you insert 1, with a default position 0, it would be pushed to the bottom of the list. Please look at the tests for this and some recent pull requests for discussions related to this.
 
