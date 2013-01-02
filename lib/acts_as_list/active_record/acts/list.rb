@@ -241,7 +241,7 @@ module ActiveRecord
           def bottom_item(except = nil)
             conditions = scope_condition
             conditions = "#{conditions} AND #{self.class.primary_key} != #{except.id}" if except
-            acts_as_list_class.unscoped.find(:first, :conditions => conditions, :order => "#{acts_as_list_class.table_name}.#{position_column} DESC")
+            acts_as_list_class.unscoped.where(conditions).order("#{acts_as_list_class.table_name}.#{position_column} DESC").first
           end
 
           # Forces item to assume the bottom position in the list.
