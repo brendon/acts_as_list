@@ -295,7 +295,7 @@ module ActiveRecord
           # Reorders intermediate items to support moving an item from old_position to new_position.
           def shuffle_positions_on_intermediate_items(old_position, new_position, avoid_id = nil)
             return if old_position == new_position
-            avoid_id_condition = avoid_id ? " AND #{self.class.primary_key} != #{avoid_id}" : ''
+            avoid_id_condition = avoid_id ? " AND #{self.class.primary_key} != '#{avoid_id}'" : ''
             if old_position < new_position
               # Decrement position of intermediate items
               #
