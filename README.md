@@ -30,10 +30,42 @@ todo_list.first.move_to_bottom
 todo_list.last.move_higher
 ```
 
+## Instance Methods Added To ActiveRecord Models
+
+You'll have a number of methods added to each instance of the ActiveRecord model that to which `acts_as_list` is added. 
+
+In `acts_as_list`, "higher" means further up the list (a lower `position`), and "lower" means further down the list (a higher `position`). That can be confusing, so it might make sense to add tests that validate that you're using the right method given your context.
+
+### Methods That Change Position and Reorder List
+
+- `list_item.insert_at(2)`
+- `list_item.move_lower` will do nothing if the item is the lowest item
+- `list_item.move_higher` will do nothing if the item is the highest item
+- `list_item.move_to_bottom`
+- `list_item.move_to_top`
+- `list_item.remove_from_list`
+
+### Methods That Change Position Without Reordering List
+
+- `list_item.increment_position`
+- `list_item.decrement_position`
+- `list_item.set_list_position(3)`
+
+### Methods That Return Attributes of the Item's List Position
+- `list_item.first?`
+- `list_item.last?`
+- `list_item.in_list?`
+- `list_item.not_in_list?`
+- `list_item.default_position?`
+- `list_item.higher_item`
+- `list_item.lower_item`
+
 ## Notes
 If the `position` column has a default value, then there is a slight change in behavior, i.e if you have 4 items in the list, and you insert 1, with a default position 0, it would be pushed to the bottom of the list. Please look at the tests for this and some recent pull requests for discussions related to this.
 
 All `position` queries (select, update, etc.) inside gem methods are executed without the default scope (i.e. `Model.unscoped`), this will prevent nasty issues when the default scope is different from `acts_as_list` scope.
+
+The `position` column is set after validations are called, so you should not put a `presence` validation on the `position` column.
 
 ## Versions
 All versions `0.1.5` onwards require Rails 3.0.x and higher.
