@@ -36,7 +36,7 @@ module ActiveRecord
         def acts_as_list(options = {})
           configuration = { :column => "position", :scope => "1 = 1", :top_of_list => 1, :add_new_at => :bottom}
           configuration.update(options) if options.is_a?(Hash)
-
+          
           configuration[:scope] = "#{configuration[:scope]}_id".intern if configuration[:scope].is_a?(Symbol) && configuration[:scope].to_s !~ /_id$/
 
           if configuration[:scope].is_a?(Symbol)
@@ -72,6 +72,14 @@ module ActiveRecord
             def position_column
               '#{configuration[:column]}'
             end
+            
+            def scope_name
+              '#{configuration[:scope]}'
+            end
+            
+            def add_new_at
+              '#{configuration[:add_new_at]}'
+            end
 
             #{scope_condition_method}
 
@@ -86,6 +94,7 @@ module ActiveRecord
             after_destroy :decrement_positions_on_lower_items
             before_create :add_to_list_#{configuration[:add_new_at]}
             after_update :update_positions
+            before_update :check_scope
           EOV
         end
       end
@@ -340,6 +349,17 @@ module ActiveRecord
             new_position = send(position_column).to_i
             return unless acts_as_list_class.unscoped.where("#{scope_condition} AND #{position_column} = #{new_position}").count > 1
             shuffle_positions_on_intermediate_items old_position, new_position, id
+          end
+          
+          def check_scope
+            if changes.include?("#{scope_name}")
+              old_scope_id = changes["#{scope_name}"].first
+              new_scope_id = changes["#{scope_name}"].last
+              self["#{scope_name}"] = old_scope_id
+              send("decrement_positions_on_lower_items")
+              self["#{scope_name}"] = new_scope_id
+              send("add_to_list_#{add_new_at}")
+            end
           end
 
           def reload_position
