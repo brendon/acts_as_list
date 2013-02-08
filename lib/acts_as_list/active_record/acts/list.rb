@@ -190,6 +190,16 @@ module ActiveRecord
           )
         end
 
+        # Return the next n higher items in the list
+        # selects all higher items by default
+        def higher_items(limit=nil)
+          limit ||= acts_as_list_list.count
+          acts_as_list_list.
+            where("#{position_column} < ?", send(position_column)).
+            limit(limit).
+            order("#{acts_as_list_class.table_name}.#{position_column} DESC")
+        end
+
         # Return the next lower item in the list.
         def lower_item
           return nil unless in_list?
@@ -197,6 +207,16 @@ module ActiveRecord
             "#{scope_condition} AND #{position_column} > #{(send(position_column).to_i).to_s}",
             :order => "#{acts_as_list_class.table_name}.#{position_column} ASC"
           )
+        end
+
+        # Return the next n lower items in the list
+        # selects all lower items by default
+        def lower_items(limit=nil)
+          limit ||= acts_as_list_list.count
+          acts_as_list_list.
+            where("#{position_column} > ?", send(position_column)).
+            limit(limit).
+            order("#{acts_as_list_class.table_name}.#{position_column} ASC")
         end
 
         # Test if this record is in a list
@@ -223,6 +243,11 @@ module ActiveRecord
         end
 
         private
+          def acts_as_list_list
+            acts_as_list_class.unscoped.
+              where(scope_condition)
+          end
+
           def add_to_list_top
             increment_positions_on_all_items
             self[position_column] = acts_as_list_top
