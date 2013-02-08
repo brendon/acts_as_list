@@ -194,10 +194,12 @@ module ActiveRecord
         # selects all higher items by default
         def higher_items(limit=nil)
           limit ||= acts_as_list_list.count
+          position_value = send(position_column)
           acts_as_list_list.
-            where("#{position_column} < ?", send(position_column)).
+            where("#{position_column} < ?", position_value).
+            where("#{position_column} >= ?", position_value - limit).
             limit(limit).
-            order("#{acts_as_list_class.table_name}.#{position_column} DESC")
+            order("#{acts_as_list_class.table_name}.#{position_column} ASC")
         end
 
         # Return the next lower item in the list.
@@ -213,8 +215,10 @@ module ActiveRecord
         # selects all lower items by default
         def lower_items(limit=nil)
           limit ||= acts_as_list_list.count
+          position_value = send(position_column)
           acts_as_list_list.
-            where("#{position_column} > ?", send(position_column)).
+            where("#{position_column} > ?", position_value).
+            where("#{position_column} <= ?", position_value + limit).
             limit(limit).
             order("#{acts_as_list_class.table_name}.#{position_column} ASC")
         end
