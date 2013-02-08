@@ -43,6 +43,22 @@ module Shared
       assert_nil ListMixin.find(4).lower_item
     end
 
+    def test_next_prev_groups
+      li1 = ListMixin.find(1)
+      li2 = ListMixin.find(2)
+      li3 = ListMixin.find(3)
+      li4 = ListMixin.find(4)
+      assert_equal [li2, li3, li4], li1.lower_items
+      assert_equal [li4], li3.lower_items
+      assert_equal [li2, li3], li1.lower_items(2)
+      assert_empty li4.lower_items
+
+      assert_equal [li2, li1], li3.higher_items
+      assert_equal [li1], li2.higher_items
+      assert_equal [li3, li2], li4.higher_items(2)
+      assert_empty li1.higher_items
+    end
+
     def test_injection
       item = ListMixin.new("parent_id"=>1)
       assert_equal '"mixins"."parent_id" = 1', item.scope_condition
