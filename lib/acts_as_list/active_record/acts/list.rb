@@ -36,7 +36,7 @@ module ActiveRecord
         def acts_as_list(options = {})
           configuration = { :column => "position", :scope => "1 = 1", :top_of_list => 1, :add_new_at => :bottom}
           configuration.update(options) if options.is_a?(Hash)
-          
+
           configuration[:scope] = "#{configuration[:scope]}_id".intern if configuration[:scope].is_a?(Symbol) && configuration[:scope].to_s !~ /_id$/
 
           if configuration[:scope].is_a?(Symbol)
@@ -72,11 +72,11 @@ module ActiveRecord
             def position_column
               '#{configuration[:column]}'
             end
-            
+
             def scope_name
               '#{configuration[:scope]}'
             end
-            
+
             def add_new_at
               '#{configuration[:add_new_at]}'
             end
@@ -350,7 +350,7 @@ module ActiveRecord
             return unless acts_as_list_class.unscoped.where("#{scope_condition} AND #{position_column} = #{new_position}").count > 1
             shuffle_positions_on_intermediate_items old_position, new_position, id
           end
-          
+
           def check_scope
             if changes.include?("#{scope_name}")
               old_scope_id = changes["#{scope_name}"].first
