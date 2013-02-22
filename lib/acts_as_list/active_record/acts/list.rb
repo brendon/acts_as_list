@@ -33,6 +33,7 @@ module ActiveRecord
         # * +top_of_list+ - defines the integer used for the top of the list. Defaults to 1. Use 0 to make the collection
         #   act more like an array in its indexing.
         # * +add_new_at+ - specifies whether objects get added to the :top or :bottom of the list. (default: +bottom+)
+        #                   `nil` will result in new items not being added to the list on create
         def acts_as_list(options = {})
           configuration = { :column => "position", :scope => "1 = 1", :top_of_list => 1, :add_new_at => :bottom}
           configuration.update(options) if options.is_a?(Hash)
@@ -92,10 +93,14 @@ module ActiveRecord
 
             before_destroy :reload_position
             after_destroy :decrement_positions_on_lower_items
-            before_create :add_to_list_#{configuration[:add_new_at]}
             after_update :update_positions
             before_update :check_scope
           EOV
+
+          if configuration[:add_new_at].present?
+            self.send(:before_create, "add_to_list_#{configuration[:add_new_at]}")
+          end
+
         end
       end
 
