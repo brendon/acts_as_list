@@ -5,4 +5,5 @@ module Shared
   autoload :ZeroBased,      'shared_zero_based'
   autoload :ArrayScopeList, 'shared_array_scope_list'
   autoload :TopAddition,    'shared_top_addition'
+  autoload :NoAddition,     'shared_no_addition'
 end
