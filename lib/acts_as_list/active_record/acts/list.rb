@@ -86,7 +86,7 @@ module ActiveRecord
             # only add to attr_accessible
             # if the class has some mass_assignment_protection
 
-            unless accessible_attributes.blank?
+            if defined?(accessible_attributes) && !accessible_attributes.blank?
               attr_accessible :#{configuration[:column]}
             end
 
