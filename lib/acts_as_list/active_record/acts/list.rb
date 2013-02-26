@@ -95,6 +95,8 @@ module ActiveRecord
             after_destroy :decrement_positions_on_lower_items
             before_update :check_scope
             after_update :update_positions
+
+            scope :in_list, -> { where("#{table_name}.#{configuration[:column]} IS NOT NULL") }
           EOV
 
           if configuration[:add_new_at].present?
@@ -255,7 +257,7 @@ module ActiveRecord
           def bottom_item(except = nil)
             conditions = scope_condition
             conditions = "#{conditions} AND #{self.class.primary_key} != #{except.id}" if except
-            acts_as_list_class.unscoped.where(conditions).order("#{acts_as_list_class.table_name}.#{position_column} DESC").first
+            acts_as_list_class.unscoped.in_list.where(conditions).order("#{acts_as_list_class.table_name}.#{position_column} DESC").first
           end
 
           # Forces item to assume the bottom position in the list.
