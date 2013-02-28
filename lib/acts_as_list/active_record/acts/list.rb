@@ -307,7 +307,7 @@ module ActiveRecord
             acts_as_list_class.unscoped.where(
               "#{scope_condition}"
             ).update_all(
-              "#{position_column} = (#{position_column} + 1)",
+              "#{position_column} = (#{position_column} + 1)"
             )
           end
 
