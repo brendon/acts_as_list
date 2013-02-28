@@ -96,7 +96,7 @@ module ActiveRecord
             before_update :check_scope
             after_update :update_positions
 
-            scope :in_list, -> { where("#{table_name}.#{configuration[:column]} IS NOT NULL") }
+            scope :in_list, lambda { where("#{table_name}.#{configuration[:column]} IS NOT NULL") }
           EOV
 
           if configuration[:add_new_at].present?
