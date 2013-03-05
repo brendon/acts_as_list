@@ -33,6 +33,7 @@ module ActiveRecord
         # * +top_of_list+ - defines the integer used for the top of the list. Defaults to 1. Use 0 to make the collection
         #   act more like an array in its indexing.
         # * +add_new_at+ - specifies whether objects get added to the :top or :bottom of the list. (default: +bottom+)
+        #                   `nil` will result in new items not being added to the list on create
         def acts_as_list(options = {})
           configuration = { :column => "position", :scope => "1 = 1", :top_of_list => 1, :add_new_at => :bottom}
           configuration.update(options) if options.is_a?(Hash)
@@ -92,10 +93,16 @@ module ActiveRecord
 
             before_destroy :reload_position
             after_destroy :decrement_positions_on_lower_items
-            before_create :add_to_list_#{configuration[:add_new_at]}
-            after_update :update_positions
             before_update :check_scope
+            after_update :update_positions
+
+            scope :in_list, lambda { where("#{table_name}.#{configuration[:column]} IS NOT NULL") }
           EOV
+
+          if configuration[:add_new_at].present?
+            self.send(:before_create, "add_to_list_#{configuration[:add_new_at]}")
+          end
+
         end
       end
 
@@ -279,7 +286,7 @@ module ActiveRecord
           def bottom_item(except = nil)
             conditions = scope_condition
             conditions = "#{conditions} AND #{self.class.primary_key} != #{except.id}" if except
-            acts_as_list_class.unscoped.where(conditions).order("#{acts_as_list_class.table_name}.#{position_column} DESC").first
+            acts_as_list_class.unscoped.in_list.where(conditions).order("#{acts_as_list_class.table_name}.#{position_column} DESC").first
           end
 
           # Forces item to assume the bottom position in the list.
@@ -390,6 +397,7 @@ module ActiveRecord
           def update_positions
             old_position = send("#{position_column}_was").to_i
             new_position = send(position_column).to_i
+
             return unless acts_as_list_class.unscoped.where("#{scope_condition} AND #{position_column} = #{new_position}").count > 1
             shuffle_positions_on_intermediate_items old_position, new_position, id
           end

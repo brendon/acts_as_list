@@ -98,6 +98,10 @@ class TopAdditionMixin < Mixin
   acts_as_list :column => "pos", :add_new_at => :top, :scope => :parent_id
 end
 
+class NoAdditionMixin < Mixin
+  acts_as_list :column => "pos", :add_new_at => nil, :scope => :parent_id
+end
+
 class ActsAsListTestCase < Test::Unit::TestCase
   # No default test required a this class is abstract.
   # Need for test/unit.
@@ -424,7 +428,6 @@ class TopAdditionTest < ActsAsListTestCase
   end
 end
 
-
 class TopAdditionTestWithDefault < ActsAsListTestCase
   include Shared::TopAddition
 
@@ -473,4 +476,13 @@ class RespectMixinProtection < ActsAsListTestCase
     assert_equal false, b.active
   end
 
+end
+
+class NoAdditionTest < ActsAsListTestCase
+  include Shared::NoAddition
+
+  def setup
+    setup_db
+    super
+  end
 end
