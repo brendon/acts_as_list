@@ -16,14 +16,21 @@ Or, from the command line:
 
 ## Example
 
+At first, you need to add a `position` column to desired table:
+
+    rails g migration AddPositionToTodoItem position:integer
+    rake db:migrate
+    
+After that you can use `acts_as_list` method in the model: 
+
 ```ruby
 class TodoList < ActiveRecord::Base
-  has_many :todo_items, :order => "position"
+  has_many :todo_items, order: :position
 end
     
 class TodoItem < ActiveRecord::Base
   belongs_to :todo_list
-  acts_as_list :scope => :todo_list
+  acts_as_list scope: :todo_list
 end
     
 todo_list.first.move_to_bottom
@@ -58,7 +65,9 @@ In `acts_as_list`, "higher" means further up the list (a lower `position`), and 
 - `list_item.not_in_list?`
 - `list_item.default_position?`
 - `list_item.higher_item`
+- `list_item.higher_items` will return all the items above `list_item` in the list (ordered by the position, ascending)
 - `list_item.lower_item`
+- `list_item.lower_items` will return all the items below `list_item` in the list (ordered by the position, ascending)
 
 ## Notes
 If the `position` column has a default value, then there is a slight change in behavior, i.e if you have 4 items in the list, and you insert 1, with a default position 0, it would be pushed to the bottom of the list. Please look at the tests for this and some recent pull requests for discussions related to this.

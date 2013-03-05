@@ -4,3 +4,4 @@ Gemfile.lock
 pkg/*
 .rvmrc
 *.tmproj
+.rbenv-version
