@@ -5,7 +5,8 @@ ActiveRecord::Schema.verbose = false
 ActiveRecord::Base.connection.schema_cache.clear!
 ActiveRecord::Schema.define(:version => 1) do
   create_table :mixins do |t|
-    t.column :pos, :integer, :default => 0
+    t.column :position, :integer, :default => 0
+    t.column :inverted_position, :integer
     t.column :active, :boolean, :default => true
     t.column :parent_id, :integer
     t.column :parent_type, :string
