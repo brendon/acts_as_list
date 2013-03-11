@@ -53,22 +53,27 @@ describe ActiveRecord::Acts::List do
       before(:each) do
         1.upto(4) { |pos| ListWithInvertedPosition.create!(:position => pos) }
         list_elements.should == [1, 2, 3, 4]
+        list_inverted_elements.should == [4, 3, 2, 1]
       end
 
       it 'should correctly move items to a lower position' do
         expect { subject.move_lower }.to change { list_elements }.to([1, 3, 2, 4])
+        list_inverted_elements.should == [4, 2, 3, 1]
       end
 
       it 'should correctly move items in a higher position' do
         expect { subject.move_higher }.to change { list_elements }.to([2, 1, 3, 4])
+        list_inverted_elements.should == [4, 3, 1, 2]
       end
 
       it 'should correctly move items to the top of the list' do
         expect { subject.move_to_top }.to change { list_elements }.to([2, 1, 3, 4])
+        list_inverted_elements.should == [4, 3, 1, 2]
       end
 
       it 'should correctly move items to the bottom of the list' do
         expect { subject.move_to_bottom }.to change { list_elements }.to([1, 3, 4, 2])
+        list_inverted_elements.should == [2, 4, 3, 1]
       end
 
     end
