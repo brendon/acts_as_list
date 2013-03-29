@@ -40,6 +40,8 @@ module ActiveRecord
 
           configuration[:scope] = "#{configuration[:scope]}_id".intern if configuration[:scope].is_a?(Symbol) && configuration[:scope].to_s !~ /_id$/
 
+          scope_method = "def scope() \"#{configuration[:scope]}\" end"
+
           if configuration[:scope].is_a?(Symbol)
             scope_condition_method = %(
               def scope_condition
@@ -55,6 +57,7 @@ module ActiveRecord
                 self.class.send(:sanitize_sql_hash_for_conditions, attrs)
               end
             )
+            scope_method = "def scope() #{configuration[:scope]} end"
           else
             scope_condition_method = "def scope_condition() \"#{configuration[:scope]}\" end"
           end
@@ -83,6 +86,8 @@ module ActiveRecord
             end
 
             #{scope_condition_method}
+
+            #{scope_method}
 
             # only add to attr_accessible
             # if the class has some mass_assignment_protection
@@ -408,14 +413,26 @@ module ActiveRecord
             shuffle_positions_on_intermediate_items old_position, new_position, id
           end
 
+          # Returns true if any of the models changes are in the scope
+          def scope_changed?
+            if scope.is_a?(Array)
+              (changes.symbolize_keys.keys & scope).any?
+            else
+              changes.include?(scope)
+            end
+          end
+
+          # Temporarily swap changes attributes with current attributes
+          def swap_changed_attributes
+            @changed_attributes.each { |k, v| @changed_attributes[k], self[k] =
+              self[k], @changed_attributes[k] }
+          end
+
           def check_scope
-            if changes.include?("#{scope_name}")
-              old_scope_id = changes["#{scope_name}"].first
-              new_scope_id = changes["#{scope_name}"].last
-              self["#{scope_name}"] = old_scope_id
-              send("decrement_positions_on_lower_items")
-              self["#{scope_name}"] = new_scope_id
-              send("#{position_column}=", nil)
+            if scope_changed?
+              swap_changed_attributes
+              send("decrement_positions_on_lower_items") if lower_item
+              swap_changed_attributes
               send("add_to_list_#{add_new_at}")
             end
           end
