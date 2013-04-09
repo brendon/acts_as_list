@@ -109,6 +109,8 @@ module Shared
     def test_delete_middle
       assert_equal [1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
 
+
+
       ListMixin.find(2).destroy
 
       assert_equal [1, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
@@ -136,6 +138,24 @@ module Shared
       new1, new2, new3 = ListMixin.create, ListMixin.create, ListMixin.create
       new2.move_higher
       assert_equal [new2, new1, new3], ListMixin.find(:all, :conditions => 'parent_id IS NULL', :order => 'pos')
+    end
+
+    def test_update_position_when_scope_changes
+      assert_equal [1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
+      parent = ListMixin.create(:id => 6)
+
+      ListMixin.find(2).move_within_scope(6)
+
+      assert_equal 1, ListMixin.find(2).pos
+
+      assert_equal [1, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
+
+      assert_equal 1, ListMixin.find(1).pos
+      assert_equal 2, ListMixin.find(3).pos
+      assert_equal 3, ListMixin.find(4).pos
+
+      ListMixin.find(2).move_within_scope(5)
+      assert_equal [1, 3, 4, 2], ListMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
     end
 
     def test_remove_from_list_should_then_fail_in_list?

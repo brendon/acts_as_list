@@ -164,6 +164,12 @@ module ActiveRecord
           end
         end
 
+        # Move the item within scope
+        def move_within_scope(scope_id)
+          send("#{scope_name}=", scope_id)
+          save!
+        end
+
         # Increase the position of this item without adjusting the rest of the list.
         def increment_position
           return unless in_list?
@@ -409,6 +415,7 @@ module ActiveRecord
               self["#{scope_name}"] = old_scope_id
               send("decrement_positions_on_lower_items")
               self["#{scope_name}"] = new_scope_id
+              send("#{position_column}=", nil)
               send("add_to_list_#{add_new_at}")
             end
           end
