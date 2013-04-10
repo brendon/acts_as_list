@@ -1,8 +1,8 @@
 module Shared
   module ArrayScopeList
     def setup
-      (1..4).each { |counter| ArrayScopeListMixin.create! :pos => counter, :parent_id => 5, :parent_type => 'ParentClass' }
-      (1..4).each { |counter| ArrayScopeListMixin.create! :pos => counter, :parent_id => 6, :parent_type => 'ParentClass' }
+      (1..4).each { |counter| ArrayScopeListMixin.create! pos: counter, parent_id: 5, parent_type: 'ParentClass' }
+      (1..4).each { |counter| ArrayScopeListMixin.create! pos: counter, parent_id: 6, parent_type: 'ParentClass' }
     end
 
     def test_reordering
@@ -45,43 +45,43 @@ module Shared
     end
 
     def test_injection
-      item = ArrayScopeListMixin.new(:parent_id => 1, :parent_type => 'ParentClass')
+      item = ArrayScopeListMixin.new(parent_id: 1, parent_type: 'ParentClass')
       assert_equal "pos", item.position_column
     end
 
     def test_insert
-      new = ArrayScopeListMixin.create(:parent_id => 20, :parent_type => 'ParentClass')
+      new = ArrayScopeListMixin.create(parent_id: 20, parent_type: 'ParentClass')
       assert_equal 1, new.pos
       assert new.first?
       assert new.last?
 
-      new = ArrayScopeListMixin.create(:parent_id => 20, :parent_type => 'ParentClass')
+      new = ArrayScopeListMixin.create(parent_id: 20, parent_type: 'ParentClass')
       assert_equal 2, new.pos
       assert !new.first?
       assert new.last?
 
-      new = ArrayScopeListMixin.create(:parent_id => 20, :parent_type => 'ParentClass')
+      new = ArrayScopeListMixin.create(parent_id: 20, parent_type: 'ParentClass')
       assert_equal 3, new.pos
       assert !new.first?
       assert new.last?
 
-      new = ArrayScopeListMixin.create(:parent_id => 0, :parent_type => 'ParentClass')
+      new = ArrayScopeListMixin.create(parent_id: 0, parent_type: 'ParentClass')
       assert_equal 1, new.pos
       assert new.first?
       assert new.last?
     end
 
     def test_insert_at
-      new = ArrayScopeListMixin.create(:parent_id => 20, :parent_type => 'ParentClass')
+      new = ArrayScopeListMixin.create(parent_id: 20, parent_type: 'ParentClass')
       assert_equal 1, new.pos
 
-      new = ArrayScopeListMixin.create(:parent_id => 20, :parent_type => 'ParentClass')
+      new = ArrayScopeListMixin.create(parent_id: 20, parent_type: 'ParentClass')
       assert_equal 2, new.pos
 
-      new = ArrayScopeListMixin.create(:parent_id => 20, :parent_type => 'ParentClass')
+      new = ArrayScopeListMixin.create(parent_id: 20, parent_type: 'ParentClass')
       assert_equal 3, new.pos
 
-      new4 = ArrayScopeListMixin.create(:parent_id => 20, :parent_type => 'ParentClass')
+      new4 = ArrayScopeListMixin.create(parent_id: 20, parent_type: 'ParentClass')
       assert_equal 4, new4.pos
 
       new4.insert_at(3)
@@ -96,7 +96,7 @@ module Shared
       new4.reload
       assert_equal 4, new4.pos
 
-      new5 = ArrayScopeListMixin.create(:parent_id => 20, :parent_type => 'ParentClass')
+      new5 = ArrayScopeListMixin.create(parent_id: 20, parent_type: 'ParentClass')
       assert_equal 5, new5.pos
 
       new5.insert_at(1)

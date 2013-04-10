@@ -1,7 +1,7 @@
 module Shared
   module TopAddition
     def setup
-      (1..4).each { |counter| TopAdditionMixin.create! :pos => counter, :parent_id => 5 }
+      (1..4).each { |counter| TopAdditionMixin.create! pos: counter, parent_id: 5 }
     end
 
     def test_reordering
@@ -27,44 +27,44 @@ module Shared
     end
 
     def test_injection
-      item = TopAdditionMixin.new(:parent_id => 1)
+      item = TopAdditionMixin.new(parent_id: 1)
       assert_equal '"mixins"."parent_id" = 1', item.scope_condition
       assert_equal "pos", item.position_column
     end
 
     def test_insert
-      new = TopAdditionMixin.create(:parent_id => 20)
+      new = TopAdditionMixin.create(parent_id: 20)
       assert_equal 1, new.pos
       assert new.first?
       assert new.last?
 
-      new = TopAdditionMixin.create(:parent_id => 20)
+      new = TopAdditionMixin.create(parent_id: 20)
       assert_equal 1, new.pos
       assert new.first?
       assert !new.last?
 
-      new = TopAdditionMixin.create(:parent_id => 20)
+      new = TopAdditionMixin.create(parent_id: 20)
       assert_equal 1, new.pos
       assert new.first?
       assert !new.last?
 
-      new = TopAdditionMixin.create(:parent_id => 0)
+      new = TopAdditionMixin.create(parent_id: 0)
       assert_equal 1, new.pos
       assert new.first?
       assert new.last?
     end
 
     def test_insert_at
-      new = TopAdditionMixin.create(:parent_id => 20)
+      new = TopAdditionMixin.create(parent_id: 20)
       assert_equal 1, new.pos
 
-      new = TopAdditionMixin.create(:parent_id => 20)
+      new = TopAdditionMixin.create(parent_id: 20)
       assert_equal 1, new.pos
 
-      new = TopAdditionMixin.create(:parent_id => 20)
+      new = TopAdditionMixin.create(parent_id: 20)
       assert_equal 1, new.pos
 
-      new4 = TopAdditionMixin.create(:parent_id => 20)
+      new4 = TopAdditionMixin.create(parent_id: 20)
       assert_equal 1, new4.pos
 
       new4.insert_at(3)

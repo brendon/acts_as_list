@@ -2,7 +2,7 @@ module Shared
   module List
     def setup
       (1..4).each do |counter|
-        node = ListMixin.new :parent_id => 5
+        node = ListMixin.new parent_id: 5
         node.pos = counter
         node.save!
       end
@@ -44,44 +44,44 @@ module Shared
     end
 
     def test_injection
-      item = ListMixin.new(:parent_id => 1)
+      item = ListMixin.new(parent_id: 1)
       assert_equal '"mixins"."parent_id" = 1', item.scope_condition
       assert_equal "pos", item.position_column
     end
 
     def test_insert
-      new = ListMixin.create(:parent_id => 20)
+      new = ListMixin.create(parent_id: 20)
       assert_equal 1, new.pos
       assert new.first?
       assert new.last?
 
-      new = ListMixin.create(:parent_id => 20)
+      new = ListMixin.create(parent_id: 20)
       assert_equal 2, new.pos
       assert !new.first?
       assert new.last?
 
-      new = ListMixin.create(:parent_id => 20)
+      new = ListMixin.create(parent_id: 20)
       assert_equal 3, new.pos
       assert !new.first?
       assert new.last?
 
-      new = ListMixin.create(:parent_id => 0)
+      new = ListMixin.create(parent_id: 0)
       assert_equal 1, new.pos
       assert new.first?
       assert new.last?
     end
 
     def test_insert_at
-      new = ListMixin.create(:parent_id => 20)
+      new = ListMixin.create(parent_id: 20)
       assert_equal 1, new.pos
 
-      new = ListMixin.create(:parent_id => 20)
+      new = ListMixin.create(parent_id: 20)
       assert_equal 2, new.pos
 
-      new = ListMixin.create(:parent_id => 20)
+      new = ListMixin.create(parent_id: 20)
       assert_equal 3, new.pos
 
-      new4 = ListMixin.create(:parent_id => 20)
+      new4 = ListMixin.create(parent_id: 20)
       assert_equal 4, new4.pos
 
       new4.insert_at(3)
@@ -96,7 +96,7 @@ module Shared
       new4.reload
       assert_equal 4, new4.pos
 
-      new5 = ListMixin.create(:parent_id => 20)
+      new5 = ListMixin.create(parent_id: 20)
       assert_equal 5, new5.pos
 
       new5.insert_at(1)
@@ -128,7 +128,7 @@ module Shared
     end
 
     def test_with_string_based_scope
-      new = ListWithStringScopeMixin.create(:parent_id => 500)
+      new = ListWithStringScopeMixin.create(parent_id: 500)
       assert_equal 1, new.pos
       assert new.first?
       assert new.last?
@@ -142,7 +142,7 @@ module Shared
 
     def test_update_position_when_scope_changes
       assert_equal [1, 2, 3, 4], ListMixin.where(parent_id: 5).order('pos').map(&:id)
-      parent = ListMixin.create(:id => 6)
+      parent = ListMixin.create(id: 6)
 
       ListMixin.where(id: 2).first.move_within_scope(6)
 
@@ -217,7 +217,7 @@ module Shared
     def test_before_create_callback_adds_to_bottom
       assert_equal [1, 2, 3, 4], ListMixin.where(parent_id: 5).order('pos').map(&:id)
 
-      new = ListMixin.create(:parent_id => 5)
+      new = ListMixin.create(parent_id: 5)
       assert_equal 5, new.pos
       assert !new.first?
       assert new.last?
@@ -228,7 +228,7 @@ module Shared
     def test_before_create_callback_adds_to_given_position
       assert_equal [1, 2, 3, 4], ListMixin.where(parent_id: 5).order('pos').map(&:id)
 
-      new = ListMixin.new(:parent_id => 5)
+      new = ListMixin.new(parent_id: 5)
       new.pos = 1
       new.save!
       assert_equal 1, new.pos
@@ -237,7 +237,7 @@ module Shared
 
       assert_equal [5, 1, 2, 3, 4], ListMixin.where(parent_id: 5).order('pos').map(&:id)
 
-      new = ListMixin.new(:parent_id => 5)
+      new = ListMixin.new(parent_id: 5)
       new.pos = 3
       new.save!
       assert_equal 3, new.pos
