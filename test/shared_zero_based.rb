@@ -27,25 +27,25 @@ module Shared
     end
 
     def test_reordering
-      assert_equal [1, 2, 3, 4], ZeroBasedMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
+      assert_equal [1, 2, 3, 4], ZeroBasedMixin.where(parent_id: 5).order('pos').map(&:id)
 
-      ListMixin.find(2).move_lower
-      assert_equal [1, 3, 2, 4], ZeroBasedMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
+      ListMixin.where(id: 2).first.move_lower
+      assert_equal [1, 3, 2, 4], ZeroBasedMixin.where(parent_id: 5).order('pos').map(&:id)
 
-      ListMixin.find(2).move_higher
-      assert_equal [1, 2, 3, 4], ZeroBasedMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
+      ListMixin.where(id: 2).first.move_higher
+      assert_equal [1, 2, 3, 4], ZeroBasedMixin.where(parent_id: 5).order('pos').map(&:id)
 
-      ListMixin.find(1).move_to_bottom
-      assert_equal [2, 3, 4, 1], ZeroBasedMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
+      ListMixin.where(id: 1).first.move_to_bottom
+      assert_equal [2, 3, 4, 1], ZeroBasedMixin.where(parent_id: 5).order('pos').map(&:id)
 
-      ListMixin.find(1).move_to_top
-      assert_equal [1, 2, 3, 4], ZeroBasedMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
+      ListMixin.where(id: 1).first.move_to_top
+      assert_equal [1, 2, 3, 4], ZeroBasedMixin.where(parent_id: 5).order('pos').map(&:id)
 
-      ListMixin.find(2).move_to_bottom
-      assert_equal [1, 3, 4, 2], ZeroBasedMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
+      ListMixin.where(id: 2).first.move_to_bottom
+      assert_equal [1, 3, 4, 2], ZeroBasedMixin.where(parent_id: 5).order('pos').map(&:id)
 
-      ListMixin.find(4).move_to_top
-      assert_equal [4, 1, 3, 2], ZeroBasedMixin.find(:all, :conditions => 'parent_id = 5', :order => 'pos').map(&:id)
+      ListMixin.where(id: 4).first.move_to_top
+      assert_equal [4, 1, 3, 2], ZeroBasedMixin.where(parent_id: 5).order('pos').map(&:id)
     end
 
     def test_insert_at

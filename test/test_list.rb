@@ -23,7 +23,7 @@ def setup_db_with_default
   setup_db :default => 0
 end
 
-# Returns true if ActiveRecord is rails3 version
+# Returns true if ActiveRecord is rails3,4 version
 def rails_3
   defined?(ActiveRecord::VERSION) && ActiveRecord::VERSION::MAJOR >= 3
 end
@@ -36,26 +36,7 @@ end
 
 class Mixin < ActiveRecord::Base
   self.table_name = 'mixins'
-  attr_accessible :active, :parent_id, :parent_type
 end
-
-class ProtectedMixin < ActiveRecord::Base
-  self.table_name = 'mixins'
-  attr_protected :active
-end
-
-class ProtectedListMixin < ProtectedMixin
-  acts_as_list :column => "pos"
-end
-
-class UnProtectedMixin < ActiveRecord::Base
-  self.table_name = 'mixins'
-end
-
-class UnProtectedListMixin < UnProtectedMixin
-  acts_as_list :column => "pos"
-end
-
 
 class ListMixin < Mixin
   acts_as_list :column => "pos", :scope => :parent
@@ -208,25 +189,25 @@ class DefaultScopedTest < ActsAsListTestCase
   end
 
   def test_reordering
-    assert_equal [1, 2, 3, 4], DefaultScopedMixin.find(:all).map(&:id)
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.all.map(&:id)
 
-    DefaultScopedMixin.find(2).move_lower
-    assert_equal [1, 3, 2, 4], DefaultScopedMixin.find(:all).map(&:id)
+    DefaultScopedMixin.where(id: 2).first.move_lower
+    assert_equal [1, 3, 2, 4], DefaultScopedMixin.all.map(&:id)
 
-    DefaultScopedMixin.find(2).move_higher
-    assert_equal [1, 2, 3, 4], DefaultScopedMixin.find(:all).map(&:id)
+    DefaultScopedMixin.where(id: 2).first.move_higher
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.all.map(&:id)
 
-    DefaultScopedMixin.find(1).move_to_bottom
-    assert_equal [2, 3, 4, 1], DefaultScopedMixin.find(:all).map(&:id)
+    DefaultScopedMixin.where(id: 1).first.move_to_bottom
+    assert_equal [2, 3, 4, 1], DefaultScopedMixin.all.map(&:id)
 
-    DefaultScopedMixin.find(1).move_to_top
-    assert_equal [1, 2, 3, 4], DefaultScopedMixin.find(:all).map(&:id)
+    DefaultScopedMixin.where(id: 1).first.move_to_top
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.all.map(&:id)
 
-    DefaultScopedMixin.find(2).move_to_bottom
-    assert_equal [1, 3, 4, 2], DefaultScopedMixin.find(:all).map(&:id)
+    DefaultScopedMixin.where(id: 2).first.move_to_bottom
+    assert_equal [1, 3, 4, 2], DefaultScopedMixin.all.map(&:id)
 
-    DefaultScopedMixin.find(4).move_to_top
-    assert_equal [4, 1, 3, 2], DefaultScopedMixin.find(:all).map(&:id)
+    DefaultScopedMixin.where(id: 4).first.move_to_top
+    assert_equal [4, 1, 3, 2], DefaultScopedMixin.all.map(&:id)
   end
 
   def test_insert_at
@@ -265,15 +246,15 @@ class DefaultScopedTest < ActsAsListTestCase
   end
 
   def test_update_position
-    assert_equal [1, 2, 3, 4], DefaultScopedMixin.find(:all).map(&:id)
-    DefaultScopedMixin.find(2).set_list_position(4)
-    assert_equal [1, 3, 4, 2], DefaultScopedMixin.find(:all).map(&:id)
-    DefaultScopedMixin.find(2).set_list_position(2)
-    assert_equal [1, 2, 3, 4], DefaultScopedMixin.find(:all).map(&:id)
-    DefaultScopedMixin.find(1).set_list_position(4)
-    assert_equal [2, 3, 4, 1], DefaultScopedMixin.find(:all).map(&:id)
-    DefaultScopedMixin.find(1).set_list_position(1)
-    assert_equal [1, 2, 3, 4], DefaultScopedMixin.find(:all).map(&:id)
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.all.map(&:id)
+    DefaultScopedMixin.where(id: 2).first.set_list_position(4)
+    assert_equal [1, 3, 4, 2], DefaultScopedMixin.all.map(&:id)
+    DefaultScopedMixin.where(id: 2).first.set_list_position(2)
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.all.map(&:id)
+    DefaultScopedMixin.where(id: 1).first.set_list_position(4)
+    assert_equal [2, 3, 4, 1], DefaultScopedMixin.all.map(&:id)
+    DefaultScopedMixin.where(id: 1).first.set_list_position(1)
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.all.map(&:id)
   end
 
 end
@@ -304,23 +285,23 @@ class DefaultScopedWhereTest < ActsAsListTestCase
   def test_reordering
     assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(:active => false).map(&:id)
 
-    DefaultScopedWhereMixin.where(:active => false).find(2).move_lower
-    assert_equal [1, 3, 2, 4], DefaultScopedWhereMixin.where(:active => false).find(:all).map(&:id)
+    DefaultScopedWhereMixin.where(:active => false).where(id: 2).first.move_lower
+    assert_equal [1, 3, 2, 4], DefaultScopedWhereMixin.where(:active => false).map(&:id)
 
-    DefaultScopedWhereMixin.where(:active => false).find(2).move_higher
-    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(:active => false).find(:all).map(&:id)
+    DefaultScopedWhereMixin.where(:active => false).where(id: 2).first.move_higher
+    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(:active => false).map(&:id)
 
-    DefaultScopedWhereMixin.where(:active => false).find(1).move_to_bottom
-    assert_equal [2, 3, 4, 1], DefaultScopedWhereMixin.where(:active => false).find(:all).map(&:id)
+    DefaultScopedWhereMixin.where(:active => false).where(id: 1).first.move_to_bottom
+    assert_equal [2, 3, 4, 1], DefaultScopedWhereMixin.where(:active => false).map(&:id)
 
-    DefaultScopedWhereMixin.where(:active => false).find(1).move_to_top
-    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(:active => false).find(:all).map(&:id)
+    DefaultScopedWhereMixin.where(:active => false).where(id: 1).first.move_to_top
+    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(:active => false).map(&:id)
 
-    DefaultScopedWhereMixin.where(:active => false).find(2).move_to_bottom
-    assert_equal [1, 3, 4, 2], DefaultScopedWhereMixin.where(:active => false).find(:all).map(&:id)
+    DefaultScopedWhereMixin.where(:active => false).where(id: 2).first.move_to_bottom
+    assert_equal [1, 3, 4, 2], DefaultScopedWhereMixin.where(:active => false).map(&:id)
 
-    DefaultScopedWhereMixin.where(:active => false).find(4).move_to_top
-    assert_equal [4, 1, 3, 2], DefaultScopedWhereMixin.where(:active => false).find(:all).map(&:id)
+    DefaultScopedWhereMixin.where(:active => false).where(id: 4).first.move_to_top
+    assert_equal [4, 1, 3, 2], DefaultScopedWhereMixin.where(:active => false).map(&:id)
   end
 
   def test_insert_at
@@ -359,15 +340,15 @@ class DefaultScopedWhereTest < ActsAsListTestCase
   end
 
   def test_update_position
-    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(:active => false).find(:all).map(&:id)
-    DefaultScopedWhereMixin.where(:active => false).find(2).set_list_position(4)
-    assert_equal [1, 3, 4, 2], DefaultScopedWhereMixin.where(:active => false).find(:all).map(&:id)
-    DefaultScopedWhereMixin.where(:active => false).find(2).set_list_position(2)
-    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(:active => false).find(:all).map(&:id)
-    DefaultScopedWhereMixin.where(:active => false).find(1).set_list_position(4)
-    assert_equal [2, 3, 4, 1], DefaultScopedWhereMixin.where(:active => false).find(:all).map(&:id)
-    DefaultScopedWhereMixin.where(:active => false).find(1).set_list_position(1)
-    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(:active => false).find(:all).map(&:id)
+    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(:active => false).map(&:id)
+    DefaultScopedWhereMixin.where(:active => false).where(id: 2).first.set_list_position(4)
+    assert_equal [1, 3, 4, 2], DefaultScopedWhereMixin.where(:active => false).map(&:id)
+    DefaultScopedWhereMixin.where(:active => false).where(id: 2).first.set_list_position(2)
+    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(:active => false).map(&:id)
+    DefaultScopedWhereMixin.where(:active => false).where(id: 1).first.set_list_position(4)
+    assert_equal [2, 3, 4, 1], DefaultScopedWhereMixin.where(:active => false).map(&:id)
+    DefaultScopedWhereMixin.where(:active => false).where(id: 1).first.set_list_position(1)
+    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(:active => false).map(&:id)
   end
 
 end
@@ -435,47 +416,6 @@ class TopAdditionTestWithDefault < ActsAsListTestCase
     setup_db_with_default
     super
   end
-end
-
-class RespectMixinProtection < ActsAsListTestCase
-  def setup
-    setup_db_with_default
-    super
-  end
-
-  # if an attribute is set attr_protected
-  # it should be unchanged by update_attributes
-  def test_unmodified_protection
-    a = ProtectedMixin.new
-    a.update_attributes({:active => false})
-    assert_equal true, a.active
-  end
-
-  # even after the acts_as_list mixin is joined
-  # that protection should continue to exist
-  def test_still_protected
-    b = ProtectedListMixin.new
-    b.update_attributes({:active => false})
-    assert_equal true, b.active
-  end
-
-  # similarly, if a class lacks mass_assignment protection
-  # it should be able to be changed
-  def test_unprotected
-    a = UnProtectedMixin.new
-    a.update_attributes({:active => false})
-    assert_equal false, a.active
-  end
-
-  # and it should continue to be mutable by mass_assignment
-  # even after the acts_as_list plugin has been joined
-  def test_still_unprotected_mixin
-    b = UnProtectedListMixin.new
-    b.assign_attributes({:active => false})
-    # p UnProtectedListMixin.accessible_attributes.length
-    assert_equal false, b.active
-  end
-
 end
 
 class NoAdditionTest < ActsAsListTestCase
