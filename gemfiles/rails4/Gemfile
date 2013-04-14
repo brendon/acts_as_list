@@ -4,3 +4,5 @@ gem 'activerecord', '>= 4.0.0.beta', '< 5'
 
 # Specify your gem's dependencies in acts_as_list.gemspec
 gemspec :path => File.join('..', '..')
+
+gem 'rake'
