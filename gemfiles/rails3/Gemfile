@@ -1,0 +1,8 @@
+source "https://rubygems.org"
+
+gem 'activerecord', '>= 3.0', '< 4'
+
+# Specify your gem's dependencies in acts_as_list.gemspec
+gemspec :path => File.join('..', '..')
+
+gem 'rake'
