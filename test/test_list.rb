@@ -70,7 +70,7 @@ class Parent < ActiveRecord::Base
 end
 
 class ListMixinAssociation < Mixin
-  acts_as_list column: "pos", scope: :parent
+  acts_as_list :column => "pos", :scope => :parent
   belongs_to :parent
 end
 
