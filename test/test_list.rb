@@ -16,6 +16,10 @@ def setup_db(position_options = {})
       t.column :created_at, :datetime
       t.column :updated_at, :datetime
     end
+    create_table :parents do |t|
+      t.column :created_at, :datetime
+      t.column :updated_at, :datetime
+    end
   end
 end
 
@@ -59,6 +63,15 @@ end
 
 class ListMixin < Mixin
   acts_as_list :column => "pos", :scope => :parent
+end
+
+class Parent < ActiveRecord::Base
+  has_many :list_mixin_associations
+end
+
+class ListMixinAssociation < Mixin
+  acts_as_list :column => "pos", :scope => :parent
+  belongs_to :parent
 end
 
 class ListMixinSub1 < ListMixin
@@ -485,4 +498,20 @@ class NoAdditionTest < ActsAsListTestCase
     setup_db
     super
   end
+end
+
+class ScopedListTest < ActsAsListTestCase
+  
+  def setup
+    setup_db
+    @parent = Parent.create!
+    (1..4).each { |counter| ListMixinAssociation.create! }
+  end
+  
+  def test_multiple_scope_changes
+    @parent.list_mixin_associations = ListMixinAssociation.all.to_a
+    @parent.save!
+    assert_equal [1, 2, 3, 4], ListMixinAssociation.all.map(&:pos)
+  end
+  
 end

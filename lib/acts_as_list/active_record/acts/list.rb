@@ -412,6 +412,7 @@ module ActiveRecord
             if changes.include?("#{scope_name}")
               old_scope_id = changes["#{scope_name}"].first
               new_scope_id = changes["#{scope_name}"].last
+              reload
               self["#{scope_name}"] = old_scope_id
               send("decrement_positions_on_lower_items")
               self["#{scope_name}"] = new_scope_id
