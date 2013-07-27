@@ -256,7 +256,6 @@ class DefaultScopedTest < ActsAsListTestCase
     DefaultScopedMixin.where(id: 1).first.set_list_position(1)
     assert_equal [1, 2, 3, 4], DefaultScopedMixin.all.map(&:id)
   end
-
 end
 
 class DefaultScopedWhereTest < ActsAsListTestCase
@@ -424,5 +423,86 @@ class NoAdditionTest < ActsAsListTestCase
   def setup
     setup_db
     super
+  end
+end
+
+class MultipleListsTest < ActsAsListTestCase
+  def setup
+    setup_db
+    (1..4).each { |counter| ListMixin.create! :pos => counter, :parent_id => 1}
+    (1..4).each { |counter| ListMixin.create! :pos => counter, :parent_id => 2}
+  end
+
+  def test_check_scope_order
+    assert_equal [1, 2, 3, 4], ListMixin.where(:parent_id => 1).order(:pos).map(&:id)
+    assert_equal [5, 6, 7, 8], ListMixin.where(:parent_id => 2).order(:pos).map(&:id)
+    ListMixin.find(4).update_attributes(:parent_id => 2, :pos => 2)
+    assert_equal [1, 2, 3], ListMixin.where(:parent_id => 1).order(:pos).map(&:id)
+    assert_equal [5, 4, 6, 7, 8], ListMixin.where(:parent_id => 2).order(:pos).map(&:id)
+  end
+
+  def test_check_scope_position
+    assert_equal [1, 2, 3, 4], ListMixin.where(:parent_id => 1).map(&:pos)
+    assert_equal [1, 2, 3, 4], ListMixin.where(:parent_id => 2).map(&:pos)
+    ListMixin.find(4).update_attributes(:parent_id => 2, :pos => 2)
+    assert_equal [1, 2, 3], ListMixin.where(:parent_id => 1).order(:pos).map(&:pos)
+    assert_equal [1, 2, 3, 4, 5], ListMixin.where(:parent_id => 2).order(:pos).map(&:pos)
+  end
+end
+
+class MultipleListsArrayScopeTest < ActsAsListTestCase
+  def setup
+    setup_db
+    (1..4).each { |counter| ArrayScopeListMixin.create! :pos => counter,:parent_id => 1, :parent_type => 'anything'}
+    (1..4).each { |counter| ArrayScopeListMixin.create! :pos => counter,:parent_id => 2, :parent_type => 'something'}
+    (1..4).each { |counter| ArrayScopeListMixin.create! :pos => counter,:parent_id => 3, :parent_type => 'anything'}
+  end
+
+  def test_order_after_all_scope_properties_are_changed
+    assert_equal [1, 2, 3, 4], ArrayScopeListMixin.where(:parent_id => 1, :parent_type => 'anything').order(:pos).map(&:id)
+    assert_equal [5, 6, 7, 8], ArrayScopeListMixin.where(:parent_id => 2, :parent_type => 'something').order(:pos).map(&:id)
+    ArrayScopeListMixin.find(2).update_attributes(:parent_id => 2, :pos => 2,:parent_type => 'something')
+    assert_equal [1, 3, 4], ArrayScopeListMixin.where(:parent_id => 1,:parent_type => 'anything').order(:pos).map(&:id)
+    assert_equal [5, 2, 6, 7, 8], ArrayScopeListMixin.where(:parent_id => 2,:parent_type => 'something').order(:pos).map(&:id)
+  end
+
+  def test_position_after_all_scope_properties_are_changed
+    assert_equal [1, 2, 3, 4], ArrayScopeListMixin.where(:parent_id => 1, :parent_type => 'anything').map(&:pos)
+    assert_equal [1, 2, 3, 4], ArrayScopeListMixin.where(:parent_id => 2, :parent_type => 'something').map(&:pos)
+    ArrayScopeListMixin.find(4).update_attributes(:parent_id => 2, :pos => 2, :parent_type => 'something')
+    assert_equal [1, 2, 3], ArrayScopeListMixin.where(:parent_id => 1, :parent_type => 'anything').order(:pos).map(&:pos)
+    assert_equal [1, 2, 3, 4, 5], ArrayScopeListMixin.where(:parent_id => 2, :parent_type => 'something').order(:pos).map(&:pos)
+  end
+
+  def test_order_after_one_scope_property_is_changed
+    assert_equal [1, 2, 3, 4], ArrayScopeListMixin.where(:parent_id => 1, :parent_type => 'anything').order(:pos).map(&:id)
+    assert_equal [9, 10, 11, 12], ArrayScopeListMixin.where(:parent_id => 3, :parent_type => 'anything').order(:pos).map(&:id)
+    ArrayScopeListMixin.find(2).update_attributes(:parent_id => 3, :pos => 2)
+    assert_equal [1, 3, 4], ArrayScopeListMixin.where(:parent_id => 1,:parent_type => 'anything').order(:pos).map(&:id)
+    assert_equal [9, 2, 10, 11, 12], ArrayScopeListMixin.where(:parent_id => 3,:parent_type => 'anything').order(:pos).map(&:id)
+  end
+
+  def test_position_after_one_scope_property_is_changed
+    assert_equal [1, 2, 3, 4], ArrayScopeListMixin.where(:parent_id => 1, :parent_type => 'anything').map(&:pos)
+    assert_equal [1, 2, 3, 4], ArrayScopeListMixin.where(:parent_id => 3, :parent_type => 'anything').map(&:pos)
+    ArrayScopeListMixin.find(4).update_attributes(:parent_id => 3, :pos => 2)
+    assert_equal [1, 2, 3], ArrayScopeListMixin.where(:parent_id => 1, :parent_type => 'anything').order(:pos).map(&:pos)
+    assert_equal [1, 2, 3, 4, 5], ArrayScopeListMixin.where(:parent_id => 3, :parent_type => 'anything').order(:pos).map(&:pos)
+  end
+
+  def test_order_after_moving_to_empty_list
+    assert_equal [1, 2, 3, 4], ArrayScopeListMixin.where(:parent_id => 1, :parent_type => 'anything').order(:pos).map(&:id)
+    assert_equal [], ArrayScopeListMixin.where(:parent_id => 4, :parent_type => 'anything').order(:pos).map(&:id)
+    ArrayScopeListMixin.find(2).update_attributes(:parent_id => 4, :pos => 1)
+    assert_equal [1, 3, 4], ArrayScopeListMixin.where(:parent_id => 1,:parent_type => 'anything').order(:pos).map(&:id)
+    assert_equal [2], ArrayScopeListMixin.where(:parent_id => 4,:parent_type => 'anything').order(:pos).map(&:id)
+  end
+
+  def test_position_after_moving_to_empty_list
+    assert_equal [1, 2, 3, 4], ArrayScopeListMixin.where(:parent_id => 1, :parent_type => 'anything').map(&:pos)
+    assert_equal [], ArrayScopeListMixin.where(:parent_id => 4, :parent_type => 'anything').map(&:pos)
+    ArrayScopeListMixin.find(2).update_attributes(:parent_id => 4, :pos => 1)
+    assert_equal [1, 2, 3], ArrayScopeListMixin.where(:parent_id => 1, :parent_type => 'anything').order(:pos).map(&:pos)
+    assert_equal [1], ArrayScopeListMixin.where(:parent_id => 4, :parent_type => 'anything').order(:pos).map(&:pos)
   end
 end

@@ -41,22 +41,39 @@ module ActiveRecord
           configuration[:scope] = "#{configuration[:scope]}_id".intern if configuration[:scope].is_a?(Symbol) && configuration[:scope].to_s !~ /_id$/
 
           if configuration[:scope].is_a?(Symbol)
-            scope_condition_method = %(
+            scope_methods = %(
               def scope_condition
                 self.class.send(:sanitize_sql_hash_for_conditions, { :#{configuration[:scope].to_s} => send(:#{configuration[:scope].to_s}) })
               end
+
+              def scope_changed?
+                changes.include?(scope_name.to_s)
+              end
             )
           elsif configuration[:scope].is_a?(Array)
-            scope_condition_method = %(
-              def scope_condition
-                attrs = %w(#{configuration[:scope].join(" ")}).inject({}) do |memo,column|
+            scope_methods = %(
+              def attrs
+                %w(#{configuration[:scope].join(" ")}).inject({}) do |memo,column|
                   memo[column.intern] = send(column.intern); memo
                 end
+              end
+
+              def scope_changed?
+                (attrs.keys & changes.keys.map(&:to_sym)).any?
+              end
+
+              def scope_condition
                 self.class.send(:sanitize_sql_hash_for_conditions, attrs)
               end
             )
           else
-            scope_condition_method = "def scope_condition() \"#{configuration[:scope]}\" end"
+            scope_methods = %(
+              def scope_condition
+                "#{configuration[:scope]}"
+              end
+
+              def scope_changed?() false end
+            )
           end
 
           class_eval <<-EOV
@@ -82,7 +99,7 @@ module ActiveRecord
               '#{configuration[:add_new_at]}'
             end
 
-            #{scope_condition_method}
+            #{scope_methods}
 
             # only add to attr_accessible
             # if the class has some mass_assignment_protection
@@ -406,14 +423,17 @@ module ActiveRecord
             shuffle_positions_on_intermediate_items old_position, new_position, id
           end
 
+          # Temporarily swap changes attributes with current attributes
+          def swap_changed_attributes
+            @changed_attributes.each { |k, _| @changed_attributes[k], self[k] =
+              self[k], @changed_attributes[k] }
+          end
+
           def check_scope
-            if changes.include?("#{scope_name}")
-              old_scope_id = changes["#{scope_name}"].first
-              new_scope_id = changes["#{scope_name}"].last
-              self["#{scope_name}"] = old_scope_id
-              send("decrement_positions_on_lower_items")
-              self["#{scope_name}"] = new_scope_id
-              send("#{position_column}=", nil)
+            if scope_changed?
+              swap_changed_attributes
+              send('decrement_positions_on_lower_items') if lower_item
+              swap_changed_attributes
               send("add_to_list_#{add_new_at}")
             end
           end

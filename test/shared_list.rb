@@ -146,7 +146,7 @@ module Shared
 
       ListMixin.where(id: 2).first.move_within_scope(6)
 
-      assert_equal 1, ListMixin.where(id: 2).first.pos
+      assert_equal 2, ListMixin.where(id: 2).first.pos
 
       assert_equal [1, 3, 4], ListMixin.where(parent_id: 5).order('pos').map(&:id)
 
@@ -155,7 +155,7 @@ module Shared
       assert_equal 3, ListMixin.where(id: 4).first.pos
 
       ListMixin.where(id: 2).first.move_within_scope(5)
-      assert_equal [1, 3, 4, 2], ListMixin.where(parent_id: 5).order('pos').map(&:id)
+      assert_equal [1, 2, 3, 4], ListMixin.where(parent_id: 5).order('pos').map(&:id)
     end
 
     def test_remove_from_list_should_then_fail_in_list?
