@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/swanandp/acts_as_list.png)](https://waffle.io/swanandp/acts_as_list)  
 # ActsAsList
 
 ## Description
