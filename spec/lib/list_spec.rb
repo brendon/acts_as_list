@@ -10,6 +10,14 @@ describe ActiveRecord::Acts::List do
     acts_as_list :inverted_position => true
   end
 
+  class ListWithInvertedPositionTopFirst < ActiveRecord::Base
+    self.table_name = 'mixins'
+    attr_accessible :active, :parent_id, :parent_type
+
+    # inverted position column and new element on top
+    acts_as_list :add_new_at => :top, :inverted_position => true
+  end
+
   describe ListWithInvertedPosition do
 
     # Return an array of positions in list ordered by primary key
@@ -73,6 +81,57 @@ describe ActiveRecord::Acts::List do
 
       it 'should correctly move items to the bottom of the list' do
         expect { subject.move_to_bottom }.to change { list_elements }.to([1, 3, 4, 2])
+      end
+
+    end
+
+  end
+
+  describe ListWithInvertedPositionTopFirst do
+
+    describe 'list reordering' do
+
+      # Return an array of positions in list ordered by primary key
+      def list_elements
+        ListWithInvertedPosition.order(:position).pluck(:id)
+      end
+
+      before(:each) do
+        1.upto(4) { |pos| ListWithInvertedPositionTopFirst.create!(:position => pos) }
+        ListWithInvertedPosition.should have_a_consistent_order
+      end
+
+      # Ensure list manipulation doesn't break list order
+      after { ListWithInvertedPosition.should have_a_consistent_order }
+
+      let(:second_element) { ListWithInvertedPositionTopFirst.find(2) }
+
+      it 'should correctly move items to a lower position' do
+        expect { second_element.move_lower }.to change { list_elements }.to([4, 3, 1, 2])
+      end
+
+      it 'should correctly move items in a higher position' do
+        expect { second_element.move_higher }.to change { list_elements }.to([4, 2, 3, 1])
+      end
+
+      it 'should correctly move items to the top of the list' do
+        expect { second_element.move_to_top }.to change { list_elements }.to([2, 4, 3, 1])
+      end
+
+      it 'should correctly move items to the bottom of the list' do
+        expect { second_element.move_to_bottom }.to change { list_elements }.to([4, 3, 1, 2])
+      end
+
+      it 'should add new elements to top and push down existing elements' do
+        expect {
+          ListWithInvertedPositionTopFirst.create!.should have_position 1
+        }.to change { second_element.reload.position }.by(1)
+      end
+
+      it 'should add new elements to top and push down existing elements' do
+        expect { second_element.move_lower }.to change { second_element.reload.position }.by(1)
+        # current position of an element in array is given by its position minus top element offset
+        list_elements[second_element.position - second_element.acts_as_list_top].should == second_element.id
       end
 
     end
