@@ -12,12 +12,12 @@ module ActiveRecord
       # Todo list example:
       #
       #   class TodoList < ActiveRecord::Base
-      #     has_many :todo_items, :order => "position"
+      #     has_many :todo_items, order: "position"
       #   end
       #
       #   class TodoItem < ActiveRecord::Base
       #     belongs_to :todo_list
-      #     acts_as_list :scope => :todo_list
+      #     acts_as_list scope: :todo_list
       #   end
       #
       #   todo_list.first.move_to_bottom
@@ -29,35 +29,52 @@ module ActiveRecord
         # * +scope+ - restricts what is to be considered a list. Given a symbol, it'll attach <tt>_id</tt>
         #   (if it hasn't already been added) and use that as the foreign key restriction. It's also possible
         #   to give it an entire string that is interpolated if you need a tighter scope than just a foreign key.
-        #   Example: <tt>acts_as_list :scope => 'todo_list_id = #{todo_list_id} AND completed = 0'</tt>
+        #   Example: <tt>acts_as_list scope: 'todo_list_id = #{todo_list_id} AND completed = 0'</tt>
         # * +top_of_list+ - defines the integer used for the top of the list. Defaults to 1. Use 0 to make the collection
         #   act more like an array in its indexing.
         # * +add_new_at+ - specifies whether objects get added to the :top or :bottom of the list. (default: +bottom+)
         #                   `nil` will result in new items not being added to the list on create
         # * +inverted_position+ - if true also an inverted position is generated and mantained for the table. (default: +false+)
         def acts_as_list(options = {})
-          configuration = { :column => "position", :scope => "1 = 1", :top_of_list => 1, :add_new_at => :bottom, :inverted_position => false}
+          configuration = { column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom, inverted_position: false}
           configuration.update(options) if options.is_a?(Hash)
 
           configuration[:scope] = "#{configuration[:scope]}_id".intern if configuration[:scope].is_a?(Symbol) && configuration[:scope].to_s !~ /_id$/
 
           if configuration[:scope].is_a?(Symbol)
-            scope_condition_method = %(
+            scope_methods = %(
               def scope_condition
                 self.class.send(:sanitize_sql_hash_for_conditions, { :#{configuration[:scope].to_s} => send(:#{configuration[:scope].to_s}) })
               end
+
+              def scope_changed?
+                changes.include?(scope_name.to_s)
+              end
             )
           elsif configuration[:scope].is_a?(Array)
-            scope_condition_method = %(
-              def scope_condition
-                attrs = %w(#{configuration[:scope].join(" ")}).inject({}) do |memo,column|
+            scope_methods = %(
+              def attrs
+                %w(#{configuration[:scope].join(" ")}).inject({}) do |memo,column|
                   memo[column.intern] = send(column.intern); memo
                 end
+              end
+
+              def scope_changed?
+                (attrs.keys & changes.keys.map(&:to_sym)).any?
+              end
+
+              def scope_condition
                 self.class.send(:sanitize_sql_hash_for_conditions, attrs)
               end
             )
           else
-            scope_condition_method = "def scope_condition() \"#{configuration[:scope]}\" end"
+            scope_methods = %(
+              def scope_condition
+                "#{configuration[:scope]}"
+              end
+
+              def scope_changed?() false end
+            )
           end
 
           # Add support for inverted position method
@@ -86,7 +103,7 @@ module ActiveRecord
               '#{configuration[:add_new_at]}'
             end
 
-            #{scope_condition_method}
+            #{scope_methods}
 
             #{inverted_position_method}
 
@@ -176,6 +193,12 @@ module ActiveRecord
           end
         end
 
+        # Move the item within scope
+        def move_within_scope(scope_id)
+          send("#{scope_name}=", scope_id)
+          save!
+        end
+
         # Increase the position of this item without adjusting the rest of the list.
         def increment_position
           return unless in_list?
@@ -203,10 +226,9 @@ module ActiveRecord
         # Return the next higher item in the list.
         def higher_item
           return nil unless in_list?
-          acts_as_list_class.unscoped.find(:first, :conditions =>
-            "#{scope_condition} AND #{position_column} < #{(send(position_column).to_i).to_s}",
-            :order => "#{acts_as_list_class.table_name}.#{position_column} DESC"
-          )
+          acts_as_list_class.unscoped.
+            where("#{scope_condition} AND #{position_column} < #{(send(position_column).to_i).to_s}").
+            order("#{acts_as_list_class.table_name}.#{position_column} DESC").first
         end
 
         # Return the next n higher items in the list
@@ -224,10 +246,9 @@ module ActiveRecord
         # Return the next lower item in the list.
         def lower_item
           return nil unless in_list?
-          acts_as_list_class.unscoped.find(:first, :conditions =>
-            "#{scope_condition} AND #{position_column} > #{(send(position_column).to_i).to_s}",
-            :order => "#{acts_as_list_class.table_name}.#{position_column} ASC"
-          )
+          acts_as_list_class.unscoped.
+            where("#{scope_condition} AND #{position_column} > #{(send(position_column).to_i).to_s}").
+            order("#{acts_as_list_class.table_name}.#{position_column} ASC").first
         end
 
         # Return the next n lower items in the list
@@ -419,13 +440,17 @@ module ActiveRecord
             shuffle_positions_on_intermediate_items old_position, new_position, id
           end
 
+          # Temporarily swap changes attributes with current attributes
+          def swap_changed_attributes
+            @changed_attributes.each { |k, _| @changed_attributes[k], self[k] =
+              self[k], @changed_attributes[k] }
+          end
+
           def check_scope
-            if changes.include?("#{scope_name}")
-              old_scope_id = changes["#{scope_name}"].first
-              new_scope_id = changes["#{scope_name}"].last
-              self["#{scope_name}"] = old_scope_id
-              send("decrement_positions_on_lower_items")
-              self["#{scope_name}"] = new_scope_id
+            if scope_changed?
+              swap_changed_attributes
+              send('decrement_positions_on_lower_items') if lower_item
+              swap_changed_attributes
               send("add_to_list_#{add_new_at}")
             end
           end

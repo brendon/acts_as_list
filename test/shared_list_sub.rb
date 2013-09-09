@@ -2,52 +2,52 @@ module Shared
   module ListSub
     def setup
       (1..4).each do |i|
-        node = ((i % 2 == 1) ? ListMixinSub1 : ListMixinSub2).new :parent_id => 5000
+        node = ((i % 2 == 1) ? ListMixinSub1 : ListMixinSub2).new parent_id: 5000
         node.pos = i
         node.save!
       end
     end
 
     def test_reordering
-      assert_equal [1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5000', :order => 'pos').map(&:id)
+      assert_equal [1, 2, 3, 4], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
 
-      ListMixin.find(2).move_lower
-      assert_equal [1, 3, 2, 4], ListMixin.find(:all, :conditions => 'parent_id = 5000', :order => 'pos').map(&:id)
+      ListMixin.where(id: 2).first.move_lower
+      assert_equal [1, 3, 2, 4], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
 
-      ListMixin.find(2).move_higher
-      assert_equal [1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5000', :order => 'pos').map(&:id)
+      ListMixin.where(id: 2).first.move_higher
+      assert_equal [1, 2, 3, 4], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
 
-      ListMixin.find(1).move_to_bottom
-      assert_equal [2, 3, 4, 1], ListMixin.find(:all, :conditions => 'parent_id = 5000', :order => 'pos').map(&:id)
+      ListMixin.where(id: 1).first.move_to_bottom
+      assert_equal [2, 3, 4, 1], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
 
-      ListMixin.find(1).move_to_top
-      assert_equal [1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5000', :order => 'pos').map(&:id)
+      ListMixin.where(id: 1).first.move_to_top
+      assert_equal [1, 2, 3, 4], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
 
-      ListMixin.find(2).move_to_bottom
-      assert_equal [1, 3, 4, 2], ListMixin.find(:all, :conditions => 'parent_id = 5000', :order => 'pos').map(&:id)
+      ListMixin.where(id: 2).first.move_to_bottom
+      assert_equal [1, 3, 4, 2], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
 
-      ListMixin.find(4).move_to_top
-      assert_equal [4, 1, 3, 2], ListMixin.find(:all, :conditions => 'parent_id = 5000', :order => 'pos').map(&:id)
+      ListMixin.where(id: 4).first.move_to_top
+      assert_equal [4, 1, 3, 2], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
     end
 
     def test_move_to_bottom_with_next_to_last_item
-      assert_equal [1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5000', :order => 'pos').map(&:id)
-      ListMixin.find(3).move_to_bottom
-      assert_equal [1, 2, 4, 3], ListMixin.find(:all, :conditions => 'parent_id = 5000', :order => 'pos').map(&:id)
+      assert_equal [1, 2, 3, 4], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
+      ListMixin.where(id: 3).first.move_to_bottom
+      assert_equal [1, 2, 4, 3], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
     end
 
     def test_next_prev
-      assert_equal ListMixin.find(2), ListMixin.find(1).lower_item
-      assert_nil ListMixin.find(1).higher_item
-      assert_equal ListMixin.find(3), ListMixin.find(4).higher_item
-      assert_nil ListMixin.find(4).lower_item
+      assert_equal ListMixin.where(id: 2).first, ListMixin.where(id: 1).first.lower_item
+      assert_nil ListMixin.where(id: 1).first.higher_item
+      assert_equal ListMixin.where(id: 3).first, ListMixin.where(id: 4).first.higher_item
+      assert_nil ListMixin.where(id: 4).first.lower_item
     end
 
     def test_next_prev_groups
-      li1 = ListMixin.find(1)
-      li2 = ListMixin.find(2)
-      li3 = ListMixin.find(3)
-      li4 = ListMixin.find(4)
+      li1 = ListMixin.where(id: 1).first
+      li2 = ListMixin.where(id: 2).first
+      li3 = ListMixin.where(id: 3).first
+      li4 = ListMixin.where(id: 4).first
       assert_equal [li2, li3, li4], li1.lower_items
       assert_equal [li4], li3.lower_items
       assert_equal [li2, li3], li1.lower_items(2)
@@ -101,22 +101,22 @@ module Shared
     end
 
     def test_delete_middle
-      assert_equal [1, 2, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5000', :order => 'pos').map(&:id)
+      assert_equal [1, 2, 3, 4], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
 
-      ListMixin.find(2).destroy
+      ListMixin.where(id: 2).first.destroy
 
-      assert_equal [1, 3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5000', :order => 'pos').map(&:id)
+      assert_equal [1, 3, 4], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
 
-      assert_equal 1, ListMixin.find(1).pos
-      assert_equal 2, ListMixin.find(3).pos
-      assert_equal 3, ListMixin.find(4).pos
+      assert_equal 1, ListMixin.where(id: 1).first.pos
+      assert_equal 2, ListMixin.where(id: 3).first.pos
+      assert_equal 3, ListMixin.where(id: 4).first.pos
 
-      ListMixin.find(1).destroy
+      ListMixin.where(id: 1).first.destroy
 
-      assert_equal [3, 4], ListMixin.find(:all, :conditions => 'parent_id = 5000', :order => 'pos').map(&:id)
+      assert_equal [3, 4], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
 
-      assert_equal 1, ListMixin.find(3).pos
-      assert_equal 2, ListMixin.find(4).pos
+      assert_equal 1, ListMixin.where(id: 3).first.pos
+      assert_equal 2, ListMixin.where(id: 4).first.pos
     end
   end
 end
