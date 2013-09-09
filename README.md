@@ -76,6 +76,43 @@ All `position` queries (select, update, etc.) inside gem methods are executed wi
 
 The `position` column is set after validations are called, so you should not put a `presence` validation on the `position` column.
 
+### MySQL query optimization
+
+When the `position` column is used to sort records in conjunction with another field and you need different sort
+directions, even if you have indexes on both sort columns you won't be able to take advantage of them. This is
+true in MySQL since the query optimizer [can't use mixed DESC and ASC clauses](http://dev.mysql.com/doc/refman/5.5/en/order-by-optimization.html)
+
+An example of this is given by the following AR model
+
+```ruby
+class Article
+  acts_as_list top_of_list: 1, add_new_at: :top
+  default_scope where(active: true).order('publication_date DESC', 'position ASC')
+end
+```
+
+If you encounter this situation and you're dealing with big number of records you can have very bad performances. Usually
+this is solved by changing the position ordering (i.e. instead of having `ORDER BY xxx DESC, position ASC` you can
+store `position * -1` in the position field and querying using the clause `ORDER BY xxx DESC, position DESC`)
+
+This isn't always possible, in that case you can use the `inverted_position: true` option with `acts_as_list` call and
+you'll have two position fields which are both managed by gem. In this way you can do optimized queries in both directions.
+
+The above example will become:
+
+```ruby
+class Article
+  acts_as_list top_of_list: 1, add_new_at: :top, inverted_position: true
+  # This can be optimized by MySQL since both ordering clauses have same modifier
+  default_scope where(active: true).order('publication_date DESC', 'inverted_position DESC')
+end
+```
+
+When the option is active the field named `"inverted_#{position_column}"` is managed by gem callbacks and every write
+ to the `position` column is also propagated to that column. In every moment the following statement will be true:
+
+For each row in model `model.position == -model.inverted_position`
+
 ## Versions
 All versions `0.1.5` onwards require Rails 3.0.x and higher.
 
