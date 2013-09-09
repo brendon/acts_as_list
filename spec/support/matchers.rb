@@ -3,6 +3,8 @@ RSpec::Matchers.define :have_a_consistent_order do
   # an AR class or a AR scope, i.e. List.should have_a_consistent_order
 
   match do |list_scope|
+    # warn if called with empty lists
+    warn 'Given list is empty' if list_scope.empty?
     # get position column names from scopes
     position_column = list_scope.new.position_column
     inverted_position_column = "inverted_#{position_column}"
