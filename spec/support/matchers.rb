@@ -14,3 +14,25 @@ RSpec::Matchers.define :have_a_consistent_order do
   end
 
 end
+
+RSpec::Matchers.define :have_position do |expected|
+  # Matcher for position in list
+
+  match do |element|
+    # get position column names from defined scope
+    element.send(element.position_column) == expected
+  end
+
+  failure_message_for_should do |actual|
+    "expected that #{actual} would have position ##{expected} in its list"
+  end
+
+  failure_message_for_should_not do |actual|
+    "expected that #{actual} would not have position ##{expected} in its list"
+  end
+
+  description do |actual|
+    "have position #{actual} in the list"
+  end
+
+end
