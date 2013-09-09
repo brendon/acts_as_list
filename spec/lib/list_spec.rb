@@ -124,14 +124,14 @@ describe ActiveRecord::Acts::List do
 
       it 'should add new elements to top and push down existing elements' do
         expect {
-          ListWithInvertedPositionTopFirst.create!.should have_position 1
+          ListWithInvertedPositionTopFirst.create!.should have_position(1).in_list(ListWithInvertedPositionTopFirst)
         }.to change { second_element.reload.position }.by(1)
       end
 
       it 'should add new elements to top and push down existing elements' do
         expect { second_element.move_lower }.to change { second_element.reload.position }.by(1)
-        # current position of an element in array is given by its position minus top element offset
-        list_elements[second_element.position - second_element.acts_as_list_top].should == second_element.id
+        # Check that its position is kept in ordered list
+        second_element.should have_position(second_element.position).in_list(ListWithInvertedPositionTopFirst)
       end
 
     end
