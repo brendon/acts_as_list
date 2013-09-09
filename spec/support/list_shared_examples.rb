@@ -10,7 +10,7 @@ shared_examples 'an ordered list' do
   # the whole collection as unordered list
   let(:list) do
     1.upto(4) { |position| described_class.create!(position_column => position) }
-    described_class.scoped
+    rails4? ? described_class.all : described_class.scoped
   end
 
   # Return records in order given by position column
