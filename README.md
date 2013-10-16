@@ -25,7 +25,7 @@ After that you can use `acts_as_list` method in the model:
 
 ```ruby
 class TodoList < ActiveRecord::Base
-  has_many :todo_items, order: :position
+  has_many :todo_items, -> { order("position DESC") }
 end
     
 class TodoItem < ActiveRecord::Base
