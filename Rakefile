@@ -4,9 +4,14 @@ Bundler::GemHelper.install_tasks
 #require 'rake'
 require 'rake/testtask'
 
+require 'rspec/core/rake_task'
+
+RSpec::Core::RakeTask.new(:spec)
+
 # Run the test with 'rake' or 'rake test'
-desc 'Default: run acts_as_list unit tests.'
+desc 'Default: run acts_as_list unit tests and specs'
 task :default => :test
+task :default => :spec
 
 desc 'Test the acts_as_list plugin.'
 Rake::TestTask.new(:test) do |t|
