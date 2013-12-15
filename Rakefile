@@ -29,5 +29,7 @@ begin
   end
 rescue LoadError
   puts 'RDocTask is not supported on this platform.'
+rescue StandardError
+  puts 'RDocTask is not supported on this platform.'
 end
 
