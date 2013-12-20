@@ -7,8 +7,8 @@ rescue Bundler::BundlerError => e
   $stderr.puts "Run `bundle install` to install missing gems"
   exit e.status_code
 end
-require 'test/unit'
 require 'active_record'
+require 'minitest/autorun'
 require "#{File.dirname(__FILE__)}/../init"
 
 require 'shared'
