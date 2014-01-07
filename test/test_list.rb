@@ -380,28 +380,6 @@ class DefaultScopedWhereAllowedMassUpdateTest < ActsAsListTestCase
     assert new.last?
   end
 
-  def test_reordering
-    assert_equal [1, 2, 3, 4], DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).map(&:id)
-
-    DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).where(id: 2).first.move_lower
-    assert_equal [1, 3, 2, 4], DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).map(&:id)
-
-    DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).where(id: 2).first.move_higher
-    assert_equal [1, 2, 3, 4], DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).map(&:id)
-
-    DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).where(id: 1).first.move_to_bottom
-    assert_equal [2, 3, 4, 1], DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).map(&:id)
-
-    DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).where(id: 1).first.move_to_top
-    assert_equal [1, 2, 3, 4], DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).map(&:id)
-
-    DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).where(id: 2).first.move_to_bottom
-    assert_equal [1, 3, 4, 2], DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).map(&:id)
-
-    DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).where(id: 4).first.move_to_top
-    assert_equal [4, 1, 3, 2], DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).map(&:id)
-  end
-
   def test_insert_at
     new = DefaultScopedWhereAllowedMassUpdateMixin.create
     assert_equal 5, new.pos
@@ -437,16 +415,46 @@ class DefaultScopedWhereAllowedMassUpdateTest < ActsAsListTestCase
     assert_equal 4, new4.pos
   end
 
-  def test_update_position
+  def test_mass_update_position
+
     assert_equal [1, 2, 3, 4], DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).map(&:id)
-    DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).where(id: 1).first.set_list_position(4)
-    DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).where(id: 2).first.set_list_position(3)
-    DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).where(id: 3).first.set_list_position(2)
-    DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).where(id: 4).first.set_list_position(1)
-    assert_equal [4, 3, 2, 1], DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).map(&:id)
-    DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).where(id: 2).first.set_list_position(2)
-    DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).where(id: 3).first.set_list_position(3)
-    assert_equal [4, 2, 3, 1], DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).map(&:id)
+
+    DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).where(id: 2).first.update_attribute(:pos, 4)
+    assert_equal [1, 3, 2, 4], DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).map(&:id)
+    assert_equal [1, 3, 4, 4], DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).map(&:pos)
+
+    DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).where(id: 2).first.update_attribute(:pos, 2)
+    assert_equal [1, 2, 3, 4], DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).map(&:id)
+    assert_equal [1, 2, 3, 4], DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).map(&:pos)
+
+    DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).where(id: 1).first.update_attribute(:pos, 4)
+    # positions after update
+    assert_equal 4, DefaultScopedWhereAllowedMassUpdateMixin.where(active: false, id: 1).map(&:pos).first
+    assert_equal 2, DefaultScopedWhereAllowedMassUpdateMixin.where(active: false, id: 2).map(&:pos).first
+    assert_equal 3, DefaultScopedWhereAllowedMassUpdateMixin.where(active: false, id: 3).map(&:pos).first
+    assert_equal 4, DefaultScopedWhereAllowedMassUpdateMixin.where(active: false, id: 4).map(&:pos).first
+
+    DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).where(id: 2).first.update_attribute(:pos, 1)
+    # positions after update
+    assert_equal 4, DefaultScopedWhereAllowedMassUpdateMixin.where(active: false, id: 1).map(&:pos).first
+    assert_equal 1, DefaultScopedWhereAllowedMassUpdateMixin.where(active: false, id: 2).map(&:pos).first
+    assert_equal 3, DefaultScopedWhereAllowedMassUpdateMixin.where(active: false, id: 3).map(&:pos).first
+    assert_equal 4, DefaultScopedWhereAllowedMassUpdateMixin.where(active: false, id: 4).map(&:pos).first
+
+    DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).where(id: 3).first.update_attribute(:pos, 2)
+    # positions after update
+    assert_equal 4, DefaultScopedWhereAllowedMassUpdateMixin.where(active: false, id: 1).map(&:pos).first
+    assert_equal 1, DefaultScopedWhereAllowedMassUpdateMixin.where(active: false, id: 2).map(&:pos).first
+    assert_equal 2, DefaultScopedWhereAllowedMassUpdateMixin.where(active: false, id: 3).map(&:pos).first
+    assert_equal 4, DefaultScopedWhereAllowedMassUpdateMixin.where(active: false, id: 4).map(&:pos).first
+
+    DefaultScopedWhereAllowedMassUpdateMixin.where(active: false).where(id: 4).first.update_attribute(:pos, 3)
+    # positions after update
+    assert_equal 4, DefaultScopedWhereAllowedMassUpdateMixin.where(active: false, id: 1).map(&:pos).first
+    assert_equal 1, DefaultScopedWhereAllowedMassUpdateMixin.where(active: false, id: 2).map(&:pos).first
+    assert_equal 2, DefaultScopedWhereAllowedMassUpdateMixin.where(active: false, id: 3).map(&:pos).first
+    assert_equal 3, DefaultScopedWhereAllowedMassUpdateMixin.where(active: false, id: 4).map(&:pos).first
+
   end
 
 end

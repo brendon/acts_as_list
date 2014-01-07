@@ -34,11 +34,25 @@ module ActiveRecord
         #   act more like an array in its indexing.
         # * +add_new_at+ - specifies whether objects get added to the :top or :bottom of the list. (default: +bottom+)
         #                   `nil` will result in new items not being added to the list on create
+        # * +allow_mass_update+ - specify whether to allow mass update of multiple positions at once, without reordering
+        # them each individually. WARNING: Only use this when a database update of a position will update all the positions
+        # within that list. If you are updating one record and wish for acts_as_list to reorder the remaining
+        # list items, do not set this.
+        #
+        # With +allow_mass_update+
+        #
+        # => AREL (0.3ms)  UPDATE `questions` SET `category_id` = 22128, `position` = 5, `updated_at` = '2014-01-07 10:05:33' WHERE `questions`.`id` = 147
+        #
+        # Without +allow_mass_update+
+        #
+        # => AREL (0.3ms)  UPDATE `questions` SET `category_id` = 22128, `position` = 5, `updated_at` = '2014-01-07 10:05:33' WHERE `questions`.`id` = 147
+        # => SQL (0.2ms)  SELECT COUNT(*) FROM `questions` WHERE (`questions`.`project_id` = 48170 AND position = 5)
+        # => AREL (0.4ms)  UPDATE `questions` SET position = (position - 1) WHERE (`questions`.`project_id` = 48170 AND position > 1 AND position <= 5 AND id != 147)
+        #
         def acts_as_list(options = {})
 
           # Whether mass update of all positions is permitted.
           update_positions_callback = :after_update
-          options[:allow_mass_update] ||= false
 
           if options[:allow_mass_update]
             update_positions_callback = :before_validation
@@ -96,6 +110,10 @@ module ActiveRecord
               ::#{self.name}
             end
 
+            def allow_mass_update
+              options[:allow_mass_update]
+            end
+
             def position_column
               '#{configuration[:column]}'
             end
@@ -120,7 +138,7 @@ module ActiveRecord
             before_destroy :reload_position
             after_destroy :decrement_positions_on_lower_items
             before_update :check_scope
-            #{update_positions_callback.to_s} :update_positions
+            #{update_positions_callback} :update_positions
 
             scope :in_list, lambda { where("#{table_name}.#{configuration[:column]} IS NOT NULL") }
           EOV
@@ -198,13 +216,13 @@ module ActiveRecord
 
         # Increase the position of this item without adjusting the rest of the list.
         def increment_position
-          return unless in_list?
+          return unless in_list? || !allow_mass_update
           set_list_position(self.send(position_column).to_i + 1)
         end
 
         # Decrease the position of this item without adjusting the rest of the list.
         def decrement_position
-          return unless in_list?
+          return unless in_list? || !allow_mass_update
           set_list_position(self.send(position_column).to_i - 1)
         end
 
