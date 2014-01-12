@@ -3,13 +3,11 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Acts as list by swanandp</title>
+    <title>acts_as_list by swanandp</title>
 
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <script src="javascripts/scale.fix.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
@@ -17,9 +15,12 @@
   <body>
     <div class="wrapper">
       <header>
-        <h1>Acts as list</h1>
-        <p>ActsAsList plugin</p>
+        <h1>acts_as_list</h1>
+        <p>A Rails plugin that provides list abilities to an ActiveRecord model</p>
+
         <p class="view"><a href="https://github.com/swanandp/acts_as_list">View the Project on GitHub <small>swanandp/acts_as_list</small></a></p>
+
+
         <ul>
           <li><a href="https://github.com/swanandp/acts_as_list/zipball/master">Download <strong>ZIP File</strong></a></li>
           <li><a href="https://github.com/swanandp/acts_as_list/tarball/master">Download <strong>TAR Ball</strong></a></li>
@@ -27,13 +28,16 @@
         </ul>
       </header>
       <section>
-        <h1>ActsAsList</h1>
+        <h1>
+<a name="actsaslist" class="anchor" href="#actsaslist"><span class="octicon octicon-link"></span></a>ActsAsList</h1>
 
-<h2>Description</h2>
+<h2>
+<a name="description" class="anchor" href="#description"><span class="octicon octicon-link"></span></a>Description</h2>
 
 <p>This <code>acts_as</code> extension provides the capabilities for sorting and reordering a number of objects in a list. The class that has this specified needs to have a <code>position</code> column defined as an integer on the mapped database table.</p>
 
-<h2>Installation</h2>
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
 
 <p>In your Gemfile:</p>
 
@@ -45,7 +49,8 @@
 <pre><code>gem install acts_as_list
 </code></pre>
 
-<h2>Example</h2>
+<h2>
+<a name="example" class="anchor" href="#example"><span class="octicon octicon-link"></span></a>Example</h2>
 
 <pre><code>class TodoList &lt; ActiveRecord::Base
   has_many :todo_items, :order =&gt; "position"
@@ -60,24 +65,29 @@ todo_list.first.move_to_bottom
 todo_list.last.move_higher
 </code></pre>
 
-<h2>Notes</h2>
+<h2>
+<a name="notes" class="anchor" href="#notes"><span class="octicon octicon-link"></span></a>Notes</h2>
 
 <p>If the <code>position</code> column has a default value, then there is a slight change in behavior, i.e if you have 4 items in the list, and you insert 1, with a default position 0, it would be pushed to the bottom of the list. Please look at the tests for this and some recent pull requests for discussions related to this.</p>
 
-<h2>Versions</h2>
+<h2>
+<a name="versions" class="anchor" href="#versions"><span class="octicon octicon-link"></span></a>Versions</h2>
 
 <p>All versions <code>0.1.5</code> onwards require Rails 3.0.x and higher.</p>
 
-<h2>Build Status</h2>
+<h2>
+<a name="build-status" class="anchor" href="#build-status"><span class="octicon octicon-link"></span></a>Build Status</h2>
 
 <p><a href="https://secure.travis-ci.org/swanandp/acts_as_list"><img src="https://secure.travis-ci.org/swanandp/acts_as_list.png" alt="Build Status"></a></p>
 
-<h2>Roadmap</h2>
+<h2>
+<a name="roadmap" class="anchor" href="#roadmap"><span class="octicon octicon-link"></span></a>Roadmap</h2>
 
 <ol>
 <li>Sort based feature</li>
 <li>Rails 4 compatibility and bye bye Rails 2! Older versions would of course continue to work with Rails 2, but there won't be any support on those.</li>
-</ol><h2>Contributing to <code>acts_as_list</code>
+</ol><h2>
+<a name="contributing-to-acts_as_list" class="anchor" href="#contributing-to-acts_as_list"><span class="octicon octicon-link"></span></a>Contributing to <code>acts_as_list</code>
 </h2>
 
 <ul>
@@ -89,16 +99,17 @@ todo_list.last.move_higher
 <li>Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.</li>
 <li>Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.</li>
 <li>I would recommend using Rails 3.1.x and higher for testing the build before a pull request. The current test harness does not quite work with 3.0.x. The plugin itself works, but the issue lies with testing infrastructure.</li>
-</ul><h2>Copyright</h2>
+</ul><h2>
+<a name="copyright" class="anchor" href="#copyright"><span class="octicon octicon-link"></span></a>Copyright</h2>
 
 <p>Copyright (c) 2007 David Heinemeier Hansson, released under the MIT license</p>
       </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/swanandp">swanandp</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
     </div>
-    <footer>
-      <p>Project maintained by <a href="https://github.com/swanandp">swanandp</a></p>
-      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
-    </footer>
-    <!--[if !IE]><script>fixScale(document);</script><!--<![endif]-->
+    <script src="javascripts/scale.fix.js"></script>
     
   </body>
 </html>
