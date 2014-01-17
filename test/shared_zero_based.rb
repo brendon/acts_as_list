@@ -24,6 +24,11 @@ module Shared
       assert_equal 0, new.pos
       assert new.first?
       assert new.last?
+
+      new = ZeroBasedMixin.create(parent_id: 1, pos: -500)
+      assert_equal 0, new.pos
+      assert new.first?
+      assert new.last?
     end
 
     def test_reordering
