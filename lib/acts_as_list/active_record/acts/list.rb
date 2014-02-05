@@ -34,8 +34,9 @@ module ActiveRecord
         #   act more like an array in its indexing.
         # * +add_new_at+ - specifies whether objects get added to the :top or :bottom of the list. (default: +bottom+)
         #                   `nil` will result in new items not being added to the list on create
+        # * +allow_gaps+ - specifies whether e.g. after deleting a list item, items with higher positions are decremented to fill the gap. (default: +false+)
         def acts_as_list(options = {})
-          configuration = { column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom}
+          configuration = { column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom, allow_gaps: false }
           configuration.update(options) if options.is_a?(Hash)
 
           configuration[:scope] = "#{configuration[:scope]}_id".intern if configuration[:scope].is_a?(Symbol) && configuration[:scope].to_s !~ /_id$/
@@ -108,11 +109,13 @@ module ActiveRecord
               attr_accessible :#{configuration[:column]}
             end
 
-            before_destroy :reload_position
-            after_destroy :decrement_positions_on_lower_items
-            before_update :check_scope
-            after_update :update_positions
-
+            unless configuration[:allow_gaps]
+              before_destroy :reload_position
+              after_destroy :decrement_positions_on_lower_items
+              before_update :check_scope
+              after_update :update_positions
+            end
+            
             scope :in_list, lambda { where("#{table_name}.#{configuration[:column]} IS NOT NULL") }
           EOV
 
