@@ -112,6 +112,7 @@ module ActiveRecord
             after_destroy :decrement_positions_on_lower_items
             before_update :check_scope
             after_update :update_positions
+            before_validation :check_top_position
 
             scope :in_list, lambda { where("#{table_name}.#{configuration[:column]} IS NOT NULL") }
           EOV
@@ -440,6 +441,12 @@ module ActiveRecord
 
           def reload_position
             self.reload
+          end
+
+          def check_top_position
+            if send(position_column) && send(position_column) < acts_as_list_top
+              self[position_column] = acts_as_list_top
+            end
           end
       end
     end
