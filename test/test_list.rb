@@ -73,6 +73,10 @@ end
 class DefaultScopedWhereMixin < Mixin
   acts_as_list column: "pos"
   default_scope { order('pos ASC').where(active: true) }
+
+  def self.for_active_false_tests
+    unscoped.order('pos ASC').where(active: false)
+  end
 end
 
 class TopAdditionMixin < Mixin
@@ -83,7 +87,7 @@ class NoAdditionMixin < Mixin
   acts_as_list column: "pos", add_new_at: nil, scope: :parent_id
 end
 
-class ActsAsListTestCase < Test::Unit::TestCase
+class ActsAsListTestCase < MiniTest::Unit::TestCase
   # No default test required a this class is abstract.
   # Need for test/unit.
   undef_method :default_test if method_defined?(:default_test)
@@ -282,25 +286,25 @@ class DefaultScopedWhereTest < ActsAsListTestCase
   end
 
   def test_reordering
-    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(active: false).map(&:id)
+    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.for_active_false_tests.map(&:id)
 
-    DefaultScopedWhereMixin.where(active: false).where(id: 2).first.move_lower
-    assert_equal [1, 3, 2, 4], DefaultScopedWhereMixin.where(active: false).map(&:id)
+    DefaultScopedWhereMixin.for_active_false_tests.where(id: 2).first.move_lower
+    assert_equal [1, 3, 2, 4], DefaultScopedWhereMixin.for_active_false_tests.map(&:id)
 
-    DefaultScopedWhereMixin.where(active: false).where(id: 2).first.move_higher
-    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(active: false).map(&:id)
+    DefaultScopedWhereMixin.for_active_false_tests.where(id: 2).first.move_higher
+    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.for_active_false_tests.map(&:id)
 
-    DefaultScopedWhereMixin.where(active: false).where(id: 1).first.move_to_bottom
-    assert_equal [2, 3, 4, 1], DefaultScopedWhereMixin.where(active: false).map(&:id)
+    DefaultScopedWhereMixin.for_active_false_tests.where(id: 1).first.move_to_bottom
+    assert_equal [2, 3, 4, 1], DefaultScopedWhereMixin.for_active_false_tests.map(&:id)
 
-    DefaultScopedWhereMixin.where(active: false).where(id: 1).first.move_to_top
-    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(active: false).map(&:id)
+    DefaultScopedWhereMixin.for_active_false_tests.where(id: 1).first.move_to_top
+    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.for_active_false_tests.map(&:id)
 
-    DefaultScopedWhereMixin.where(active: false).where(id: 2).first.move_to_bottom
-    assert_equal [1, 3, 4, 2], DefaultScopedWhereMixin.where(active: false).map(&:id)
+    DefaultScopedWhereMixin.for_active_false_tests.where(id: 2).first.move_to_bottom
+    assert_equal [1, 3, 4, 2], DefaultScopedWhereMixin.for_active_false_tests.map(&:id)
 
-    DefaultScopedWhereMixin.where(active: false).where(id: 4).first.move_to_top
-    assert_equal [4, 1, 3, 2], DefaultScopedWhereMixin.where(active: false).map(&:id)
+    DefaultScopedWhereMixin.for_active_false_tests.where(id: 4).first.move_to_top
+    assert_equal [4, 1, 3, 2], DefaultScopedWhereMixin.for_active_false_tests.map(&:id)
   end
 
   def test_insert_at
@@ -339,15 +343,15 @@ class DefaultScopedWhereTest < ActsAsListTestCase
   end
 
   def test_update_position
-    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(active: false).map(&:id)
-    DefaultScopedWhereMixin.where(active: false).where(id: 2).first.set_list_position(4)
-    assert_equal [1, 3, 4, 2], DefaultScopedWhereMixin.where(active: false).map(&:id)
-    DefaultScopedWhereMixin.where(active: false).where(id: 2).first.set_list_position(2)
-    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(active: false).map(&:id)
-    DefaultScopedWhereMixin.where(active: false).where(id: 1).first.set_list_position(4)
-    assert_equal [2, 3, 4, 1], DefaultScopedWhereMixin.where(active: false).map(&:id)
-    DefaultScopedWhereMixin.where(active: false).where(id: 1).first.set_list_position(1)
-    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.where(active: false).map(&:id)
+    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.for_active_false_tests.map(&:id)
+    DefaultScopedWhereMixin.for_active_false_tests.where(id: 2).first.set_list_position(4)
+    assert_equal [1, 3, 4, 2], DefaultScopedWhereMixin.for_active_false_tests.map(&:id)
+    DefaultScopedWhereMixin.for_active_false_tests.where(id: 2).first.set_list_position(2)
+    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.for_active_false_tests.map(&:id)
+    DefaultScopedWhereMixin.for_active_false_tests.where(id: 1).first.set_list_position(4)
+    assert_equal [2, 3, 4, 1], DefaultScopedWhereMixin.for_active_false_tests.map(&:id)
+    DefaultScopedWhereMixin.for_active_false_tests.where(id: 1).first.set_list_position(1)
+    assert_equal [1, 2, 3, 4], DefaultScopedWhereMixin.for_active_false_tests.map(&:id)
   end
 
 end
