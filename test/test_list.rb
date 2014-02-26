@@ -87,6 +87,12 @@ class NoAdditionMixin < Mixin
   acts_as_list column: "pos", add_new_at: nil, scope: :parent_id
 end
 
+class GroupedListMixin < ListMixin
+  acts_as_list column: "pos", scope: :parent
+  has_many :children, -> { order(pos: :asc) }, class_name: 'GroupedListMixin', foreign_key: 'parent_id'
+  belongs_to :parent, class_name: 'GroupedListMixin'
+end
+
 class ActsAsListTestCase < MiniTest::Unit::TestCase
   # No default test required a this class is abstract.
   # Need for test/unit.
@@ -166,6 +172,25 @@ class ArrayScopeListTestWithDefault < ActsAsListTestCase
   def setup
     setup_db_with_default
     super
+  end
+end
+
+class GroupedTest < ActsAsListTestCase
+  def setup
+    setup_db
+    GroupedListMixin.create!
+    (1..4).each { |counter| GroupedListMixin.create!({pos: counter, parent_id: 1}) }
+  end
+
+  def test_sort
+    children = GroupedListMixin.first.children
+    children.as_list_sort!("id desc")
+
+    GroupedListMixin.first.reload
+    children = GroupedListMixin.first.children
+
+    assert_equal 5, children.first.id
+    assert_equal 3, children.third.id
   end
 end
 
