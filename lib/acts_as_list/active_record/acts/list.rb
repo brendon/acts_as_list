@@ -373,7 +373,13 @@ module ActiveRecord
           def shuffle_positions_on_intermediate_items(old_position, new_position, avoid_id = nil)
             return if old_position == new_position
             avoid_id_condition = avoid_id ? " AND #{self.class.primary_key} != '#{avoid_id}'" : ''
-            if old_position < new_position
+            if old_position.nil?
+              acts_as_list_class.unscoped.where(
+                "#{scope_condition} AND #{position_column} >= #{new_position}#{avoid_id_condition}"
+              ).update_all(
+                "#{position_column} = (#{position_column} + 1)"
+              )
+            elsif old_position < new_position
               # Decrement position of intermediate items
               #
               # e.g., if moving an item from 2 to 5,
@@ -418,9 +424,9 @@ module ActiveRecord
           end
 
           def update_positions
-            old_position = send("#{position_column}_was").to_i
+            old_position = send("#{position_column}_was")
+            old_position = old_position.to_i unless old_position.nil?
             new_position = send(position_column).to_i
-
             return unless acts_as_list_class.unscoped.where("#{scope_condition} AND #{position_column} = #{new_position}").count > 1
             shuffle_positions_on_intermediate_items old_position, new_position, id
           end
