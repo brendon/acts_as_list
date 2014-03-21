@@ -89,7 +89,11 @@ end
 
 class GroupedListMixin < ListMixin
   acts_as_list column: "pos", scope: :parent
-  has_many :children, -> { order(pos: :asc) }, class_name: 'GroupedListMixin', foreign_key: 'parent_id'
+  if ActiveRecord::VERSION::MAJOR < 4
+    has_many :children, order: 'pos', class_name: 'GroupedListMixin', foreign_key: 'parent_id'
+  else
+    has_many :children, -> { order(pos: :asc) }, class_name: 'GroupedListMixin', foreign_key: 'parent_id'
+  end
   belongs_to :parent, class_name: 'GroupedListMixin'
 end
 
