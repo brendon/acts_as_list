@@ -76,6 +76,15 @@ All `position` queries (select, update, etc.) inside gem methods are executed wi
 
 The `position` column is set after validations are called, so you should not put a `presence` validation on the `position` column.
 
+
+If you need a scope by a non-association field you should pass an array, containing field name, to a scope:
+```ruby
+class TodoItem < ActiveRecord::Base
+  # `kind` is a plain text field (e.g. 'work', 'shopping', 'meeting'), not an association
+  acts_as_list scope: [:kind]
+end
+```
+
 ## Versions
 All versions `0.1.5` onwards require Rails 3.0.x and higher.
 
