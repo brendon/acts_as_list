@@ -117,10 +117,29 @@ module ActiveRecord
             scope :in_list, lambda { where("#{table_name}.#{configuration[:column]} IS NOT NULL") }
           EOV
 
+          class_eval <<-EOF
+            def self.as_list_shuffle!
+              sql = ''
+              ordered_positions = pluck(:#{configuration[:column]}).sort
+              pluck(:id).shuffle.each_with_index do |id, index|
+                sql += "when (id=\#{id}) then \#{ordered_positions[index]} "
+              end
+              update_all(['#{configuration[:column]}=case', sql, 'end'].join(' '))
+            end
+
+            def self.as_list_sort!(*args)
+              sql = ''
+              ordered_possitions = pluck(:#{configuration[:column]}).sort
+              reorder(*args).pluck(:id).each_with_index do |id, index|
+                sql += "when (id=\#{id}) then \#{ordered_possitions[index]} "
+              end
+              update_all(['#{configuration[:column]}=case', sql, 'end'].join(' '))
+            end
+          EOF
+
           if configuration[:add_new_at].present?
             self.send(:before_create, "add_to_list_#{configuration[:add_new_at]}")
           end
-
         end
       end
 
