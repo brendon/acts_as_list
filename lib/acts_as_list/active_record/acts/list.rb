@@ -310,7 +310,7 @@ module ActiveRecord
           # Returns the bottom item
           def bottom_item(except = nil)
             conditions = scope_condition
-            conditions = "#{conditions} AND #{self.class.primary_key} != #{self.class.quote_value(except.id)}" if except
+            conditions = "#{conditions} AND #{self.class.primary_key} != #{self.class.connection.quote(except.id)}" if except
             acts_as_list_class.unscoped do
               acts_as_list_class.in_list.where(conditions).order("#{acts_as_list_class.table_name}.#{position_column} DESC").first
             end
@@ -387,7 +387,7 @@ module ActiveRecord
           # Reorders intermediate items to support moving an item from old_position to new_position.
           def shuffle_positions_on_intermediate_items(old_position, new_position, avoid_id = nil)
             return if old_position == new_position
-            avoid_id_condition = avoid_id ? " AND #{self.class.primary_key} != #{self.class.quote_value(avoid_id)}" : ''
+            avoid_id_condition = avoid_id ? " AND #{self.class.primary_key} != #{self.class.connection.quote(avoid_id)}" : ''
 
             if old_position < new_position
               # Decrement position of intermediate items

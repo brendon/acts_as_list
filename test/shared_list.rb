@@ -137,7 +137,7 @@ module Shared
     def test_nil_scope
       new1, new2, new3 = ListMixin.create, ListMixin.create, ListMixin.create
       new2.move_higher
-      assert_equal [new2, new1, new3], ListMixin.where(parent_id: nil).order('pos')
+      assert_equal [new2, new1, new3].map(&:id), ListMixin.where(parent_id: nil).order('pos').map(&:id)
     end
 
     def test_update_position_when_scope_changes
