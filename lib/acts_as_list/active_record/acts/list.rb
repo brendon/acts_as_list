@@ -99,6 +99,11 @@ module ActiveRecord
               '#{configuration[:add_new_at]}'
             end
 
+            def #{configuration[:column]}=(position)
+              write_attribute(:#{configuration[:column]}, position)
+              @position_changed = true
+            end
+
             #{scope_methods}
 
             # only add to attr_accessible
@@ -182,7 +187,8 @@ module ActiveRecord
           end
         end
 
-        # Move the item within scope
+        # Move the item within scope. If a position within the new scope isn't supplied, the item will
+        # be appended to the end of the list.
         def move_within_scope(scope_id)
           send("#{scope_name}=", scope_id)
           save!
@@ -290,10 +296,10 @@ module ActiveRecord
           end
 
           def add_to_list_bottom
-            if not_in_list? || default_position?
+            if not_in_list? || scope_changed? && !@position_changed || default_position?
               self[position_column] = bottom_position_in_list.to_i + 1
             else
-              increment_positions_on_lower_items(self[position_column])
+              increment_positions_on_lower_items(self[position_column], id)
             end
           end
 
@@ -363,10 +369,12 @@ module ActiveRecord
           end
 
           # This has the effect of moving all the lower items down one.
-          def increment_positions_on_lower_items(position)
+          def increment_positions_on_lower_items(position, avoid_id = nil)
+            avoid_id_condition = avoid_id ? " AND #{self.class.primary_key} != #{self.class.connection.quote(avoid_id)}" : ''
+
             acts_as_list_class.unscoped do
               acts_as_list_class.where(
-                "#{scope_condition} AND #{position_column} >= #{position}"
+                "#{scope_condition} AND #{position_column} >= #{position}#{avoid_id_condition}"
               ).update_all(
                 "#{position_column} = (#{position_column} + 1)"
               )
