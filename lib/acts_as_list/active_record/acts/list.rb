@@ -474,8 +474,10 @@ module ActiveRecord
             self.reload
           end
 
+          # This check is skipped if the position is currently the default position from the table
+          # as modifying the default position on creation is handled elsewhere
           def check_top_position
-            if send(position_column) && send(position_column) < acts_as_list_top
+            if send(position_column) && !default_position? && send(position_column) < acts_as_list_top
               self[position_column] = acts_as_list_top
             end
           end

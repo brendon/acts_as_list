@@ -6,16 +6,21 @@ ActiveRecord::Schema.verbose = false
 
 def setup_db(position_options = {})
   # AR caches columns options like defaults etc. Clear them!
+  ActiveRecord::Base.connection.create_table :mixins do |t|
+    t.column :pos, :integer, position_options
+    t.column :active, :boolean, default: true
+    t.column :parent_id, :integer
+    t.column :parent_type, :string
+    t.column :created_at, :datetime
+    t.column :updated_at, :datetime
+  end
+  
   ActiveRecord::Base.connection.schema_cache.clear!
-  ActiveRecord::Schema.define(version: 1) do
-    create_table :mixins do |t|
-      t.column :pos, :integer, position_options
-      t.column :active, :boolean, default: true
-      t.column :parent_id, :integer
-      t.column :parent_type, :string
-      t.column :created_at, :datetime
-      t.column :updated_at, :datetime
-    end
+  [ Mixin, ListMixin, ListMixinSub1, ListMixinSub2, ListWithStringScopeMixin,
+    ArrayScopeListMixin, ZeroBasedMixin, DefaultScopedMixin,
+    DefaultScopedWhereMixin, TopAdditionMixin, NoAdditionMixin ].each do |klass|
+    
+    klass.reset_column_information
   end
 end
 
@@ -87,8 +92,8 @@ class NoAdditionMixin < Mixin
   acts_as_list column: "pos", add_new_at: nil, scope: :parent_id
 end
 
-class ActsAsListTestCase < MiniTest::Unit::TestCase
-  # No default test required a this class is abstract.
+class ActsAsListTestCase < Minitest::Test
+  # No default test required as this class is abstract.
   # Need for test/unit.
   undef_method :default_test if method_defined?(:default_test)
 
