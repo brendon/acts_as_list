@@ -1,33 +1,36 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
+
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>acts_as_list by swanandp</title>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="acts_as_list : A Rails plugin that provides list abilities to an ActiveRecord model" />
 
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>acts_as_list</title>
   </head>
+
   <body>
-    <div class="wrapper">
-      <header>
-        <h1>acts_as_list</h1>
-        <p>A Rails plugin that provides list abilities to an ActiveRecord model</p>
 
-        <p class="view"><a href="https://github.com/swanandp/acts_as_list">View the Project on GitHub <small>swanandp/acts_as_list</small></a></p>
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/swanandp/acts_as_list">View on GitHub</a>
 
+          <h1 id="project_title">acts_as_list</h1>
+          <h2 id="project_tagline">A Rails plugin that provides list abilities to an ActiveRecord model</h2>
 
-        <ul>
-          <li><a href="https://github.com/swanandp/acts_as_list/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/swanandp/acts_as_list/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/swanandp/acts_as_list">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/swanandp/acts_as_list/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/swanandp/acts_as_list/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
         <h1>
 <a name="actsaslist" class="anchor" href="#actsaslist"><span class="octicon octicon-link"></span></a>ActsAsList</h1>
 
@@ -52,23 +55,84 @@
 <h2>
 <a name="example" class="anchor" href="#example"><span class="octicon octicon-link"></span></a>Example</h2>
 
-<pre><code>class TodoList &lt; ActiveRecord::Base
-  has_many :todo_items, :order =&gt; "position"
-end
+<p>At first, you need to add a <code>position</code> column to desired table:</p>
 
-class TodoItem &lt; ActiveRecord::Base
-  belongs_to :todo_list
-  acts_as_list :scope =&gt; :todo_list
-end
-
-todo_list.first.move_to_bottom
-todo_list.last.move_higher
+<pre><code>rails g migration AddPositionToTodoItem position:integer
+rake db:migrate
 </code></pre>
 
+<p>After that you can use <code>acts_as_list</code> method in the model: </p>
+
+<div class="highlight highlight-ruby"><pre><span class="k">class</span> <span class="nc">TodoList</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">has_many</span> <span class="ss">:todo_items</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">order</span><span class="p">(</span><span class="s2">"position ASC"</span><span class="p">)</span> <span class="p">}</span>
+<span class="k">end</span>
+
+<span class="k">class</span> <span class="nc">TodoItem</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="n">belongs_to</span> <span class="ss">:todo_list</span>
+  <span class="n">acts_as_list</span> <span class="ss">scope</span><span class="p">:</span> <span class="ss">:todo_list</span>
+<span class="k">end</span>
+
+<span class="n">todo_list</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">move_to_bottom</span>
+<span class="n">todo_list</span><span class="o">.</span><span class="n">last</span><span class="o">.</span><span class="n">move_higher</span>
+</pre></div>
+
 <h2>
+<a name="instance-methods-added-to-activerecord-models" class="anchor" href="#instance-methods-added-to-activerecord-models"><span class="octicon octicon-link"></span></a>Instance Methods Added To ActiveRecord Models</h2>
+
+<p>You'll have a number of methods added to each instance of the ActiveRecord model that to which <code>acts_as_list</code> is added. </p>
+
+<p>In <code>acts_as_list</code>, "higher" means further up the list (a lower <code>position</code>), and "lower" means further down the list (a higher <code>position</code>). That can be confusing, so it might make sense to add tests that validate that you're using the right method given your context.</p>
+
+<h3>
+<a name="methods-that-change-position-and-reorder-list" class="anchor" href="#methods-that-change-position-and-reorder-list"><span class="octicon octicon-link"></span></a>Methods That Change Position and Reorder List</h3>
+
+<ul>
+<li><code>list_item.insert_at(2)</code></li>
+<li>
+<code>list_item.move_lower</code> will do nothing if the item is the lowest item</li>
+<li>
+<code>list_item.move_higher</code> will do nothing if the item is the highest item</li>
+<li><code>list_item.move_to_bottom</code></li>
+<li><code>list_item.move_to_top</code></li>
+<li><code>list_item.remove_from_list</code></li>
+</ul><h3>
+<a name="methods-that-change-position-without-reordering-list" class="anchor" href="#methods-that-change-position-without-reordering-list"><span class="octicon octicon-link"></span></a>Methods That Change Position Without Reordering List</h3>
+
+<ul>
+<li><code>list_item.increment_position</code></li>
+<li><code>list_item.decrement_position</code></li>
+<li><code>list_item.set_list_position(3)</code></li>
+</ul><h3>
+<a name="methods-that-return-attributes-of-the-items-list-position" class="anchor" href="#methods-that-return-attributes-of-the-items-list-position"><span class="octicon octicon-link"></span></a>Methods That Return Attributes of the Item's List Position</h3>
+
+<ul>
+<li><code>list_item.first?</code></li>
+<li><code>list_item.last?</code></li>
+<li><code>list_item.in_list?</code></li>
+<li><code>list_item.not_in_list?</code></li>
+<li><code>list_item.default_position?</code></li>
+<li><code>list_item.higher_item</code></li>
+<li>
+<code>list_item.higher_items</code> will return all the items above <code>list_item</code> in the list (ordered by the position, ascending)</li>
+<li><code>list_item.lower_item</code></li>
+<li>
+<code>list_item.lower_items</code> will return all the items below <code>list_item</code> in the list (ordered by the position, ascending)</li>
+</ul><h2>
 <a name="notes" class="anchor" href="#notes"><span class="octicon octicon-link"></span></a>Notes</h2>
 
 <p>If the <code>position</code> column has a default value, then there is a slight change in behavior, i.e if you have 4 items in the list, and you insert 1, with a default position 0, it would be pushed to the bottom of the list. Please look at the tests for this and some recent pull requests for discussions related to this.</p>
+
+<p>All <code>position</code> queries (select, update, etc.) inside gem methods are executed without the default scope (i.e. <code>Model.unscoped</code>), this will prevent nasty issues when the default scope is different from <code>acts_as_list</code> scope.</p>
+
+<p>The <code>position</code> column is set after validations are called, so you should not put a <code>presence</code> validation on the <code>position</code> column.</p>
+
+<p>If you need a scope by a non-association field you should pass an array, containing field name, to a scope:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="k">class</span> <span class="nc">TodoItem</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+  <span class="c1"># `kind` is a plain text field (e.g. 'work', 'shopping', 'meeting'), not an association</span>
+  <span class="n">acts_as_list</span> <span class="ss">scope</span><span class="p">:</span> <span class="o">[</span><span class="ss">:kind</span><span class="o">]</span>
+<span class="k">end</span>
+</pre></div>
 
 <h2>
 <a name="versions" class="anchor" href="#versions"><span class="octicon octicon-link"></span></a>Versions</h2>
@@ -104,12 +168,17 @@ todo_list.last.move_higher
 
 <p>Copyright (c) 2007 David Heinemeier Hansson, released under the MIT license</p>
       </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/swanandp">swanandp</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">acts_as_list maintained by <a href="https://github.com/swanandp">swanandp</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
       </footer>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
+
     
+
   </body>
 </html>
