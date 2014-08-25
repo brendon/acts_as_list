@@ -274,7 +274,7 @@ module ActiveRecord
         end
 
         def default_position?
-          default_position == send(position_column)
+          default_position && default_position.to_i == send(position_column)
         end
 
         # Sets the new position and saves it
