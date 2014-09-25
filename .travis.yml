@@ -7,7 +7,6 @@ rvm:
   - jruby-19mode
   - rbx-2
 gemfile:
- - gemfiles/rails3/Gemfile
  - gemfiles/rails4/Gemfile
 matrix:
   allow_failures:
