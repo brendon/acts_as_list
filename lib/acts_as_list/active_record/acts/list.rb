@@ -112,10 +112,10 @@ module ActiveRecord
             end
 
             before_validation :check_top_position
-            
+
             before_destroy :lock!
             after_destroy :decrement_positions_on_lower_items
-            
+
             before_update :check_scope
             after_update :update_positions
 
@@ -455,24 +455,31 @@ module ActiveRecord
 
           def internal_scope_changed?
             return @scope_changed if defined?(@scope_changed)
-            
+
             @scope_changed = scope_changed?
           end
 
           # Temporarily swap changes attributes with current attributes
-          def swap_changed_attributes
-            @changed_attributes.each do |k, _|
-              if self.class.column_names.include? k
-                @changed_attributes[k], self[k] = self[k], @changed_attributes[k]
-              end
+          def with_old_attributes
+            begin
+              @changed_attributes.each { |k, _| @changed_attributes[k], self[k] = self[k], @changed_attributes[k] }
+              yield
+            ensure
+              @changed_attributes.each { |k, _| @changed_attributes[k], self[k] = self[k], @changed_attributes[k] }
             end
           end
 
           def check_scope
             if internal_scope_changed?
-              swap_changed_attributes
-              send('decrement_positions_on_lower_items') if lower_item
-              swap_changed_attributes
+              with_old_attributes do
+                # if position unchanged and db has a different value for position column
+                unless send("#{position_column}_changed?")
+                  db_position = self.class.select(position_column).where(id: id).first[position_column]
+                  # Assign up to date db value to position column and do the computation below
+                  self[position_column] = db_position if send(position_column).to_i != db_position
+                end
+                decrement_positions_on_lower_items if lower_item
+              end
               send("add_to_list_#{add_new_at}")
             end
           end
