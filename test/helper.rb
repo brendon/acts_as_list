@@ -19,3 +19,4 @@ if defined?(ActiveRecord::VERSION) &&
 end
 
 require "shared"
+require "ancestry"

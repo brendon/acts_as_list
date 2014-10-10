@@ -16,6 +16,8 @@ gem "rake"
 gem "appraisal"
 # Used to automatically generate changelog file
 gem "github_changelog_generator", "1.9.0"
+# Used in #131 reproduction
+gem "ancestry"
 
 group :test do
 	gem "minitest", "~> 5.0"
