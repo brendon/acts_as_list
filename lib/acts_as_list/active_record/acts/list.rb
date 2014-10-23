@@ -140,22 +140,23 @@ module ActiveRecord
         end
 
         # Swap positions with the next lower item, if one exists.
+                # Swap positions with the next lower item, if one exists.
         def move_lower
-          return unless lower_item
-
           acts_as_list_class.transaction do
-            lower_item.decrement_position
-            increment_position
+            if other = lower_item
+              update_clause = "#{position_column} = (CASE id WHEN #{id} THEN #{position_column} + 1 ELSE #{position_column} - 1 END)"
+              acts_as_list_class.unscoped.where(id: [id, other.id]).update_all(update_clause)
+            end
           end
         end
 
         # Swap positions with the next higher item, if one exists.
         def move_higher
-          return unless higher_item
-
           acts_as_list_class.transaction do
-            higher_item.increment_position
-            decrement_position
+            if other = higher_item
+              update_clause = "#{position_column} = (CASE id WHEN #{id} THEN #{position_column} - 1 ELSE #{position_column} + 1 END)"
+              acts_as_list_class.unscoped.where(id: [id, other.id]).update_all(update_clause)
+            end
           end
         end
 
