@@ -14,6 +14,9 @@ def setup_db(position_options = {})
     t.column :created_at, :datetime
     t.column :updated_at, :datetime
   end
+
+  # Add uniqueness constraint to position column
+  ActiveRecord::Base.connection.add_index :mixins, [:parent_id, :pos], unique: true
   
   ActiveRecord::Base.connection.schema_cache.clear!
   [ Mixin, ListMixin, ListMixinSub1, ListMixinSub2, ListWithStringScopeMixin,
