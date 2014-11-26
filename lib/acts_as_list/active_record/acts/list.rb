@@ -84,7 +84,7 @@ module ActiveRecord
             end
 
             def acts_as_list_class
-              ::#{self.name}
+              @acts_as_list_class ||= eval('::'+self.class.name.to_s)
             end
 
             def position_column
