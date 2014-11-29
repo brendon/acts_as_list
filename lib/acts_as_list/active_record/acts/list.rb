@@ -43,7 +43,7 @@ module ActiveRecord
           if configuration[:scope].is_a?(Symbol)
             scope_methods = %(
               def scope_condition
-                self.class.send(:sanitize_sql_hash_for_conditions, { :#{configuration[:scope].to_s} => send(:#{configuration[:scope].to_s}) })
+                { :#{configuration[:scope].to_s} => send(:#{configuration[:scope].to_s}) }
               end
 
               def scope_changed?
@@ -63,7 +63,7 @@ module ActiveRecord
               end
 
               def scope_condition
-                self.class.send(:sanitize_sql_hash_for_conditions, attrs)
+                attrs
               end
             )
           else
@@ -304,7 +304,7 @@ module ActiveRecord
           end
 
           # Overwrite this method to define the scope of the list changes
-          def scope_condition() "1" end
+          def scope_condition() {} end
 
           # Returns the bottom position number in the list.
           #   bottom_position_in_list    # => 2
