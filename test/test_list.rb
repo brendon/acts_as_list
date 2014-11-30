@@ -92,6 +92,19 @@ class NoAdditionMixin < Mixin
   acts_as_list column: "pos", add_new_at: nil, scope: :parent_id
 end
 
+class TheBaseClass < ActiveRecord::Base
+  self.abstract_class = true
+  acts_as_list column: "pos", scope: :parent
+end
+
+class TheSubClass1 < TheBaseClass
+  self.table_name = 'mixins'
+end
+
+class TheSubClass2 < TheBaseClass
+  self.table_name = 'mixins'
+end
+
 class ActsAsListTestCase < Minitest::Test
   # No default test required as this class is abstract.
   # Need for test/unit.

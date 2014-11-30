@@ -118,5 +118,10 @@ module Shared
       assert_equal 1, ListMixin.where(id: 3).first.pos
       assert_equal 2, ListMixin.where(id: 4).first.pos
     end
+
+    def test_acts_as_list_class
+      assert_equal TheSubClass1, TheSubClass1.new.acts_as_list_class
+      assert_equal TheSubClass2, TheSubClass2.new.acts_as_list_class
+    end
   end
 end
