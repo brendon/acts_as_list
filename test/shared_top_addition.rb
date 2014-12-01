@@ -1,7 +1,7 @@
 module Shared
   module TopAddition
     def setup
-      (1..4).each { |counter| TopAdditionMixin.create! pos: counter, parent_id: 5 }
+      (1..4).each { |counter| TopAdditionMixin.create! parent_id: 5 }
     end
 
     def test_reordering
