@@ -54,7 +54,7 @@ module ActiveRecord
             scope_methods = %(
               def attrs
                 %w(#{configuration[:scope].join(" ")}).inject({}) do |memo,column|
-                  memo[column.intern] = send(column.intern); memo
+                  memo[column.intern] = read_attribute(column.intern); memo
                 end
               end
 
