@@ -84,7 +84,7 @@ module ActiveRecord
             end
 
             def acts_as_list_class
-              self.class
+              ::#{self.name}
             end
 
             def position_column

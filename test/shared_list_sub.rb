@@ -120,8 +120,8 @@ module Shared
     end
 
     def test_acts_as_list_class
-      assert_equal TheSubClass1, TheSubClass1.new.acts_as_list_class
-      assert_equal TheSubClass2, TheSubClass2.new.acts_as_list_class
+      assert_equal TheBaseClass, TheBaseSubclass.new.acts_as_list_class
+      assert_equal TheAbstractSubclass, TheAbstractSubclass.new.acts_as_list_class
     end
   end
 end
