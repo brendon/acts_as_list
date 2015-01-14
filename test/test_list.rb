@@ -109,17 +109,21 @@ class NoAdditionMixin < Mixin
   acts_as_list column: "pos", add_new_at: nil, scope: :parent_id
 end
 
-class TheBaseClass < ActiveRecord::Base
+class TheAbstractClass < ActiveRecord::Base
   self.abstract_class = true
+  self.table_name = 'mixins'
+end
+
+class TheAbstractSubclass < TheAbstractClass
   acts_as_list column: "pos", scope: :parent
 end
 
-class TheSubClass1 < TheBaseClass
+class TheBaseClass < ActiveRecord::Base
   self.table_name = 'mixins'
+  acts_as_list column: "pos", scope: :parent
 end
 
-class TheSubClass2 < TheBaseClass
-  self.table_name = 'mixins'
+class TheBaseSubclass < TheBaseClass
 end
 
 class ActsAsListTestCase < Minitest::Test
