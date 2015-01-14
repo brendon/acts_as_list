@@ -1,9 +1,7 @@
 require 'acts_as_list/active_record/acts/list'
 
 module ActsAsList
-  begin
-    require 'rails'
-
+  if defined?(Rails::Railtie)
     class Railtie < Rails::Railtie
       initializer 'acts_as_list.insert_into_active_record' do
         ActiveSupport.on_load :active_record do
@@ -11,7 +9,7 @@ module ActsAsList
         end
       end
     end
-  rescue LoadError
+  else
     ActiveRecord::Base.send(:include, ActiveRecord::Acts::List) if defined?(ActiveRecord)
   end
 end
