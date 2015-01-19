@@ -104,6 +104,13 @@ module Shared
 
       new4.reload
       assert_equal 5, new4.pos
+
+      new6 = ListMixin.new(parent_id: 20)
+      new6.insert_at 1
+      assert_equal 1, new6.pos
+
+      new5.reload
+      assert_equal 2, new5.pos
     end
 
     def test_delete_middle
