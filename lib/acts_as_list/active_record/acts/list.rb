@@ -279,7 +279,8 @@ module ActiveRecord
 
         # Sets the new position and saves it
         def set_list_position(new_position)
-          send("#{position_column}=", new_position)
+          write_attribute position_column, new_position
+          @position_changed = true if new_record?
           save(validate: false)
         end
 
