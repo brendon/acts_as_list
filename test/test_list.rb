@@ -752,63 +752,46 @@ end
 class CircularAssociationsScopeTest < ActsAsListTestCase
   class Foo < ActiveRecord::Base
     has_many :cats, -> { order :position }, inverse_of: :foo
-    has_many :bats, inverse_of: :foo
     accepts_nested_attributes_for :cats
-  end
-
-  class Bar < ActiveRecord::Base
-    belongs_to :cat, inverse_of: :bars
-    has_many :cats, inverse_of: :bar
   end
 
   class Bat < ActiveRecord::Base
     belongs_to :cat, inverse_of: :bats
-    belongs_to :foo, inverse_of: :bats
+    has_many :cats, inverse_of: :bat
   end
 
   class Cat < ActiveRecord::Base
     belongs_to :foo, inverse_of: :cats
-    has_many :bars, inverse_of: :cat
+    belongs_to :bat, inverse_of: :cats
     has_many :bats, inverse_of: :cat
-    belongs_to :bar
-
-    acts_as_list scope: :foo
+    acts_as_list scope: :bat
   end
 
   def setup
     ActiveRecord::Base.connection.create_table :foos do |t|
     end
-    ActiveRecord::Base.connection.create_table :bars do |t|
-      t.integer :cat_id
-    end
     ActiveRecord::Base.connection.create_table :bats do |t|
-      t.integer :foo_id
       t.integer :cat_id
     end
     ActiveRecord::Base.connection.create_table :cats do |t|
-      t.string :name
       t.integer :foo_id
+      t.integer :bat_id
       t.integer :position
-      t.integer :bar_id
+      t.string :name
     end
   end
 
   def test_position
+    ActiveRecord::Base.logger = Logger.new STDOUT
     foo = Foo.new
 
-    cat1 = Cat.new(position: 1, name: '1')
-    bar = Bar.new
-    cat1.bars << bar
-    foo.cats << cat1
-
-    cat2 = Cat.new(position: 2, name: '2')
-    foo.cats << cat2
-
-    cat2.bar = bar
+    cat1 = foo.cats.build(position: 1, name: '1')
+    cat2 = foo.cats.build(position: 2, name: '2')
 
     bat = Bat.new
     bat.cat = cat2
-    foo.bats << bat
+    cat1.bat = bat
+    cat2.bat = bat
 
     foo.save!
     foo.reload
