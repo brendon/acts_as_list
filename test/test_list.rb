@@ -748,3 +748,72 @@ class ActsAsListTopTest < ActsAsListTestCase
     assert_equal 0, ZeroBasedMixin.acts_as_list_top
   end
 end
+
+class CircularAssociationsScopeTest < ActsAsListTestCase
+  class Foo < ActiveRecord::Base
+    has_many :cats, -> { order :position }, inverse_of: :foo
+    has_many :bats, inverse_of: :foo
+    accepts_nested_attributes_for :cats
+  end
+
+  class Bar < ActiveRecord::Base
+    belongs_to :cat, inverse_of: :bars
+    has_many :cats, inverse_of: :bar
+  end
+
+  class Bat < ActiveRecord::Base
+    belongs_to :cat, inverse_of: :bats
+    belongs_to :foo, inverse_of: :bats
+  end
+
+  class Cat < ActiveRecord::Base
+    belongs_to :foo, inverse_of: :cats
+    has_many :bars, inverse_of: :cat
+    has_many :bats, inverse_of: :cat
+    belongs_to :bar
+
+    acts_as_list scope: :foo
+  end
+
+  def setup
+    ActiveRecord::Base.connection.create_table :foos do |t|
+    end
+    ActiveRecord::Base.connection.create_table :bars do |t|
+      t.integer :cat_id
+    end
+    ActiveRecord::Base.connection.create_table :bats do |t|
+      t.integer :foo_id
+      t.integer :cat_id
+    end
+    ActiveRecord::Base.connection.create_table :cats do |t|
+      t.string :name
+      t.integer :foo_id
+      t.integer :position
+      t.integer :bar_id
+    end
+  end
+
+  def test_position
+    foo = Foo.new
+
+    cat1 = Cat.new(position: 1, name: '1')
+    bar = Bar.new
+    cat1.bars << bar
+    foo.cats << cat1
+
+    cat2 = Cat.new(position: 2, name: '2')
+    foo.cats << cat2
+
+    cat2.bar = bar
+
+    bat = Bat.new
+    bat.cat = cat2
+    foo.bats << bat
+
+    foo.save!
+    foo.reload
+
+    assert_equal [1,2], foo.cats.map(&:position)
+    assert_equal ['1','2'], foo.cats.map(&:name)
+  end
+end
