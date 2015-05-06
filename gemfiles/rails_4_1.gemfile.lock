@@ -1,7 +1,7 @@
 PATH
   remote: ../
   specs:
-    acts_as_list (0.6.0)
+    acts_as_list (0.7.2)
       activerecord (>= 3.0)
 
 GEM
