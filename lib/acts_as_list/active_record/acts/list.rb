@@ -311,7 +311,11 @@ module ActiveRecord
           def bottom_item(except = nil)
             conditions = scope_condition
             conditions = except ? "#{self.class.primary_key} != #{self.class.connection.quote(except.id)}" : {}
-            acts_as_list_list.in_list.where(conditions).order("#{acts_as_list_class.table_name}.#{position_column} DESC").first
+            acts_as_list_list.in_list.where(
+                conditions
+              ).order(
+                "#{acts_as_list_class.table_name}.#{position_column} DESC"
+              ).first
           end
 
           # Forces item to assume the bottom position in the list.
@@ -367,7 +371,9 @@ module ActiveRecord
 
           # Increments position (<tt>position_column</tt>) of all items in the list.
           def increment_positions_on_all_items
-            acts_as_list_list.update_all("#{position_column} = (#{position_column} + 1)")
+            acts_as_list_list.update_all(
+              "#{position_column} = (#{position_column} + 1)"
+            )
           end
 
           # Reorders intermediate items to support moving an item from old_position to new_position.
@@ -427,7 +433,9 @@ module ActiveRecord
             old_position = send("#{position_column}_was").to_i
             new_position = send(position_column).to_i
 
-            return unless acts_as_list_list.where("#{position_column} = #{new_position}").count > 1
+            return unless acts_as_list_list.where(
+              "#{position_column} = #{new_position}"
+            ).any?
             shuffle_positions_on_intermediate_items old_position, new_position, id
           end
 
