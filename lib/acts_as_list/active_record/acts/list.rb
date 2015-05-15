@@ -435,7 +435,7 @@ module ActiveRecord
 
             return unless acts_as_list_list.where(
               "#{position_column} = #{new_position}"
-            ).any?
+            ).count > 1
             shuffle_positions_on_intermediate_items old_position, new_position, id
           end
 
