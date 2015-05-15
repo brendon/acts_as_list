@@ -221,10 +221,7 @@ module ActiveRecord
         # Return the next higher item in the list.
         def higher_item
           return nil unless in_list?
-          acts_as_list_class.unscoped do
-            acts_as_list_class.where(scope_condition).where("#{position_column} < #{(send(position_column).to_i).to_s}").
-            order("#{acts_as_list_class.table_name}.#{position_column} DESC").first
-          end
+          higher_items(1).first
         end
 
         # Return the next n higher items in the list
@@ -242,10 +239,7 @@ module ActiveRecord
         # Return the next lower item in the list.
         def lower_item
           return nil unless in_list?
-          acts_as_list_class.unscoped do
-            acts_as_list_class.where(scope_condition).where("#{position_column} > #{(send(position_column).to_i).to_s}").
-            order("#{acts_as_list_class.table_name}.#{position_column} ASC").first
-          end
+          lower_items(1).first
         end
 
         # Return the next n lower items in the list
