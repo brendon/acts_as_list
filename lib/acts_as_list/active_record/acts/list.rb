@@ -38,7 +38,13 @@ module ActiveRecord
           configuration = { column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom}
           configuration.update(options) if options.is_a?(Hash)
 
-          configuration[:scope] = "#{configuration[:scope]}_id".intern if configuration[:scope].is_a?(Symbol) && configuration[:scope].to_s !~ /_id$/
+          if configuration[:scope].is_a?(Symbol) && configuration[:scope].to_s !~ /_id$/
+            if reflect_on_association(configuration).try(:options).try(:[], :polymorphic) == true
+              configuration[:scope] = ["#{configuration[:scope]}_id".intern, "#{configuration[:scope]}_type".intern]
+            else
+              configuration[:scope] = "#{configuration[:scope]}_id".intern
+            end
+          end
 
           if configuration[:scope].is_a?(Symbol)
             scope_methods = %(
