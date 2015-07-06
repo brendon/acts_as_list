@@ -174,7 +174,14 @@ module ActiveRecord
         def move_to_top
           return unless in_list?
           acts_as_list_class.transaction do
-            increment_positions_on_higher_items
+            highest_item_position = (higher_items.first || self).send(position_column)
+
+            if highest_item_position && highest_item_position < acts_as_list_top
+              increment_positions_on_all_items(id)
+              write_attribute(position_column, send(position_column) + 1)
+            end
+
+            increment_positions_on_higher_items(id)
             assume_top_position
           end
         end
@@ -280,6 +287,7 @@ module ActiveRecord
         # Sets the new position and saves it
         def set_list_position(new_position)
           write_attribute position_column, new_position
+          check_top_position
           save(validate: false)
         end
 
@@ -357,24 +365,26 @@ module ActiveRecord
           end
 
           # This has the effect of moving all the higher items down one.
-          def increment_positions_on_higher_items
+          def increment_positions_on_higher_items(avoid_id = nil)
             return unless in_list?
             acts_as_list_class.unscoped do
               acts_as_list_class.where(scope_condition).where(
-                "#{position_column} < #{send(position_column).to_i}"
+                "#{position_column} < #{send(position_column).to_i} AND #{avoid_id_condition(avoid_id)}"
               ).update_all(
                 "#{position_column} = (#{position_column} + 1)"
               )
             end
           end
 
+          def avoid_id_condition(avoid_id)
+            avoid_id ? "#{self.class.primary_key} != #{self.class.connection.quote(avoid_id)}" : '1 + 1'
+          end
+
           # This has the effect of moving all the lower items down one.
           def increment_positions_on_lower_items(position, avoid_id = nil)
-            avoid_id_condition = avoid_id ? " AND #{self.class.primary_key} != #{self.class.connection.quote(avoid_id)}" : ''
-
             acts_as_list_class.unscoped do
               acts_as_list_class.where(scope_condition).where(
-                "#{position_column} >= #{position}#{avoid_id_condition}"
+                "#{position_column} >= #{position} AND #{avoid_id_condition(avoid_id)}"
               ).update_all(
                 "#{position_column} = (#{position_column} + 1)"
               )
@@ -382,10 +392,10 @@ module ActiveRecord
           end
 
           # Increments position (<tt>position_column</tt>) of all items in the list.
-          def increment_positions_on_all_items
+          def increment_positions_on_all_items(avoid_id = nil)
             acts_as_list_class.unscoped do
-              acts_as_list_class.where(
-                scope_condition
+              acts_as_list_class.where(scope_condition).where(
+                avoid_id_condition(avoid_id)
               ).update_all(
                 "#{position_column} = (#{position_column} + 1)"
               )
@@ -395,8 +405,6 @@ module ActiveRecord
           # Reorders intermediate items to support moving an item from old_position to new_position.
           def shuffle_positions_on_intermediate_items(old_position, new_position, avoid_id = nil)
             return if old_position == new_position
-            avoid_id_condition = avoid_id ? " AND #{self.class.primary_key} != #{self.class.connection.quote(avoid_id)}" : ''
-
             if old_position < new_position
               # Decrement position of intermediate items
               #
@@ -406,7 +414,7 @@ module ActiveRecord
                 acts_as_list_class.where(scope_condition).where(
                   "#{position_column} > #{old_position}"
                 ).where(
-                  "#{position_column} <= #{new_position}#{avoid_id_condition}"
+                  "#{position_column} <= #{new_position} AND #{avoid_id_condition(avoid_id)}"
                 ).update_all(
                   "#{position_column} = (#{position_column} - 1)"
                 )
@@ -420,7 +428,7 @@ module ActiveRecord
                 acts_as_list_class.where(scope_condition).where(
                   "#{position_column} >= #{new_position}"
                 ).where(
-                  "#{position_column} < #{old_position}#{avoid_id_condition}"
+                  "#{position_column} < #{old_position} AND #{avoid_id_condition(avoid_id)}"
                 ).update_all(
                   "#{position_column} = (#{position_column} + 1)"
                 )

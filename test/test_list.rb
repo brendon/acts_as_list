@@ -20,7 +20,7 @@ def setup_db(position_options = {})
     ArrayScopeListMixin, ZeroBasedMixin, DefaultScopedMixin,
     DefaultScopedWhereMixin, TopAdditionMixin, NoAdditionMixin ]
 
-  mixins << EnumArrayScopeListMixin if rails_4
+  mixins << EnumArrayScopeListMixin if rails_4_1
 
   ActiveRecord::Base.connection.schema_cache.clear!
   mixins.each do |klass|
@@ -37,8 +37,8 @@ def rails_3
   defined?(ActiveRecord::VERSION) && ActiveRecord::VERSION::MAJOR >= 3
 end
 
-def rails_4
-  defined?(ActiveRecord::VERSION) && ActiveRecord::VERSION::MAJOR >= 4
+def rails_4_1
+  defined?(ActiveRecord::VERSION) && ActiveRecord::VERSION::MAJOR >= 4 && ActiveRecord::VERSION::MINOR >= 1
 end
 
 def teardown_db
@@ -74,7 +74,7 @@ class ArrayScopeListMixin < Mixin
   acts_as_list column: "pos", scope: [:parent_id, :parent_type]
 end
 
-if rails_4
+if rails_4_1
   class EnumArrayScopeListMixin < Mixin
     STATE_VALUES = %w(active archived)
     enum state: STATE_VALUES
@@ -85,6 +85,10 @@ end
 
 class ZeroBasedMixin < Mixin
   acts_as_list column: "pos", top_of_list: 0, scope: [:parent_id]
+end
+
+class SimpleMixin < Mixin
+  acts_as_list column: "pos"
 end
 
 class DefaultScopedMixin < Mixin
@@ -205,6 +209,62 @@ class ArrayScopeListTestWithDefault < ActsAsListTestCase
   def setup
     setup_db_with_default
     super
+  end
+end
+
+class SimpleMixinTest < ActsAsListTestCase
+  def setup
+    setup_db
+  end
+
+  def test_move_to_top_intermediate1
+    SimpleMixin.create(id: 1).update_column(:pos, 0)
+    SimpleMixin.create(id: 2).update_column(:pos, 2)
+    SimpleMixin.create(id: 3).update_column(:pos, 3)
+    SimpleMixin.create(id: 4).update_column(:pos, 1)
+
+    SimpleMixin.where(id: 4).first.move_to_top
+
+    assert_equal [2, 3, 4, 1], SimpleMixin.order("id asc").pluck(:pos)
+  end
+
+  def test_move_to_top_intermediate2
+    SimpleMixin.create(id: 1).update_column(:pos, 0)
+    SimpleMixin.create(id: 2).update_column(:pos, 1)
+    SimpleMixin.create(id: 3).update_column(:pos, 3)
+    SimpleMixin.create(id: 4).update_column(:pos, 2)
+
+    SimpleMixin.where(id: 4).first.move_to_top
+
+    assert_equal [2, 3, 4, 1], SimpleMixin.order("id asc").pluck(:pos)
+  end
+
+  def test_move_to_top_highest
+    SimpleMixin.create(id: 1).update_column(:pos, 0)
+    SimpleMixin.create(id: 2).update_column(:pos, 1)
+    SimpleMixin.create(id: 3).update_column(:pos, 2)
+    SimpleMixin.create(id: 4).update_column(:pos, 3)
+
+    SimpleMixin.where(id: 4).first.move_to_top
+
+    assert_equal [2, 3, 4, 1], SimpleMixin.order("id asc").pluck(:pos)
+  end
+
+  def test_move_to_top_lowest
+    SimpleMixin.create(id: 1).update_column(:pos, 1)
+    SimpleMixin.create(id: 2).update_column(:pos, 2)
+    SimpleMixin.create(id: 3).update_column(:pos, 3)
+    SimpleMixin.create(id: 4).update_column(:pos, 0)
+
+    SimpleMixin.where(id: 4).first.move_to_top
+
+    assert_equal [2, 3, 4, 1], SimpleMixin.order("id asc").pluck(:pos)
+  end
+
+  def test_insert_at_wrong_position
+    SimpleMixin.create(id: 1, pos: 0).insert_at(0)
+
+    assert_equal 1, SimpleMixin.where(id: 1).first.pos
   end
 end
 
@@ -493,7 +553,7 @@ class MultipleListsTest < ActsAsListTestCase
   end
 end
 
-if rails_4
+if rails_4_1
   class EnumArrayScopeListMixinTest < ActsAsListTestCase
     def setup
       setup_db
