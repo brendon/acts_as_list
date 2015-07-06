@@ -461,8 +461,11 @@ module ActiveRecord
 
           # Temporarily swap changes attributes with current attributes
           def swap_changed_attributes
-            @changed_attributes.each { |k, _| @changed_attributes[k], self[k] =
-              self[k], @changed_attributes[k] }
+            @changed_attributes.each do |k, _|
+              if self.class.column_names.include? k
+                @changed_attributes[k], self[k] = self[k], @changed_attributes[k]
+              end
+            end
           end
 
           def check_scope
