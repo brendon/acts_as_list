@@ -628,3 +628,54 @@ class MultipleListsArrayScopeTest < ActsAsListTestCase
     assert_equal [1], ArrayScopeListMixin.where(:parent_id => 4, :parent_type => 'anything').order(:pos).map(&:pos)
   end
 end
+
+class TouchTest < ActsAsListTestCase
+  def setup
+    setup_db
+    4.times { ListMixin.create! updated_at: 1.day.ago }
+  end
+
+  def test_moving_item_lower_touches_self_and_lower_item
+    ListMixin.first.move_lower
+    ListMixin.pluck(:updated_at)[0..1].each do |updated_at|
+      assert_in_delta updated_at, Time.now.utc, 1.second
+    end
+    ListMixin.pluck(:updated_at)[2..3].each do |updated_at|
+      assert_in_delta updated_at, 1.day.ago, 1.second
+    end
+  end
+
+  def test_moving_item_higher_touches_self_and_higher_item
+    ListMixin.all.second.move_higher
+    ListMixin.pluck(:updated_at)[0..1].each do |updated_at|
+      assert_in_delta updated_at, Time.now.utc, 1.second
+    end
+    ListMixin.pluck(:updated_at)[2..3].each do |updated_at|
+      assert_in_delta updated_at, 1.day.ago, 1.second
+    end
+  end
+
+  def test_moving_item_to_bottom_touches_all_other_items
+    ListMixin.first.move_to_bottom
+    ListMixin.pluck(:updated_at).each do |updated_at|
+      assert_in_delta updated_at, Time.now.utc, 1.second
+    end
+  end
+
+  def test_moving_item_to_top_touches_all_other_items
+    ListMixin.last.move_to_top
+    ListMixin.pluck(:updated_at).each do |updated_at|
+      assert_in_delta updated_at, Time.now.utc, 1.second
+    end
+  end
+
+  def test_removing_item_touches_all_lower_items
+    ListMixin.all.third.remove_from_list
+    ListMixin.pluck(:updated_at)[0..1].each do |updated_at|
+      assert_in_delta updated_at, 1.day.ago, 1.second
+    end
+    ListMixin.pluck(:updated_at)[2..2].each do |updated_at|
+      assert_in_delta updated_at, Time.now.utc, 1.second
+    end
+  end
+end
