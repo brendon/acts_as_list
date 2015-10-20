@@ -121,7 +121,7 @@ module ActiveRecord
 
             after_commit 'remove_instance_variable(:@scope_changed) if defined?(@scope_changed)'
 
-            scope :in_list, lambda { where("#{table_name}.#{configuration[:column]} IS NOT NULL") }
+            scope :in_list, lambda { where("`#{table_name}`.#{configuration[:column]} IS NOT NULL") }
           EOV
 
           if configuration[:add_new_at].present?
@@ -235,7 +235,7 @@ module ActiveRecord
             where("#{position_column} < ?", position_value).
             where("#{position_column} >= ?", position_value - limit).
             limit(limit).
-            order("#{acts_as_list_class.table_name}.#{position_column} ASC")
+            order("`#{acts_as_list_class.table_name}`.#{position_column} ASC")
         end
 
         # Return the next lower item in the list.
@@ -253,7 +253,7 @@ module ActiveRecord
             where("#{position_column} > ?", position_value).
             where("#{position_column} <= ?", position_value + limit).
             limit(limit).
-            order("#{acts_as_list_class.table_name}.#{position_column} ASC")
+            order("`#{acts_as_list_class.table_name}`.#{position_column} ASC")
         end
 
         # Test if this record is in a list
@@ -328,7 +328,7 @@ module ActiveRecord
             acts_as_list_list.in_list.where(
               conditions
             ).order(
-              "#{acts_as_list_class.table_name}.#{position_column} DESC"
+              "`#{acts_as_list_class.table_name}`.#{position_column} DESC"
             ).first
           end
 
