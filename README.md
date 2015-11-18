@@ -32,9 +32,10 @@ class TodoItem < ActiveRecord::Base
   belongs_to :todo_list
   acts_as_list scope: :todo_list
 end
-    
-todo_list.first.move_to_bottom
-todo_list.last.move_higher
+
+todo_list = TodoList.find(...)    
+todo_list.todo_items.first.move_to_bottom
+todo_list.todo_items.last.move_higher
 ```
 
 ## Instance Methods Added To ActiveRecord Models
