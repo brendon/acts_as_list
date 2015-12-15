@@ -32,3 +32,11 @@ rescue LoadError
 rescue StandardError
   puts "RDocTask is not supported on this platform."
 end
+
+# See https://github.com/skywinder/github-changelog-generator#rake-task for details
+# and github_changelog_generator --help for available options
+require 'github_changelog_generator/task'
+GitHubChangelogGenerator::RakeTask.new :changelog do |config|
+  config.project = 'acts_as_list'
+  config.user = 'swanandp'
+end
