@@ -18,5 +18,5 @@ gem "appraisal"
 gem "github_changelog_generator"
 
 group :test do
-	gem "minitest"
+	gem "minitest", "~> 5.0"
 end

@@ -1,4 +1,10 @@
 language: ruby
+# Explicit usage of containerized builds, should provide faster feedback
+# see https://docs.travis-ci.com/user/workers/container-based-infrastructure/
+# and https://docs.travis-ci.com/user/ci-environment/#Virtualization-environments
+sudo: false
+before_install:
+  - gem update bundler
 rvm:
   - 1.9.3
   - 2.0.0
