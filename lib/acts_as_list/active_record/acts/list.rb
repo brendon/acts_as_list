@@ -280,7 +280,6 @@ module ActiveRecord
         # Sets the new position and saves it
         def set_list_position(new_position)
           write_attribute position_column, new_position
-          @position_changed = true if new_record?
           save(validate: false)
         end
 
@@ -297,7 +296,7 @@ module ActiveRecord
           end
 
           def add_to_list_bottom
-            if not_in_list? || scope_changed? && !@position_changed || default_position?
+            if not_in_list? || scope_changed? && !@position_changed && !new_record? || default_position?
               self[position_column] = bottom_position_in_list.to_i + 1
             else
               increment_positions_on_lower_items(self[position_column], id)
