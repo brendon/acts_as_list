@@ -5,3 +5,5 @@ pkg/*
 .rvmrc
 *.tmproj
 .rbenv-version
+.ruby-gemset
+.ruby-version

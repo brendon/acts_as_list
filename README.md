@@ -25,16 +25,17 @@ After that you can use `acts_as_list` method in the model:
 
 ```ruby
 class TodoList < ActiveRecord::Base
-  has_many :todo_items, -> { order("position ASC") }
+  has_many :todo_items, -> { order(position: :asc) }
 end
     
 class TodoItem < ActiveRecord::Base
   belongs_to :todo_list
   acts_as_list scope: :todo_list
 end
-    
-todo_list.first.move_to_bottom
-todo_list.last.move_higher
+
+todo_list = TodoList.find(...)    
+todo_list.todo_items.first.move_to_bottom
+todo_list.todo_items.last.move_higher
 ```
 
 ## Instance Methods Added To ActiveRecord Models
@@ -84,6 +85,14 @@ class TodoItem < ActiveRecord::Base
   acts_as_list scope: [:kind]
 end
 ```
+
+## More Options
+- `column`
+default: 'position'. Use this option if the column name in your database is different from position.
+- `top_of_list`
+default: '1'. Use this option to define the top of the list. Use 0 to make the collection act more like an array in its indexing.
+- `add_new_at`
+default: ':bottom'. Use this option to specify whether objects get added to the :top or :bottom of the list. `nil` will result in new items not being added to the list on create, i.e, position will be kept nil after create.
 
 ## Versions
 All versions `0.1.5` onwards require Rails 3.0.x and higher.
