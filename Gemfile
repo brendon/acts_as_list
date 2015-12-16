@@ -14,6 +14,8 @@ gemspec
 
 gem "rake"
 gem "appraisal"
+# Used to automatically generate changelog file
+gem "github_changelog_generator"
 
 group :test do
 	gem "minitest"
