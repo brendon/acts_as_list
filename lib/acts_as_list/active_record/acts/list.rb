@@ -255,8 +255,8 @@ module ActiveRecord
           limit ||= acts_as_list_list.count
           position_value = send(position_column)
           acts_as_list_list.
-            where("#{position_column} < ?", position_value).
-            where("#{position_column} >= ?", position_value - limit).
+            where("#{acts_as_list_class.table_name}.#{position_column} < ?", position_value).
+            where("#{acts_as_list_class.table_name}.#{position_column} >= ?", position_value - limit).
             limit(limit).
             order("#{quoted_table_name}.#{quoted_position_column} ASC")
         end
@@ -273,8 +273,8 @@ module ActiveRecord
           limit ||= acts_as_list_list.count
           position_value = send(position_column)
           acts_as_list_list.
-            where("#{position_column} > ?", position_value).
-            where("#{position_column} <= ?", position_value + limit).
+            where("#{acts_as_list_class.table_name}.#{position_column} > ?", position_value).
+            where("#{acts_as_list_class.table_name}.#{position_column} <= ?", position_value + limit).
             limit(limit).
             order("#{quoted_table_name}.#{quoted_position_column} ASC")
         end
