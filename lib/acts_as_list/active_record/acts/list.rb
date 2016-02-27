@@ -111,11 +111,16 @@ module ActiveRecord
               attr_accessible :#{configuration[:column]}
             end
 
+            before_validation :check_top_position
+            
             before_destroy :reload_position
             after_destroy :decrement_positions_on_lower_items
+            
             before_update :check_scope
             after_update :update_positions
-            before_validation :check_top_position
+
+            after_save '@scope_changed = false'
+            after_commit 'remove_instance_variable(:@scope_changed)'
 
             scope :in_list, lambda { where("#{table_name}.#{configuration[:column]} IS NOT NULL") }
           EOV
@@ -287,8 +292,10 @@ module ActiveRecord
             self[position_column] = acts_as_list_top
           end
 
+          # A poorly named method. It will insert the item at the desired position if the position
+          # has been set manually using position=, not necessarily the bottom of the list
           def add_to_list_bottom
-            if not_in_list? || scope_changed? && !@position_changed || default_position?
+            if not_in_list? || internal_scope_changed? && !@position_changed || default_position?
               self[position_column] = bottom_position_in_list.to_i + 1
             else
               increment_positions_on_lower_items(self[position_column], id)
@@ -437,6 +444,12 @@ module ActiveRecord
             shuffle_positions_on_intermediate_items old_position, new_position, id
           end
 
+          def internal_scope_changed?
+            return @scope_changed if defined?(@scope_changed)
+            
+            @scope_changed = scope_changed?
+          end
+
           # Temporarily swap changes attributes with current attributes
           def swap_changed_attributes
             @changed_attributes.each do |k, _|
@@ -447,7 +460,7 @@ module ActiveRecord
           end
 
           def check_scope
-            if scope_changed?
+            if internal_scope_changed?
               swap_changed_attributes
               send('decrement_positions_on_lower_items') if lower_item
               swap_changed_attributes
