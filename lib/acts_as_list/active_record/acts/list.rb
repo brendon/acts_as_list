@@ -38,32 +38,30 @@ module ActiveRecord
           configuration = { column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom}
           configuration.update(options) if options.is_a?(Hash)
 
-          configuration[:scope] = "#{configuration[:scope]}_id".intern if configuration[:scope].is_a?(Symbol) && configuration[:scope].to_s !~ /_id$/
+          if configuration[:scope].is_a?(Symbol) && configuration[:scope].to_s !~ /_id$/
+            configuration[:scope] = :"#{configuration[:scope]}_id"
+          end
 
           if configuration[:scope].is_a?(Symbol)
             scope_methods = %(
               def scope_condition
-                { :#{configuration[:scope].to_s} => send(:#{configuration[:scope].to_s}) }
+                { #{configuration[:scope]}: send(:#{configuration[:scope]}) }
               end
 
               def scope_changed?
-                changes.include?(scope_name.to_s)
+                changed.include?(scope_name.to_s)
               end
             )
           elsif configuration[:scope].is_a?(Array)
             scope_methods = %(
-              def attrs
-                %w(#{configuration[:scope].join(" ")}).inject({}) do |memo,column|
-                  memo[column.intern] = read_attribute(column.intern); memo
+              def scope_condition
+                #{configuration[:scope]}.inject({}) do |hash, column|
+                  hash.merge!({ column.to_sym => read_attribute(column.to_sym) })
                 end
               end
 
               def scope_changed?
-                (attrs.keys & changes.keys.map(&:to_sym)).any?
-              end
-
-              def scope_condition
-                attrs
+                (scope_condition.keys & changed.map(&:to_sym)).any?
               end
             )
           else
