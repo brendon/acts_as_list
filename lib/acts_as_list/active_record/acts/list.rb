@@ -119,7 +119,6 @@ module ActiveRecord
             before_update :check_scope
             after_update :update_positions
 
-            after_save '@scope_changed = false'
             after_commit 'remove_instance_variable(:@scope_changed)'
 
             scope :in_list, lambda { where("#{table_name}.#{configuration[:column]} IS NOT NULL") }
@@ -290,6 +289,10 @@ module ActiveRecord
           def add_to_list_top
             increment_positions_on_all_items
             self[position_column] = acts_as_list_top
+            # Make sure we know that we've processed this scope change already
+            @scope_changed = false
+            #dont halt the callback chain
+            true
           end
 
           # A poorly named method. It will insert the item at the desired position if the position
@@ -297,11 +300,12 @@ module ActiveRecord
           def add_to_list_bottom
             if not_in_list? || internal_scope_changed? && !@position_changed || default_position?
               self[position_column] = bottom_position_in_list.to_i + 1
-              @scope_changed = false
             else
               increment_positions_on_lower_items(self[position_column], id)
-              @scope_changed = false
             end
+
+            # Make sure we know that we've processed this scope change already
+            @scope_changed = false
 
             #dont halt the callback chain
             true
