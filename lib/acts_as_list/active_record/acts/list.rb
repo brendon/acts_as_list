@@ -285,8 +285,12 @@ module ActiveRecord
           end
 
           def add_to_list_top
-            increment_positions_on_all_items
-            self[position_column] = acts_as_list_top
+            if not_in_list? || scope_changed? && !@position_changed || default_position?
+              increment_positions_on_all_items
+              self[position_column] = acts_as_list_top
+            else
+              increment_positions_on_lower_items(self[position_column])
+            end
           end
 
           def add_to_list_bottom
