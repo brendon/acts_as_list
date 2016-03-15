@@ -76,7 +76,7 @@ module ActiveRecord
             )
           end
 
-          class_eval <<-EOV
+          class_eval <<-EOV, __FILE__, __LINE__ + 1
             include ::ActiveRecord::Acts::List::InstanceMethods
 
             def acts_as_list_top
