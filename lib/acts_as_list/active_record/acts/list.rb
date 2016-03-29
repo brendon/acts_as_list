@@ -410,6 +410,7 @@ module ActiveRecord
 
           def insert_at_position(position)
             return set_list_position(position) if new_record?
+            reload_position
             if in_list?
               old_position = send(position_column).to_i
               return if position == old_position
