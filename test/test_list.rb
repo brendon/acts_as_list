@@ -109,6 +109,29 @@ class NoAdditionMixin < Mixin
   acts_as_list column: "pos", add_new_at: nil, scope: :parent_id
 end
 
+##
+# The way we track changes to
+# scope and position can get tripped up
+# by someone using update_attributes within
+# a callback because it causes multiple passes
+# through the callback chain
+module CallbackMixin
+
+  def self.included(base)
+    base.send :include, InstanceMethods
+    base.after_create :change_field
+  end
+
+  module InstanceMethods
+    def change_field
+      # doesn't matter what column changes, just
+      # need to change something
+
+      self.update_attributes(active: !self.active)
+    end
+  end
+end
+
 class TheAbstractClass < ActiveRecord::Base
   self.abstract_class = true
   self.table_name = 'mixins'
@@ -161,6 +184,18 @@ class ListTest < ActsAsListTestCase
     setup_db
     super
   end
+end
+
+class ListWithCallbackTest < ActsAsListTestCase
+
+  include Shared::List
+
+  def setup
+    ListMixin.send(:include, CallbackMixin)
+    setup_db
+    super
+  end
+
 end
 
 class ListTestWithDefault < ActsAsListTestCase
