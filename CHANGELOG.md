@@ -1,10 +1,7 @@
 # Change Log
 
 ## [v0.7.3](https://github.com/swanandp/acts_as_list/tree/v0.7.3) (2016-04-14)
-[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.7.2...v0.7.3)
-
-## [v0.7.2](https://github.com/swanandp/acts_as_list/tree/v0.7.2) (2016-04-01)
-[Full Changelog](https://github.com/swanandp/acts_as_list/compare/0.7.2...v0.7.2)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.7.1...v0.7.3)
 
 **Closed issues:**
 
