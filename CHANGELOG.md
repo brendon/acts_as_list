@@ -1,17 +1,28 @@
 # Change Log
 
-## [Unreleased](https://github.com/swanandp/acts_as_list/tree/HEAD)
+## [v0.7.3](https://github.com/swanandp/acts_as_list/tree/v0.7.3) (2016-04-14)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.7.2...v0.7.3)
 
-[Full Changelog](https://github.com/swanandp/acts_as_list/compare/0.7.2...HEAD)
+## [v0.7.2](https://github.com/swanandp/acts_as_list/tree/v0.7.2) (2016-04-01)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/0.7.2...v0.7.2)
 
 **Closed issues:**
 
+- DEPRECATION WARNING: Passing string to define callback on Rails 5 beta 3 [\#191](https://github.com/swanandp/acts_as_list/issues/191)
+- Why is `add\_to\_list\_bottom` private? [\#187](https://github.com/swanandp/acts_as_list/issues/187)
+- Ordering of children when there are two possible parent models. [\#172](https://github.com/swanandp/acts_as_list/issues/172)
+- Fix the jruby and rbx builds [\#169](https://github.com/swanandp/acts_as_list/issues/169)
 - Unable to run tests [\#162](https://github.com/swanandp/acts_as_list/issues/162)
 - shuffle\_positions\_on\_intermediate\_items is creating problems [\#134](https://github.com/swanandp/acts_as_list/issues/134)
 - introduce Changelog file to quickly track changes [\#68](https://github.com/swanandp/acts_as_list/issues/68)
+- Mongoid support? [\#52](https://github.com/swanandp/acts_as_list/issues/52)
 
 **Merged pull requests:**
 
+- Add filename/line number to class\_eval call [\#193](https://github.com/swanandp/acts_as_list/pull/193) ([hfwang](https://github.com/hfwang))
+- Use a symbol as a string to define callback [\#192](https://github.com/swanandp/acts_as_list/pull/192) ([brendon](https://github.com/brendon))
+- Pin changelog generator to a working version [\#190](https://github.com/swanandp/acts_as_list/pull/190) ([fabn](https://github.com/fabn))
+- Fix bug, position is recomputed when object saved [\#188](https://github.com/swanandp/acts_as_list/pull/188) ([chrisortman](https://github.com/chrisortman))
 - Update bundler before running tests, fixes test run on travis [\#179](https://github.com/swanandp/acts_as_list/pull/179) ([fabn](https://github.com/fabn))
 - Changelog generator, closes \#68 [\#177](https://github.com/swanandp/acts_as_list/pull/177) ([fabn](https://github.com/fabn))
 - Updating README example [\#175](https://github.com/swanandp/acts_as_list/pull/175) ([ryanbillings](https://github.com/ryanbillings))
