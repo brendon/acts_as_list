@@ -119,7 +119,7 @@ module ActiveRecord
             before_update :check_scope
             after_update :update_positions
 
-            after_commit 'remove_instance_variable(:@scope_changed)'
+            after_commit 'remove_instance_variable(:@scope_changed) if defined?(@scope_changed)'
 
             scope :in_list, lambda { where("#{table_name}.#{configuration[:column]} IS NOT NULL") }
           EOV
