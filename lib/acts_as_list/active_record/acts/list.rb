@@ -478,7 +478,7 @@ module ActiveRecord
           end
 
           def reload_position
-            self.reload
+            reload unless new_record?
           end
 
           # This check is skipped if the position is currently the default position from the table
