@@ -1,7 +1,29 @@
 # Change Log
 
+## [Unreleased](https://github.com/swanandp/acts_as_list/tree/HEAD)
+
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.7.4...HEAD)
+
+**Closed issues:**
+
+- Undefined instance variable @scope\_changed since 0.7.3 [\#199](https://github.com/swanandp/acts_as_list/issues/199)
+
+## [v0.7.4](https://github.com/swanandp/acts_as_list/tree/v0.7.4) (2016-04-15)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.7.3...v0.7.4)
+
+**Closed issues:**
+
+- Releasing a new gem version [\#196](https://github.com/swanandp/acts_as_list/issues/196)
+
+**Merged pull requests:**
+
+- Fix scope changed [\#200](https://github.com/swanandp/acts_as_list/pull/200) ([brendon](https://github.com/brendon))
+
 ## [v0.7.3](https://github.com/swanandp/acts_as_list/tree/v0.7.3) (2016-04-14)
-[Full Changelog](https://github.com/swanandp/acts_as_list/compare/0.7.1...v0.7.3)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.7.2...v0.7.3)
+
+## [v0.7.2](https://github.com/swanandp/acts_as_list/tree/v0.7.2) (2016-04-01)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/0.7.2...v0.7.2)
 
 **Closed issues:**
 
