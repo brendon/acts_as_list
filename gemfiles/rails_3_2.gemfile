@@ -11,6 +11,8 @@ gem "activerecord", "~> 3.2.21"
 
 group :test do
   gem "minitest", "~> 5.0"
+  gem "test_after_commit", "~> 0.4.2"
+  gem "after_commit_exception_notification"
 end
 
 platforms :rbx do
