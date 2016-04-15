@@ -113,7 +113,7 @@ module ActiveRecord
 
             before_validation :check_top_position
             
-            before_destroy :reload_position
+            before_destroy :lock!
             after_destroy :decrement_positions_on_lower_items
             
             before_update :check_scope
@@ -475,10 +475,6 @@ module ActiveRecord
               swap_changed_attributes
               send("add_to_list_#{add_new_at}")
             end
-          end
-
-          def reload_position
-            self.reload
           end
 
           # This check is skipped if the position is currently the default position from the table
