@@ -246,5 +246,11 @@ module Shared
 
       assert_equal [5, 1, 6, 2, 3, 4], ListMixin.where(parent_id: 5).order('pos').map(&:id)
     end
+
+    def test_non_persisted_records_dont_get_lock_called
+      new = ListMixin.new(parent_id: 5)
+
+      new.destroy
+    end
   end
 end
