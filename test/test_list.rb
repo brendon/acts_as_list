@@ -475,6 +475,21 @@ class MultiDestroyTest < ActsAsListTestCase
   end
 end
 
+class IncorrectOrderTest < ActsAsListTestCase
+
+  def setup
+    setup_db_with_default
+  end
+
+  def test_default_ordering
+    new1 = ListMixin.create!
+    new2 = ListMixin.create!
+
+    assert_equal [1, 2], [new1.pos, new2.pos]
+  end
+
+end
+
 #class TopAdditionMixin < Mixin
 
 class TopAdditionTest < ActsAsListTestCase
