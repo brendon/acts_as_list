@@ -15,3 +15,8 @@ gemfile:
   - gemfiles/rails_3_2.gemfile
   - gemfiles/rails_4_1.gemfile
   - gemfiles/rails_4_2.gemfile
+matrix:
+  include:
+    rvm: 2.2.2
+      gemfile: gemfiles/rails_5_0.gemfile
+
