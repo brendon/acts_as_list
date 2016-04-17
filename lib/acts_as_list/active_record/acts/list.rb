@@ -345,9 +345,9 @@ module ActiveRecord
           # This has the effect of moving all the higher items up one.
           def decrement_positions_on_higher_items(position)
             acts_as_list_list.where(
-              "#{position_column} <= #{position}"
+              "#{table_name}.#{position_column} <= #{position}"
             ).update_all(
-              "#{position_column} = (#{position_column} - 1)"
+              "#{table_name}.#{position_column} = (#{table_name}.#{position_column} - 1)"
             )
           end
 
@@ -356,9 +356,9 @@ module ActiveRecord
             return unless in_list?
             position ||= send(position_column).to_i
             acts_as_list_list.where(
-              "#{position_column} > #{position}"
+              "#{table_name}.#{position_column} > #{position}"
             ).update_all(
-              "#{position_column} = (#{position_column} - 1)"
+              "#{table_name}.#{position_column} = (#{table_name}.#{position_column} - 1)"
             )
           end
 
@@ -366,9 +366,9 @@ module ActiveRecord
           def increment_positions_on_higher_items
             return unless in_list?
             acts_as_list_list.where(
-              "#{position_column} < #{send(position_column).to_i}"
+              "#{table_name}.#{position_column} < #{send(position_column).to_i}"
             ).update_all(
-              "#{position_column} = (#{position_column} + 1)"
+              "#{table_name}.#{position_column} = (#{table_name}.#{position_column} + 1)"
             )
           end
 
@@ -377,16 +377,16 @@ module ActiveRecord
             avoid_id_condition = avoid_id ? " AND #{self.class.primary_key} != #{self.class.connection.quote(avoid_id)}" : ''
 
             acts_as_list_list.where(
-              "#{position_column} >= #{position}#{avoid_id_condition}"
+              "#{table_name}.#{position_column} >= #{position}#{avoid_id_condition}"
             ).update_all(
-              "#{position_column} = (#{position_column} + 1)"
+              "#{table_name}.#{position_column} = (#{table_name}.#{position_column} + 1)"
             )
           end
 
           # Increments position (<tt>position_column</tt>) of all items in the list.
           def increment_positions_on_all_items
             acts_as_list_list.update_all(
-              "#{position_column} = (#{position_column} + 1)"
+              "#{table_name}.#{position_column} = (#{table_name}.#{position_column} + 1)"
             )
           end
 
@@ -401,11 +401,11 @@ module ActiveRecord
               # e.g., if moving an item from 2 to 5,
               # move [3, 4, 5] to [2, 3, 4]
               acts_as_list_list.where(
-                "#{position_column} > #{old_position}"
+                "#{table_name}.#{position_column} > #{old_position}"
               ).where(
-                "#{position_column} <= #{new_position}#{avoid_id_condition}"
+                "#{table_name}.#{position_column} <= #{new_position}#{avoid_id_condition}"
               ).update_all(
-                "#{position_column} = (#{position_column} - 1)"
+                "#{table_name}.#{position_column} = (#{table_name}.#{position_column} - 1)"
               )
             else
               # Increment position of intermediate items
@@ -413,12 +413,12 @@ module ActiveRecord
               # e.g., if moving an item from 5 to 2,
               # move [2, 3, 4] to [3, 4, 5]
               acts_as_list_list.where(
-                "#{position_column} >= #{new_position}"
-              ).where(
-                "#{position_column} < #{old_position}#{avoid_id_condition}"
-              ).update_all(
-                "#{position_column} = (#{position_column} + 1)"
-              )
+                      "#{table_name}.#{position_column} >= #{new_position}"
+                    ).where(
+                      "#{table_name}.#{position_column} < #{old_position}#{avoid_id_condition}"
+                    ).update_all(
+                      "#{table_name}.#{position_column} = (#{table_name}.#{position_column} + 1)"
+                    )
             end
           end
 
@@ -448,7 +448,7 @@ module ActiveRecord
             new_position = send(position_column).to_i
 
             return unless acts_as_list_list.where(
-              "#{position_column} = #{new_position}"
+              position_column => new_position
             ).count > 1
             shuffle_positions_on_intermediate_items old_position, new_position, id
           end
