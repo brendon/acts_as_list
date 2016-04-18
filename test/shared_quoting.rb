@@ -9,5 +9,13 @@ module Shared
       assert_equal QuotedList.in_list.size, 3
     end
 
+    # This test execute raw queries involving table name
+    def test_moving
+      item = QuotedList.first
+      item.higher_items
+      item.lower_items
+      item.send :bottom_item # Part of private api
+    end
+
   end
 end
