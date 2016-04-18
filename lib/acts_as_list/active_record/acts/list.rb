@@ -474,7 +474,7 @@ module ActiveRecord
               with_old_attributes do
                 # if position unchanged and db has a different value for position column
                 unless send("#{position_column}_changed?")
-                  db_position = self.class.select(position_column).where(id: id).first[position_column]
+                  db_position = self.class.select(position_column).where(id: id).pluck(position_column).first
                   # Assign up to date db value to position column and do the computation below
                   self[position_column] = db_position if send(position_column).to_i != db_position
                 end
