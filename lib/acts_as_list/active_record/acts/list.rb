@@ -462,10 +462,10 @@ module ActiveRecord
           # Temporarily swap changes attributes with current attributes
           def with_old_attributes
             begin
-              @changed_attributes.each { |k, _| @changed_attributes[k], self[k] = self[k], @changed_attributes[k] }
+              changed_attributes.each { |k, _| @changed_attributes[k], self[k] = self[k], @changed_attributes[k] }
               yield
             ensure
-              @changed_attributes.each { |k, _| @changed_attributes[k], self[k] = self[k], @changed_attributes[k] }
+              changed_attributes.each { |k, _| @changed_attributes[k], self[k] = self[k], @changed_attributes[k] }
             end
           end
 
