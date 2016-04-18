@@ -16,9 +16,14 @@ def setup_db(position_options = {})
     t.column :state, :integer
   end
 
+  # This table is used to test table names and column names quoting
+  ActiveRecord::Base.connection.create_table 'table-name' do |t|
+    t.column :order, :integer
+  end
+
   mixins = [ Mixin, ListMixin, ListMixinSub1, ListMixinSub2, ListWithStringScopeMixin,
     ArrayScopeListMixin, ZeroBasedMixin, DefaultScopedMixin,
-    DefaultScopedWhereMixin, TopAdditionMixin, NoAdditionMixin ]
+    DefaultScopedWhereMixin, TopAdditionMixin, NoAdditionMixin, QuotedList ]
 
   mixins << EnumArrayScopeListMixin if rails_4
 
@@ -149,6 +154,11 @@ end
 class TheBaseSubclass < TheBaseClass
 end
 
+class QuotedList < ActiveRecord::Base
+  self.table_name = 'table-name'
+  acts_as_list column: :order
+end
+
 class ActsAsListTestCase < Minitest::Test
   # No default test required as this class is abstract.
   # Need for test/unit.
@@ -236,6 +246,15 @@ end
 
 class ArrayScopeListTestWithDefault < ActsAsListTestCase
   include Shared::ArrayScopeList
+
+  def setup
+    setup_db_with_default
+    super
+  end
+end
+
+class QuotingTestList < ActsAsListTestCase
+  include Shared::Quoting
 
   def setup
     setup_db_with_default
