@@ -47,7 +47,13 @@ def rails_4
 end
 
 def teardown_db
-  ActiveRecord::Base.connection.data_sources.each do |table|
+  if ActiveRecord::VERSION::MAJOR >= 5
+    tables = ActiveRecord::Base.connection.data_sources
+  else
+    tables = ActiveRecord::Base.connection.tables
+  end
+
+  tables.each do |table|
     ActiveRecord::Base.connection.drop_table(table)
   end
 end
