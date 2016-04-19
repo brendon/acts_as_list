@@ -12,9 +12,9 @@ require "minitest/autorun"
 require "#{File.dirname(__FILE__)}/../init"
 
 if defined?(ActiveRecord::VERSION) &&
-  ActiveRecord::VERSION::MAJOR > 4 ||
-  (ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 2)
+  ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 2
 
+  # Was removed in Rails 5 and is effectively true.
   ActiveRecord::Base.raise_in_transactional_callbacks = true
 end
 
