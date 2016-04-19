@@ -464,20 +464,14 @@ module ActiveRecord
             remove_instance_variable(:@scope_changed) if defined?(@scope_changed)
           end
 
-          # Temporarily swap changes attributes with current attributes
-          def swap_changed_attributes
-            @changed_attributes.each do |k, _|
-              if self.class.column_names.include? k
-                @changed_attributes[k], self[k] = self[k], @changed_attributes[k]
-              end
-            end
-          end
-
           def check_scope
             if internal_scope_changed?
-              swap_changed_attributes
+              cached_changes = changes
+
+              cached_changes.each { |attribute, values| self[attribute] = values[0] }
               send('decrement_positions_on_lower_items') if lower_item
-              swap_changed_attributes
+              cached_changes.each { |attribute, values| self[attribute] = values[1] }
+
               send("add_to_list_#{add_new_at}")
             end
           end
