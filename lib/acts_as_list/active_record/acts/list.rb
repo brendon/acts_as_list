@@ -479,22 +479,19 @@ module ActiveRecord
           end
 
           def decrement_all_with_touch(scope)
-            touch_all scope
-            scope.update_all "#{quoted_position_column} = (#{quoted_position_column} - 1)"
+            update_all_with_touch scope, "#{quoted_position_column} = (#{quoted_position_column} - 1)"
           end
 
           def increment_all_with_touch(scope)
-            touch_all scope
-            scope.update_all "#{quoted_position_column} = (#{quoted_position_column} + 1)"
+            update_all_with_touch scope, "#{quoted_position_column} = (#{quoted_position_column} + 1)"
           end
 
-          def touch_all(scope)
+          def update_all_with_touch(scope, updates)
             attrs = timestamp_attributes_for_update_in_model
-            return if attrs.empty?
-            query = attrs.inject({}) do |hash, attr|
-              hash.merge attr => Time.now.utc
-            end
-            scope.update_all(query)
+            query = attrs.map { |attr| "#{attr} = :now" }
+            query.push updates
+            query = query.join(", ")
+            scope.update_all([query, now: Time.now.utc])
           end
       end
     end
