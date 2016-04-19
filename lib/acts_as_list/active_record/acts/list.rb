@@ -122,11 +122,15 @@ module ActiveRecord
             end
 
             def self.update_all_with_touch(updates)
-              attrs = new.send(:timestamp_attributes_for_update_in_model)
+              record = new
+              attrs = record.send(:timestamp_attributes_for_update_in_model)
+              now = record.send(:current_time_from_proper_timezone)
+
               query = attrs.map { |attr| "\#{attr} = :now" }
               query.push updates
               query = query.join(", ")
-              update_all([query, now: Time.now.utc])
+
+              update_all([query, now: now])
             end
           EOV
 
