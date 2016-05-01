@@ -75,8 +75,6 @@ module ActiveRecord
           end
 
           class_eval <<-EOV, __FILE__, __LINE__ + 1
-            include ::ActiveRecord::Acts::List::InstanceMethods
-
             def acts_as_list_top
               #{configuration[:top_of_list]}.to_i
             end
@@ -110,24 +108,27 @@ module ActiveRecord
             if defined?(accessible_attributes) and !accessible_attributes.blank?
               attr_accessible :#{configuration[:column]}
             end
-
-            before_validation :check_top_position
-            
-            before_destroy :lock!
-            after_destroy :decrement_positions_on_lower_items
-            
-            before_update :check_scope
-            after_update :update_positions
-
-            after_commit 'remove_instance_variable(:@scope_changed) if defined?(@scope_changed)'
-
-            scope :in_list, lambda { where(%q{#{quoted_table_name}.#{connection.quote_column_name(configuration[:column])} IS NOT NULL}) }
           EOV
 
+          attr_reader :position_changed
+
+          before_validation :check_top_position
+          
+          before_destroy :lock!
+          after_destroy :decrement_positions_on_lower_items
+          
+          before_update :check_scope
+          after_update :update_positions
+
+          after_commit :clear_scope_changed
+
+          scope :in_list, lambda { where("#{quoted_table_name}.#{connection.quote_column_name(configuration[:column])} IS NOT NULL") }
+
           if configuration[:add_new_at].present?
-            self.send :before_create, :"add_to_list_#{configuration[:add_new_at]}"
+            before_create "add_to_list_#{configuration[:add_new_at]}".to_sym
           end
 
+          include ::ActiveRecord::Acts::List::InstanceMethods
         end
       end
 
@@ -298,7 +299,7 @@ module ActiveRecord
           # A poorly named method. It will insert the item at the desired position if the position
           # has been set manually using position=, not necessarily the bottom of the list
           def add_to_list_bottom
-            if not_in_list? || internal_scope_changed? && !@position_changed || default_position?
+            if not_in_list? || internal_scope_changed? && !position_changed || default_position?
               self[position_column] = bottom_position_in_list.to_i + 1
             else
               increment_positions_on_lower_items(self[position_column], id)
@@ -459,20 +460,18 @@ module ActiveRecord
             @scope_changed = scope_changed?
           end
 
-          # Temporarily swap changes attributes with current attributes
-          def swap_changed_attributes
-            @changed_attributes.each do |k, _|
-              if self.class.column_names.include? k
-                @changed_attributes[k], self[k] = self[k], @changed_attributes[k]
-              end
-            end
+          def clear_scope_changed
+            remove_instance_variable(:@scope_changed) if defined?(@scope_changed)
           end
 
           def check_scope
             if internal_scope_changed?
-              swap_changed_attributes
+              cached_changes = changes
+
+              cached_changes.each { |attribute, values| self[attribute] = values[0] }
               send('decrement_positions_on_lower_items') if lower_item
-              swap_changed_attributes
+              cached_changes.each { |attribute, values| self[attribute] = values[1] }
+
               send("add_to_list_#{add_new_at}")
             end
           end

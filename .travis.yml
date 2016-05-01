@@ -9,9 +9,24 @@ rvm:
   - 1.9.3
   - 2.0.0
   - 2.1.0
+  - 2.2.2
   - jruby-19mode
   - rbx-2
 gemfile:
   - gemfiles/rails_3_2.gemfile
   - gemfiles/rails_4_1.gemfile
   - gemfiles/rails_4_2.gemfile
+  - gemfiles/rails_5_0.gemfile
+matrix:
+  exclude:
+    - rvm: 1.9.3
+      gemfile: gemfiles/rails_5_0.gemfile
+    - rvm: 2.0.0
+      gemfile: gemfiles/rails_5_0.gemfile
+    - rvm: 2.1.0
+      gemfile: gemfiles/rails_5_0.gemfile
+    - rvm: jruby-19mode
+      gemfile: gemfiles/rails_5_0.gemfile
+    - rvm: rbx-2
+      gemfile: gemfiles/rails_5_0.gemfile
+
