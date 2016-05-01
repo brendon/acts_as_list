@@ -74,6 +74,8 @@ module ActiveRecord
             )
           end
 
+          quoted_position_column = connection.quote_column_name(configuration[:column])
+
           class_eval <<-EOV, __FILE__, __LINE__ + 1
             def acts_as_list_top
               #{configuration[:top_of_list]}.to_i
@@ -108,6 +110,28 @@ module ActiveRecord
             if defined?(accessible_attributes) and !accessible_attributes.blank?
               attr_accessible :#{configuration[:column]}
             end
+
+            scope :in_list, lambda { where(%q{#{quoted_table_name}.#{quoted_position_column} IS NOT NULL}) }
+
+            def self.decrement_all
+              update_all_with_touch %q(#{quoted_position_column} = (#{quoted_table_name}.#{quoted_position_column} - 1))
+            end
+
+            def self.increment_all
+              update_all_with_touch %q(#{quoted_position_column} = (#{quoted_table_name}.#{quoted_position_column} + 1))
+            end
+
+            def self.update_all_with_touch(updates)
+              record = new
+              attrs = record.send(:timestamp_attributes_for_update_in_model)
+              now = record.send(:current_time_from_proper_timezone)
+
+              query = attrs.map { |attr| %(\#{connection.quote_column_name(attr)} = :now) }
+              query.push updates
+              query = query.join(", ")
+
+              update_all([query, now: now])
+            end
           EOV
 
           attr_reader :position_changed
@@ -121,8 +145,6 @@ module ActiveRecord
           after_update :update_positions
 
           after_commit :clear_scope_changed
-
-          scope :in_list, lambda { where("#{quoted_table_name}.#{connection.quote_column_name(configuration[:column])} IS NOT NULL") }
 
           if configuration[:add_new_at].present?
             before_create "add_to_list_#{configuration[:add_new_at]}".to_sym
@@ -345,50 +367,32 @@ module ActiveRecord
 
           # This has the effect of moving all the higher items up one.
           def decrement_positions_on_higher_items(position)
-            acts_as_list_list.where(
-              "#{quoted_position_column} <= #{position}"
-            ).update_all(
-              "#{quoted_position_column} = (#{quoted_position_column} - 1)"
-            )
+            acts_as_list_list.where("#{quoted_position_column} <= #{position}").decrement_all
           end
 
           # This has the effect of moving all the lower items up one.
           def decrement_positions_on_lower_items(position=nil)
             return unless in_list?
             position ||= send(position_column).to_i
-            acts_as_list_list.where(
-              "#{quoted_position_column} > #{position}"
-            ).update_all(
-              "#{quoted_position_column} = (#{quoted_position_column} - 1)"
-            )
+            acts_as_list_list.where("#{quoted_position_column} > #{position}").decrement_all
           end
 
           # This has the effect of moving all the higher items down one.
           def increment_positions_on_higher_items
             return unless in_list?
-            acts_as_list_list.where(
-              "#{quoted_position_column} < #{send(position_column).to_i}"
-            ).update_all(
-              "#{quoted_position_column} = (#{quoted_position_column} + 1)"
-            )
+            acts_as_list_list.where("#{quoted_position_column} < #{send(position_column).to_i}").increment_all
           end
 
           # This has the effect of moving all the lower items down one.
           def increment_positions_on_lower_items(position, avoid_id = nil)
             avoid_id_condition = avoid_id ? " AND #{self.class.primary_key} != #{self.class.connection.quote(avoid_id)}" : ''
 
-            acts_as_list_list.where(
-              "#{quoted_position_column} >= #{position}#{avoid_id_condition}"
-            ).update_all(
-              "#{quoted_position_column} = (#{quoted_position_column} + 1)"
-            )
+            acts_as_list_list.where("#{quoted_position_column} >= #{position}#{avoid_id_condition}").increment_all
           end
 
           # Increments position (<tt>position_column</tt>) of all items in the list.
           def increment_positions_on_all_items
-            acts_as_list_list.update_all(
-              "#{quoted_position_column} = (#{quoted_position_column} + 1)"
-            )
+            acts_as_list_list.increment_all
           end
 
           # Reorders intermediate items to support moving an item from old_position to new_position.
@@ -405,9 +409,7 @@ module ActiveRecord
                 "#{quoted_position_column} > #{old_position}"
               ).where(
                 "#{quoted_position_column} <= #{new_position}#{avoid_id_condition}"
-              ).update_all(
-                "#{quoted_position_column} = (#{quoted_position_column} - 1)"
-              )
+              ).decrement_all
             else
               # Increment position of intermediate items
               #
@@ -417,9 +419,7 @@ module ActiveRecord
                 "#{quoted_position_column} >= #{new_position}"
               ).where(
                 "#{quoted_position_column} < #{old_position}#{avoid_id_condition}"
-              ).update_all(
-                "#{quoted_position_column} = (#{quoted_position_column} + 1)"
-              )
+              ).increment_all
             end
           end
 
