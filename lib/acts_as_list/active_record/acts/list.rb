@@ -113,11 +113,11 @@ module ActiveRecord
 
             scope :in_list, lambda { where(%q{#{quoted_table_name}.#{quoted_position_column} IS NOT NULL}) }
 
-            def self.decrement_all_with_touch
+            def self.decrement_all
               update_all_with_touch %q(#{quoted_position_column} = (#{quoted_table_name}.#{quoted_position_column} - 1))
             end
 
-            def self.increment_all_with_touch
+            def self.increment_all
               update_all_with_touch %q(#{quoted_position_column} = (#{quoted_table_name}.#{quoted_position_column} + 1))
             end
 
@@ -367,32 +367,32 @@ module ActiveRecord
 
           # This has the effect of moving all the higher items up one.
           def decrement_positions_on_higher_items(position)
-            acts_as_list_list.where("#{quoted_position_column} <= #{position}").decrement_all_with_touch
+            acts_as_list_list.where("#{quoted_position_column} <= #{position}").decrement_all
           end
 
           # This has the effect of moving all the lower items up one.
           def decrement_positions_on_lower_items(position=nil)
             return unless in_list?
             position ||= send(position_column).to_i
-            acts_as_list_list.where("#{quoted_position_column} > #{position}").decrement_all_with_touch
+            acts_as_list_list.where("#{quoted_position_column} > #{position}").decrement_all
           end
 
           # This has the effect of moving all the higher items down one.
           def increment_positions_on_higher_items
             return unless in_list?
-            acts_as_list_list.where("#{quoted_position_column} < #{send(position_column).to_i}").increment_all_with_touch
+            acts_as_list_list.where("#{quoted_position_column} < #{send(position_column).to_i}").increment_all
           end
 
           # This has the effect of moving all the lower items down one.
           def increment_positions_on_lower_items(position, avoid_id = nil)
             avoid_id_condition = avoid_id ? " AND #{self.class.primary_key} != #{self.class.connection.quote(avoid_id)}" : ''
 
-            acts_as_list_list.where("#{quoted_position_column} >= #{position}#{avoid_id_condition}").increment_all_with_touch
+            acts_as_list_list.where("#{quoted_position_column} >= #{position}#{avoid_id_condition}").increment_all
           end
 
           # Increments position (<tt>position_column</tt>) of all items in the list.
           def increment_positions_on_all_items
-            acts_as_list_list.increment_all_with_touch
+            acts_as_list_list.increment_all
           end
 
           # Reorders intermediate items to support moving an item from old_position to new_position.
@@ -409,7 +409,7 @@ module ActiveRecord
                 "#{quoted_position_column} > #{old_position}"
               ).where(
                 "#{quoted_position_column} <= #{new_position}#{avoid_id_condition}"
-              ).decrement_all_with_touch
+              ).decrement_all
             else
               # Increment position of intermediate items
               #
@@ -419,7 +419,7 @@ module ActiveRecord
                 "#{quoted_position_column} >= #{new_position}"
               ).where(
                 "#{quoted_position_column} < #{old_position}#{avoid_id_condition}"
-              ).increment_all_with_touch
+              ).increment_all
             end
           end
 
