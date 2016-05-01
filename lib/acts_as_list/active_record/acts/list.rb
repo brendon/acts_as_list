@@ -114,11 +114,11 @@ module ActiveRecord
             scope :in_list, lambda { where(%q{#{quoted_table_name}.#{quoted_position_column} IS NOT NULL}) }
 
             def self.decrement_all_with_touch
-              update_all_with_touch %q(#{quoted_position_column} = (#{quoted_position_column} - 1))
+              update_all_with_touch %q(#{quoted_position_column} = (#{quoted_table_name}.#{quoted_position_column} - 1))
             end
 
             def self.increment_all_with_touch
-              update_all_with_touch %q(#{quoted_position_column} = (#{quoted_position_column} + 1))
+              update_all_with_touch %q(#{quoted_position_column} = (#{quoted_table_name}.#{quoted_position_column} + 1))
             end
 
             def self.update_all_with_touch(updates)
@@ -126,7 +126,7 @@ module ActiveRecord
               attrs = record.send(:timestamp_attributes_for_update_in_model)
               now = record.send(:current_time_from_proper_timezone)
 
-              query = attrs.map { |attr| "\#{attr} = :now" }
+              query = attrs.map { |attr| %(\#{connection.quote_column_name(attr)} = :now) }
               query.push updates
               query = query.join(", ")
 
