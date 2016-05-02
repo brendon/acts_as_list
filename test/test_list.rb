@@ -751,7 +751,11 @@ end
 
 class CircularAssociationsScopeTest < ActsAsListTestCase
   class Foo < ActiveRecord::Base
-    has_many :cats, -> { order :position }, inverse_of: :foo
+    if ActiveRecord::VERSION::MAJOR >= 4
+      has_many :cats, -> { order :position }, inverse_of: :foo
+    else
+      has_many :cats, order: :position, inverse_of: :foo
+    end
     accepts_nested_attributes_for :cats
   end
 
