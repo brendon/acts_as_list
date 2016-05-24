@@ -1,10 +1,7 @@
 # NOTE: following now done in helper.rb (better Readability)
 require 'helper'
 
-ActiveRecord::Base.establish_connection(
-  adapter: "sqlite3",
-  database: 'file:memdb1?mode=memory&cache=shared'
-)
+ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
 ActiveRecord::Schema.verbose = false
 
 def setup_db(position_options = {})
