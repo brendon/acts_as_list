@@ -346,7 +346,6 @@ module ActiveRecord
 
           # Returns the bottom item
           def bottom_item(except = nil)
-            conditions = scope_condition
             conditions = except ? "#{self.class.primary_key} != #{self.class.connection.quote(except.id)}" : {}
             acts_as_list_list.in_list.where(
               conditions
