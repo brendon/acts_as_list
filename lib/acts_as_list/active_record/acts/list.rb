@@ -137,10 +137,8 @@ module ActiveRecord
           attr_reader :position_changed
 
           before_validation :check_top_position
-          
           before_destroy :lock!
           after_destroy :decrement_positions_on_lower_items
-          
           before_update :check_scope
           after_update :update_positions
 
@@ -169,8 +167,12 @@ module ActiveRecord
           return unless lower_item
 
           acts_as_list_class.transaction do
-            lower_item.decrement_position
-            increment_position
+            if lower_item.send(position_column) != self.send(position_column)
+              swap_positions(lower_item, self)
+            else
+              lower_item.decrement_position
+              increment_position
+            end
           end
         end
 
@@ -179,8 +181,12 @@ module ActiveRecord
           return unless higher_item
 
           acts_as_list_class.transaction do
-            higher_item.increment_position
-            decrement_position
+            if higher_item.send(position_column) != self.send(position_column)
+              swap_positions(higher_item, self)
+            else
+              higher_item.increment_position
+              decrement_position
+            end
           end
         end
 
@@ -231,16 +237,14 @@ module ActiveRecord
           set_list_position(self.send(position_column).to_i - 1)
         end
 
-        # Return +true+ if this object is the first in the list.
         def first?
           return false unless in_list?
-          self.send(position_column) == acts_as_list_top
+          !higher_item
         end
 
-        # Return +true+ if this object is the last in the list.
         def last?
           return false unless in_list?
-          self.send(position_column) == bottom_position_in_list
+          !lower_item
         end
 
         # Return the next higher item in the list.
@@ -256,9 +260,8 @@ module ActiveRecord
           position_value = send(position_column)
           acts_as_list_list.
             where("#{quoted_table_name}.#{quoted_position_column} < ?", position_value).
-            where("#{quoted_table_name}.#{quoted_position_column} >= ?", position_value - limit).
             limit(limit).
-            order("#{quoted_table_name}.#{quoted_position_column} ASC")
+            order("#{quoted_table_name}.#{quoted_position_column} DESC")
         end
 
         # Return the next lower item in the list.
@@ -274,7 +277,6 @@ module ActiveRecord
           position_value = send(position_column)
           acts_as_list_list.
             where("#{quoted_table_name}.#{quoted_position_column} > ?", position_value).
-            where("#{quoted_table_name}.#{quoted_position_column} <= ?", position_value + limit).
             limit(limit).
             order("#{quoted_table_name}.#{quoted_position_column} ASC")
         end
@@ -303,6 +305,12 @@ module ActiveRecord
         end
 
         private
+
+          def swap_positions(item1, item2)
+            item1.set_list_position(item2.send(position_column))
+            item2.set_list_position(item1.send("#{position_column}_was"))
+          end
+
           def acts_as_list_list
             acts_as_list_class.unscoped do
               acts_as_list_class.where(scope_condition)
