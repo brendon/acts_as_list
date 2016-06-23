@@ -70,6 +70,31 @@ In `acts_as_list`, "higher" means further up the list (a lower `position`), and 
 - `list_item.lower_item`
 - `list_item.lower_items` will return all the items below `list_item` in the list (ordered by the position, ascending)
 
+## Adding `acts_as_list` To An Existing Model
+As it stands ActsAsList requires position values to be set on the model before the instance methods above will work. Adding something like the below to your migration will set the default position. Change the parameters to order if you want a different initial ordering.
+
+```ruby
+class AddPositionToTodoItem < ActiveRecord::Migration
+  def change
+    add_column :todo_items, :position, :integer
+
+    TodoItem.order(:updated_at).each_with_index do |todo_item, i|
+      todo_item.update_columns(position: i + 1)
+    end
+  end
+end
+```
+
+If you are using the scope option things can get a bit more complicated. Let's say you have `acts_as_list scope: :todo_list`, you might instead need something like this:
+
+```ruby
+TodoItem.distinct(:todo_list_id).map(&:todo_list).each do |todo_list|
+	todo_list.todo_items.order(:updated_at).each_with_index do |todo_item, i|
+		todo_item.update_columns(position: i + 1)
+	end
+end
+```
+
 ## Notes
 If the `position` column has a default value, then there is a slight change in behavior, i.e if you have 4 items in the list, and you insert 1, with a default position 0, it would be pushed to the bottom of the list. Please look at the tests for this and some recent pull requests for discussions related to this.
 
