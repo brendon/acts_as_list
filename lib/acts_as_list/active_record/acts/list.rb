@@ -260,8 +260,8 @@ module ActiveRecord
           position_value = send(position_column)
           acts_as_list_list.
             where("#{quoted_table_name}.#{quoted_position_column} < ?", position_value).
-            limit(limit).
-            order("#{quoted_table_name}.#{quoted_position_column} DESC")
+            order("#{quoted_table_name}.#{quoted_position_column} DESC").
+            limit(limit)
         end
 
         # Return the next lower item in the list.
@@ -277,8 +277,8 @@ module ActiveRecord
           position_value = send(position_column)
           acts_as_list_list.
             where("#{quoted_table_name}.#{quoted_position_column} > ?", position_value).
-            limit(limit).
-            order("#{quoted_table_name}.#{quoted_position_column} ASC")
+            order("#{quoted_table_name}.#{quoted_position_column} ASC").
+            limit(limit)
         end
 
         # Test if this record is in a list
