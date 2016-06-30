@@ -1,12 +1,53 @@
 # Change Log
 
-## [Unreleased](https://github.com/swanandp/acts_as_list/tree/HEAD)
+## [v0.7.5](https://github.com/swanandp/acts_as_list/tree/v0.7.5) (2016-06-30)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.7.4...v0.7.5)
 
-[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.7.4...HEAD)
+**Implemented enhancements:**
+
+- Touch when reordering [\#173](https://github.com/swanandp/acts_as_list/pull/173) ([botandrose](https://github.com/botandrose))
 
 **Closed issues:**
 
+- Exception raised when calling destroy "NameError - instance variable @scope\_changed not defined:" [\#206](https://github.com/swanandp/acts_as_list/issues/206)
 - Undefined instance variable @scope\_changed since 0.7.3 [\#199](https://github.com/swanandp/acts_as_list/issues/199)
+- Reordering large lists is slow [\#198](https://github.com/swanandp/acts_as_list/issues/198)
+- Reparenting child leaves gap in source list in rails 5 [\#194](https://github.com/swanandp/acts_as_list/issues/194)
+- Support rails 5 ? [\#186](https://github.com/swanandp/acts_as_list/issues/186)
+- I get a NoMethodError: undefined method `acts\_as\_list' when trying to include acts\_as\_list [\#176](https://github.com/swanandp/acts_as_list/issues/176)
+- Phenomenon of mysterious value of the position is skipped by one [\#166](https://github.com/swanandp/acts_as_list/issues/166)
+- Model.find being called twice with acts\_as\_list on destroy [\#161](https://github.com/swanandp/acts_as_list/issues/161)
+- `scope\_changed?` problem with acts\_as\_paranoid [\#158](https://github.com/swanandp/acts_as_list/issues/158)
+- Inconsistent behaviour between Symbol and Array scopes [\#155](https://github.com/swanandp/acts_as_list/issues/155)
+- insert\_at doesn't seem to be working in ActiveRecord callback \(Rails 4.2\) [\#150](https://github.com/swanandp/acts_as_list/issues/150)
+- Project Documentation link redirects to expired domain [\#149](https://github.com/swanandp/acts_as_list/issues/149)
+- Problem when updating an position of array of AR objects. [\#137](https://github.com/swanandp/acts_as_list/issues/137)
+- Unexpected behaviour when inserting consecutive items with default positions [\#124](https://github.com/swanandp/acts_as_list/issues/124)
+- self.reload prone to error [\#122](https://github.com/swanandp/acts_as_list/issues/122)
+- Rails 3.0.x in\_list causes the return of default\_scope [\#120](https://github.com/swanandp/acts_as_list/issues/120)
+- Relationships with dependency:destroy cause ActiveRecord::RecordNotFound [\#118](https://github.com/swanandp/acts_as_list/issues/118)
+- Using insert\_at with values with type String [\#117](https://github.com/swanandp/acts_as_list/issues/117)
+- Batch setting of position [\#112](https://github.com/swanandp/acts_as_list/issues/112)
+- position: 0 now makes model pushed to top? [\#110](https://github.com/swanandp/acts_as_list/issues/110)
+- Create element in default position [\#103](https://github.com/swanandp/acts_as_list/issues/103)
+- Enhancement: Expose scope object [\#97](https://github.com/swanandp/acts_as_list/issues/97)
+- Shuffle list [\#96](https://github.com/swanandp/acts_as_list/issues/96)
+- Creating an item with a nil scope should not add it to the list [\#92](https://github.com/swanandp/acts_as_list/issues/92)
+- Performance Improvements  [\#88](https://github.com/swanandp/acts_as_list/issues/88)
+- has\_many :through or has\_many\_and\_belongs\_to\_many support [\#86](https://github.com/swanandp/acts_as_list/issues/86)
+- ActiveRecord dependency causes rake assets:compile to fail without access to a database [\#84](https://github.com/swanandp/acts_as_list/issues/84)
+- move\_higher/move\_lower vs move\_to\_top/move\_to\_bottom act differently when item is already at top or bottom [\#77](https://github.com/swanandp/acts_as_list/issues/77)
+- Limiting the list size [\#61](https://github.com/swanandp/acts_as_list/issues/61)
+- Adding multiple creates strange ordering [\#55](https://github.com/swanandp/acts_as_list/issues/55)
+- Feature: sort [\#26](https://github.com/swanandp/acts_as_list/issues/26)
+
+**Merged pull requests:**
+
+- Removed duplicated assignment [\#207](https://github.com/swanandp/acts_as_list/pull/207) ([shunwen](https://github.com/shunwen))
+- Quote all identifiers [\#205](https://github.com/swanandp/acts_as_list/pull/205) ([fabn](https://github.com/fabn))
+- Start testing Rails 5 [\#203](https://github.com/swanandp/acts_as_list/pull/203) ([brendon](https://github.com/brendon))
+- Lock! the record before destroying [\#201](https://github.com/swanandp/acts_as_list/pull/201) ([brendon](https://github.com/brendon))
+- Fix ambiguous column error when joining some relations [\#180](https://github.com/swanandp/acts_as_list/pull/180) ([natw](https://github.com/natw))
 
 ## [v0.7.4](https://github.com/swanandp/acts_as_list/tree/v0.7.4) (2016-04-15)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.7.3...v0.7.4)

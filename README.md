@@ -95,6 +95,8 @@ default: '1'. Use this option to define the top of the list. Use 0 to make the c
 default: ':bottom'. Use this option to specify whether objects get added to the :top or :bottom of the list. `nil` will result in new items not being added to the list on create, i.e, position will be kept nil after create.
 
 ## Versions
+As of version `0.7.5` Rails 5 is supported.
+
 All versions `0.1.5` onwards require Rails 3.0.x and higher.
 
 ## Build Status
@@ -106,7 +108,6 @@ All versions `0.1.5` onwards require Rails 3.0.x and higher.
 ## Roadmap
 
 1. Sort based feature
-2. Rails 4 compatibility and bye bye Rails 2! Older versions would of course continue to work with Rails 2, but there won't be any support on those.
 
 ## Contributing to `acts_as_list`
  
