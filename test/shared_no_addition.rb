@@ -21,5 +21,16 @@ module Shared
       assert !new.in_list?
     end
 
+    def test_update_scope_does_not_add_to_list
+      new = NoAdditionMixin.create
+
+      new.update_attribute(:parent_id, 20)
+      new.reload
+      assert !new.in_list?
+
+      new.update_attribute(:parent_id, 5)
+      new.reload
+      assert !new.in_list?
+    end
   end
 end
