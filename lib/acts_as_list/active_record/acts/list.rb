@@ -471,9 +471,7 @@ module ActiveRecord
               send('decrement_positions_on_lower_items') if lower_item
               cached_changes.each { |attribute, values| self[attribute] = values[1] }
 
-              if add_new_at.present?
-                send("add_to_list_#{add_new_at}")
-              end
+              send("add_to_list_#{add_new_at}") if add_new_at.present?
             end
           end
 
