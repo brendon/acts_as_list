@@ -77,6 +77,10 @@ module ActiveRecord
           quoted_position_column = connection.quote_column_name(configuration[:column])
 
           class_eval <<-EOV, __FILE__, __LINE__ + 1
+            def self.acts_as_list_top
+              #{configuration[:top_of_list]}.to_i
+            end
+
             def acts_as_list_top
               #{configuration[:top_of_list]}.to_i
             end
