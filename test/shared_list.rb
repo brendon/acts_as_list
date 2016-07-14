@@ -104,6 +104,23 @@ module Shared
 
       new4.reload
       assert_equal 5, new4.pos
+
+      # new records are inserted at the correct location
+      new6 = ListMixin.new(parent_id: 20)
+      new6.insert_at 1
+      assert_equal 1, new6.pos
+
+      new5.reload
+      assert_equal 2, new5.pos
+
+      # scope change initiates a position change
+      new7 = ListMixin.create(parent_id: 21)
+      assert_equal 1, new7.pos
+      new7.parent_id = 20
+      new7.save
+
+      assert_equal 7, new7.pos
+
     end
 
     def test_delete_middle
