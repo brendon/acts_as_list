@@ -129,6 +129,13 @@ end
 class TheBaseSubclass < TheBaseClass
 end
 
+class DBConfigTest < Minitest::Test
+  def test_db_config
+    # make sure sqlite3 accepts multi threaded access
+    assert_equal "file:memdb1?mode=memory&cache=shared", ActiveRecord::Base.connection.pool.spec.config[:database]
+  end
+end
+
 class ActsAsListTestCase < Minitest::Test
   # No default test required as this class is abstract.
   # Need for test/unit.
