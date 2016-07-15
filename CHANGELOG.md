@@ -1,5 +1,17 @@
 # Change Log
 
+## [v0.7.6](https://github.com/swanandp/acts_as_list/tree/v0.7.6) (2016-07-15)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.7.5...v0.7.6)
+
+**Closed issues:**
+
+- add\_new\_at nil with scope causes NoMethodError [\#211](https://github.com/swanandp/acts_as_list/issues/211)
+
+**Merged pull requests:**
+
+- Add class method acts\_as\_list\_top as reader for configured top\_of\_list [\#213](https://github.com/swanandp/acts_as_list/pull/213) ([krzysiek1507](https://github.com/krzysiek1507))
+- Bugfix/add new at nil on scope change [\#212](https://github.com/swanandp/acts_as_list/pull/212) ([greatghoul](https://github.com/greatghoul))
+
 ## [v0.7.5](https://github.com/swanandp/acts_as_list/tree/v0.7.5) (2016-06-30)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.7.4...v0.7.5)
 
