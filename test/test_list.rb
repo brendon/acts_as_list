@@ -691,3 +691,19 @@ class TouchTest < ActsAsListTestCase
     end
   end
 end
+
+class ActsAsListTopTest < ActsAsListTestCase
+  def setup
+    setup_db
+  end
+
+  def test_acts_as_list_top
+    assert_equal 1, TheBaseSubclass.new.acts_as_list_top
+    assert_equal 0, ZeroBasedMixin.new.acts_as_list_top
+  end
+
+  def test_class_acts_as_list_top
+    assert_equal 1, TheBaseSubclass.acts_as_list_top
+    assert_equal 0, ZeroBasedMixin.acts_as_list_top
+  end
+end
