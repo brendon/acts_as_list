@@ -148,7 +148,7 @@ module Shared
 
     def test_update_position_when_scope_changes
       assert_equal [1, 2, 3, 4], ListMixin.where(parent_id: 5).order('pos').map(&:id)
-      parent = ListMixin.create(parent_id: 6)
+      ListMixin.create(parent_id: 6)
 
       ListMixin.where(id: 2).first.move_within_scope(6)
 
@@ -251,6 +251,12 @@ module Shared
       assert !new.last?
 
       assert_equal [5, 1, 6, 2, 3, 4], ListMixin.where(parent_id: 5).order('pos').map(&:id)
+    end
+
+    def test_non_persisted_records_dont_get_lock_called
+      new = ListMixin.new(parent_id: 5)
+
+      new.destroy
     end
   end
 end

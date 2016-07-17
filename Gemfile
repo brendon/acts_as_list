@@ -19,4 +19,5 @@ gem "github_changelog_generator", "1.9.0"
 
 group :test do
 	gem "minitest", "~> 5.0"
+  gem "test_after_commit", "~> 0.4.2"
 end

@@ -7,7 +7,7 @@ gem "activerecord-jdbcsqlite3-adapter", :platforms => [:jruby]
 gem "rake"
 gem "appraisal"
 gem "github_changelog_generator", "1.9.0"
-gem "activerecord", "~> 4.2.1"
+gem "activerecord", "~> 5.0.0.beta3"
 
 group :test do
   gem "minitest", "~> 5.0"

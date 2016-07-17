@@ -19,9 +19,14 @@ def setup_db(position_options = {})
     t.column :state, :integer
   end
 
+  # This table is used to test table names and column names quoting
+  ActiveRecord::Base.connection.create_table 'table-name' do |t|
+    t.column :order, :integer
+  end
+
   mixins = [ Mixin, ListMixin, ListMixinSub1, ListMixinSub2, ListWithStringScopeMixin,
     ArrayScopeListMixin, ZeroBasedMixin, DefaultScopedMixin,
-    DefaultScopedWhereMixin, TopAdditionMixin, NoAdditionMixin ]
+    DefaultScopedWhereMixin, TopAdditionMixin, NoAdditionMixin, QuotedList ]
 
   mixins << EnumArrayScopeListMixin if rails_4
 
@@ -45,7 +50,13 @@ def rails_4
 end
 
 def teardown_db
-  ActiveRecord::Base.connection.tables.each do |table|
+  if ActiveRecord::VERSION::MAJOR >= 5
+    tables = ActiveRecord::Base.connection.data_sources
+  else
+    tables = ActiveRecord::Base.connection.tables
+  end
+
+  tables.each do |table|
     ActiveRecord::Base.connection.drop_table(table)
   end
 end
@@ -112,6 +123,29 @@ class NoAdditionMixin < Mixin
   acts_as_list column: "pos", add_new_at: nil, scope: :parent_id
 end
 
+##
+# The way we track changes to
+# scope and position can get tripped up
+# by someone using update_attributes within
+# a callback because it causes multiple passes
+# through the callback chain
+module CallbackMixin
+
+  def self.included(base)
+    base.send :include, InstanceMethods
+    base.after_create :change_field
+  end
+
+  module InstanceMethods
+    def change_field
+      # doesn't matter what column changes, just
+      # need to change something
+
+      self.update_attributes(active: !self.active)
+    end
+  end
+end
+
 class TheAbstractClass < ActiveRecord::Base
   self.abstract_class = true
   self.table_name = 'mixins'
@@ -134,6 +168,11 @@ class DBConfigTest < Minitest::Test
     # make sure sqlite3 accepts multi threaded access
     assert_equal "file:memdb1?mode=memory&cache=shared", ActiveRecord::Base.connection.pool.spec.config[:database]
   end
+end
+
+class QuotedList < ActiveRecord::Base
+  self.table_name = 'table-name'
+  acts_as_list column: :order
 end
 
 class ActsAsListTestCase < Minitest::Test
@@ -204,6 +243,18 @@ class ListTest < ActsAsListTestCase
   end
 end
 
+class ListWithCallbackTest < ActsAsListTestCase
+
+  include Shared::List
+
+  def setup
+    ListMixin.send(:include, CallbackMixin)
+    setup_db
+    super
+  end
+
+end
+
 class ListTestWithDefault < ActsAsListTestCase
   include Shared::List
 
@@ -242,6 +293,15 @@ end
 
 class ArrayScopeListTestWithDefault < ActsAsListTestCase
   include Shared::ArrayScopeList
+
+  def setup
+    setup_db_with_default
+    super
+  end
+end
+
+class QuotingTestList < ActsAsListTestCase
+  include Shared::Quoting
 
   def setup
     setup_db_with_default
@@ -607,5 +667,84 @@ class MultipleListsArrayScopeTest < ActsAsListTestCase
     ArrayScopeListMixin.find(2).update_attributes(:parent_id => 4, :pos => 1)
     assert_equal [1, 2, 3], ArrayScopeListMixin.where(:parent_id => 1, :parent_type => 'anything').order(:pos).map(&:pos)
     assert_equal [1], ArrayScopeListMixin.where(:parent_id => 4, :parent_type => 'anything').order(:pos).map(&:pos)
+  end
+end
+
+class TouchTest < ActsAsListTestCase
+  def setup
+    setup_db
+    4.times { ListMixin.create! updated_at: yesterday }
+  end
+
+  def now
+    Time.now.utc
+  end
+
+  def yesterday
+    1.day.ago
+  end
+
+  def updated_ats
+    ListMixin.pluck(:updated_at)
+  end
+
+  def test_moving_item_lower_touches_self_and_lower_item
+    ListMixin.first.move_lower
+    updated_ats[0..1].each do |updated_at|
+      assert_in_delta updated_at, now, 1.second
+    end
+    updated_ats[2..3].each do |updated_at|
+      assert_in_delta updated_at, yesterday, 1.second
+    end
+  end
+
+  def test_moving_item_higher_touches_self_and_higher_item
+    ListMixin.all.second.move_higher
+    updated_ats[0..1].each do |updated_at|
+      assert_in_delta updated_at, now, 1.second
+    end
+    updated_ats[2..3].each do |updated_at|
+      assert_in_delta updated_at, yesterday, 1.second
+    end
+  end
+
+  def test_moving_item_to_bottom_touches_all_other_items
+    ListMixin.first.move_to_bottom
+    updated_ats.each do |updated_at|
+      assert_in_delta updated_at, now, 1.second
+    end
+  end
+
+  def test_moving_item_to_top_touches_all_other_items
+    ListMixin.last.move_to_top
+    updated_ats.each do |updated_at|
+      assert_in_delta updated_at, now, 1.second
+    end
+  end
+
+  def test_removing_item_touches_all_lower_items
+    ListMixin.all.third.remove_from_list
+    updated_ats[0..1].each do |updated_at|
+      assert_in_delta updated_at, yesterday, 1.second
+    end
+    updated_ats[2..2].each do |updated_at|
+      assert_in_delta updated_at, now, 1.second
+    end
+  end
+end
+
+class ActsAsListTopTest < ActsAsListTestCase
+  def setup
+    setup_db
+  end
+
+  def test_acts_as_list_top
+    assert_equal 1, TheBaseSubclass.new.acts_as_list_top
+    assert_equal 0, ZeroBasedMixin.new.acts_as_list_top
+  end
+
+  def test_class_acts_as_list_top
+    assert_equal 1, TheBaseSubclass.acts_as_list_top
+    assert_equal 0, ZeroBasedMixin.acts_as_list_top
   end
 end

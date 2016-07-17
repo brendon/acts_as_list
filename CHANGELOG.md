@@ -1,17 +1,100 @@
 # Change Log
 
-## [Unreleased](https://github.com/swanandp/acts_as_list/tree/HEAD)
-
-[Full Changelog](https://github.com/swanandp/acts_as_list/compare/0.7.2...HEAD)
+## [v0.7.6](https://github.com/swanandp/acts_as_list/tree/v0.7.6) (2016-07-15)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.7.5...v0.7.6)
 
 **Closed issues:**
 
-- Unable to run tests [\#162](https://github.com/swanandp/acts_as_list/issues/162)
-- shuffle\_positions\_on\_intermediate\_items is creating problems [\#134](https://github.com/swanandp/acts_as_list/issues/134)
-- introduce Changelog file to quickly track changes [\#68](https://github.com/swanandp/acts_as_list/issues/68)
+- add\_new\_at nil with scope causes NoMethodError [\#211](https://github.com/swanandp/acts_as_list/issues/211)
 
 **Merged pull requests:**
 
+- Add class method acts\_as\_list\_top as reader for configured top\_of\_list [\#213](https://github.com/swanandp/acts_as_list/pull/213) ([krzysiek1507](https://github.com/krzysiek1507))
+- Bugfix/add new at nil on scope change [\#212](https://github.com/swanandp/acts_as_list/pull/212) ([greatghoul](https://github.com/greatghoul))
+
+## [v0.7.5](https://github.com/swanandp/acts_as_list/tree/v0.7.5) (2016-06-30)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.7.4...v0.7.5)
+
+**Implemented enhancements:**
+
+- Touch when reordering [\#173](https://github.com/swanandp/acts_as_list/pull/173) ([botandrose](https://github.com/botandrose))
+
+**Closed issues:**
+
+- Exception raised when calling destroy "NameError - instance variable @scope\_changed not defined:" [\#206](https://github.com/swanandp/acts_as_list/issues/206)
+- Undefined instance variable @scope\_changed since 0.7.3 [\#199](https://github.com/swanandp/acts_as_list/issues/199)
+- Reordering large lists is slow [\#198](https://github.com/swanandp/acts_as_list/issues/198)
+- Reparenting child leaves gap in source list in rails 5 [\#194](https://github.com/swanandp/acts_as_list/issues/194)
+- Support rails 5 ? [\#186](https://github.com/swanandp/acts_as_list/issues/186)
+- I get a NoMethodError: undefined method `acts\_as\_list' when trying to include acts\_as\_list [\#176](https://github.com/swanandp/acts_as_list/issues/176)
+- Phenomenon of mysterious value of the position is skipped by one [\#166](https://github.com/swanandp/acts_as_list/issues/166)
+- Model.find being called twice with acts\_as\_list on destroy [\#161](https://github.com/swanandp/acts_as_list/issues/161)
+- `scope\_changed?` problem with acts\_as\_paranoid [\#158](https://github.com/swanandp/acts_as_list/issues/158)
+- Inconsistent behaviour between Symbol and Array scopes [\#155](https://github.com/swanandp/acts_as_list/issues/155)
+- insert\_at doesn't seem to be working in ActiveRecord callback \(Rails 4.2\) [\#150](https://github.com/swanandp/acts_as_list/issues/150)
+- Project Documentation link redirects to expired domain [\#149](https://github.com/swanandp/acts_as_list/issues/149)
+- Problem when updating an position of array of AR objects. [\#137](https://github.com/swanandp/acts_as_list/issues/137)
+- Unexpected behaviour when inserting consecutive items with default positions [\#124](https://github.com/swanandp/acts_as_list/issues/124)
+- self.reload prone to error [\#122](https://github.com/swanandp/acts_as_list/issues/122)
+- Rails 3.0.x in\_list causes the return of default\_scope [\#120](https://github.com/swanandp/acts_as_list/issues/120)
+- Relationships with dependency:destroy cause ActiveRecord::RecordNotFound [\#118](https://github.com/swanandp/acts_as_list/issues/118)
+- Using insert\_at with values with type String [\#117](https://github.com/swanandp/acts_as_list/issues/117)
+- Batch setting of position [\#112](https://github.com/swanandp/acts_as_list/issues/112)
+- position: 0 now makes model pushed to top? [\#110](https://github.com/swanandp/acts_as_list/issues/110)
+- Create element in default position [\#103](https://github.com/swanandp/acts_as_list/issues/103)
+- Enhancement: Expose scope object [\#97](https://github.com/swanandp/acts_as_list/issues/97)
+- Shuffle list [\#96](https://github.com/swanandp/acts_as_list/issues/96)
+- Creating an item with a nil scope should not add it to the list [\#92](https://github.com/swanandp/acts_as_list/issues/92)
+- Performance Improvements  [\#88](https://github.com/swanandp/acts_as_list/issues/88)
+- has\_many :through or has\_many\_and\_belongs\_to\_many support [\#86](https://github.com/swanandp/acts_as_list/issues/86)
+- ActiveRecord dependency causes rake assets:compile to fail without access to a database [\#84](https://github.com/swanandp/acts_as_list/issues/84)
+- move\_higher/move\_lower vs move\_to\_top/move\_to\_bottom act differently when item is already at top or bottom [\#77](https://github.com/swanandp/acts_as_list/issues/77)
+- Limiting the list size [\#61](https://github.com/swanandp/acts_as_list/issues/61)
+- Adding multiple creates strange ordering [\#55](https://github.com/swanandp/acts_as_list/issues/55)
+- Feature: sort [\#26](https://github.com/swanandp/acts_as_list/issues/26)
+
+**Merged pull requests:**
+
+- Removed duplicated assignment [\#207](https://github.com/swanandp/acts_as_list/pull/207) ([shunwen](https://github.com/shunwen))
+- Quote all identifiers [\#205](https://github.com/swanandp/acts_as_list/pull/205) ([fabn](https://github.com/fabn))
+- Start testing Rails 5 [\#203](https://github.com/swanandp/acts_as_list/pull/203) ([brendon](https://github.com/brendon))
+- Lock! the record before destroying [\#201](https://github.com/swanandp/acts_as_list/pull/201) ([brendon](https://github.com/brendon))
+- Fix ambiguous column error when joining some relations [\#180](https://github.com/swanandp/acts_as_list/pull/180) ([natw](https://github.com/natw))
+
+## [v0.7.4](https://github.com/swanandp/acts_as_list/tree/v0.7.4) (2016-04-15)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.7.3...v0.7.4)
+
+**Closed issues:**
+
+- Releasing a new gem version [\#196](https://github.com/swanandp/acts_as_list/issues/196)
+
+**Merged pull requests:**
+
+- Fix scope changed [\#200](https://github.com/swanandp/acts_as_list/pull/200) ([brendon](https://github.com/brendon))
+
+## [v0.7.3](https://github.com/swanandp/acts_as_list/tree/v0.7.3) (2016-04-14)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.7.2...v0.7.3)
+
+## [v0.7.2](https://github.com/swanandp/acts_as_list/tree/v0.7.2) (2016-04-01)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/0.7.2...v0.7.2)
+
+**Closed issues:**
+
+- DEPRECATION WARNING: Passing string to define callback on Rails 5 beta 3 [\#191](https://github.com/swanandp/acts_as_list/issues/191)
+- Why is `add\_to\_list\_bottom` private? [\#187](https://github.com/swanandp/acts_as_list/issues/187)
+- Ordering of children when there are two possible parent models. [\#172](https://github.com/swanandp/acts_as_list/issues/172)
+- Fix the jruby and rbx builds [\#169](https://github.com/swanandp/acts_as_list/issues/169)
+- Unable to run tests [\#162](https://github.com/swanandp/acts_as_list/issues/162)
+- shuffle\_positions\_on\_intermediate\_items is creating problems [\#134](https://github.com/swanandp/acts_as_list/issues/134)
+- introduce Changelog file to quickly track changes [\#68](https://github.com/swanandp/acts_as_list/issues/68)
+- Mongoid support? [\#52](https://github.com/swanandp/acts_as_list/issues/52)
+
+**Merged pull requests:**
+
+- Add filename/line number to class\_eval call [\#193](https://github.com/swanandp/acts_as_list/pull/193) ([hfwang](https://github.com/hfwang))
+- Use a symbol as a string to define callback [\#192](https://github.com/swanandp/acts_as_list/pull/192) ([brendon](https://github.com/brendon))
+- Pin changelog generator to a working version [\#190](https://github.com/swanandp/acts_as_list/pull/190) ([fabn](https://github.com/fabn))
+- Fix bug, position is recomputed when object saved [\#188](https://github.com/swanandp/acts_as_list/pull/188) ([chrisortman](https://github.com/chrisortman))
 - Update bundler before running tests, fixes test run on travis [\#179](https://github.com/swanandp/acts_as_list/pull/179) ([fabn](https://github.com/fabn))
 - Changelog generator, closes \#68 [\#177](https://github.com/swanandp/acts_as_list/pull/177) ([fabn](https://github.com/fabn))
 - Updating README example [\#175](https://github.com/swanandp/acts_as_list/pull/175) ([ryanbillings](https://github.com/ryanbillings))
