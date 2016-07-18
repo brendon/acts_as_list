@@ -104,6 +104,12 @@ module Shared
 
       new4.reload
       assert_equal 5, new4.pos
+
+      last1 = ListMixin.order('pos').last
+      last2 = ListMixin.order('pos').last
+      last1.insert_at(1)
+      last2.insert_at(1)
+      assert_equal [1, 2, 3, 4, 5], ListMixin.where(parent_id: 20).order('pos').map(&:pos)
     end
 
     def test_delete_middle
