@@ -34,9 +34,8 @@ module ActiveRecord
         #   act more like an array in its indexing.
         # * +add_new_at+ - specifies whether objects get added to the :top or :bottom of the list. (default: +bottom+)
         #                   `nil` will result in new items not being added to the list on create
-        def acts_as_list(options = {})
-          configuration = { column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom}
-          configuration.update(options) if options.is_a?(Hash)
+        def acts_as_list(column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom)
+          configuration = { column: column, scope: scope, top_of_list: top_of_list, add_new_at: add_new_at }
 
           if configuration[:scope].is_a?(Symbol) && configuration[:scope].to_s !~ /_id$/
             configuration[:scope] = :"#{configuration[:scope]}_id"
@@ -116,7 +115,7 @@ module ActiveRecord
               @_quoted_position_column_with_table_name ||= "#{caller_class.quoted_table_name}.#{quoted_position_column}"
             end
 
-            scope :in_list, lambda { where("#{quoted_position_column_with_table_name} IS NOT NULL") }
+            self.scope :in_list, lambda { where("#{quoted_position_column_with_table_name} IS NOT NULL") }
 
             define_singleton_method :decrement_all do
               update_all_with_touch "#{quoted_position_column} = (#{quoted_position_column_with_table_name} - 1)"
