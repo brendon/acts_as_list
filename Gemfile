@@ -16,8 +16,10 @@ gem "rake"
 gem "appraisal"
 # Used to automatically generate changelog file
 gem "github_changelog_generator", "1.9.0"
+# Rack 2.0.1 breaks the build for Ruby < 2.2.2
+gem "rack", "< 2.0"
 
 group :test do
-	gem "minitest", "~> 5.0"
+  gem "minitest", "~> 5.0"
   gem "test_after_commit", "~> 0.4.2"
 end
