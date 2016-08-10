@@ -113,7 +113,7 @@ module ActiveRecord
             end
 
             define_singleton_method :quoted_position_column do
-              connection.quote_column_name(configuration[:column])
+              @_quoted_position_column ||= connection.quote_column_name(configuration[:column])
             end
 
             define_singleton_method :quoted_position_column_with_table_name do
