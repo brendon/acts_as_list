@@ -16,6 +16,8 @@ gemspec
 gem "rake"
 gem "appraisal"
 gem "github_changelog_generator", "1.9.0"
+# Rack 2.0.1 breaks the build for Ruby < 2.2.2
+gem "rack", "< 2.0"
 
 group :test do
 	gem "minitest", "~> 5.0"
