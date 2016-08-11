@@ -4,6 +4,7 @@ source "http://rubygems.org"
 
 gem "sqlite3", :platforms => [:ruby]
 gem "activerecord-jdbcsqlite3-adapter", :platforms => [:jruby]
+gem "rack", "~> 1", :platforms => [:ruby_19, :ruby_20, :ruby_21]
 gem "rake"
 gem "appraisal"
 gem "activerecord", "~> 3.2.22.2"

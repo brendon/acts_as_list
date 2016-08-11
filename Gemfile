@@ -9,6 +9,8 @@ platforms :rbx do
   gem "rubysl-test-unit"
 end
 
+gem "rack", "~> 1", platforms: [:ruby_19, :ruby_20, :ruby_21]
+
 gemspec
 
 gem "rake"
