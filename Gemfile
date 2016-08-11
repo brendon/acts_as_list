@@ -9,13 +9,15 @@ platforms :rbx do
   gem "rubysl-test-unit"
 end
 
-# Specify your gem"s dependencies in acts_as_list-rails3.gemspec
 gemspec
 
 gem "rake"
 gem "appraisal"
-# Used to automatically generate changelog file
-gem "github_changelog_generator", "1.9.0"
+
+group :development do
+	# Used to automatically generate changelog file
+	gem "github_changelog_generator", "1.9.0"
+end
 
 group :test do
 	gem "minitest", "~> 5.0"
