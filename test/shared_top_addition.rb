@@ -71,6 +71,11 @@ module Shared
       assert_equal 3, new4.pos
     end
 
+    def test_supplied_position
+      new = TopAdditionMixin.create(parent_id: 20, pos: 3)
+      assert_equal 3, new.pos
+    end
+
     def test_delete_middle
       assert_equal [4, 3, 2, 1], TopAdditionMixin.where(parent_id: 5).order('pos').map(&:id)
 
