@@ -141,10 +141,10 @@ module ActiveRecord
           attr_reader :position_changed
 
           before_validation :check_top_position
-          
+
           before_destroy :lock!
           after_destroy :decrement_positions_on_lower_items
-          
+
           before_update :check_scope
           after_update :update_positions
 
@@ -350,7 +350,7 @@ module ActiveRecord
 
           # Returns the bottom item
           def bottom_item(except = nil)
-            conditions = except ? "#{self.class.primary_key} != #{self.class.connection.quote(except.id)}" : {}
+            conditions = except ? "#{quoted_table_name}.#{self.class.primary_key} != #{self.class.connection.quote(except.id)}" : {}
             acts_as_list_list.in_list.where(
               conditions
             ).order(
@@ -370,27 +370,27 @@ module ActiveRecord
 
           # This has the effect of moving all the higher items up one.
           def decrement_positions_on_higher_items(position)
-            acts_as_list_list.where("#{quoted_position_column} <= #{position}").decrement_all
+            acts_as_list_list.where("#{quoted_table_name}.#{quoted_position_column} <= #{position}").decrement_all
           end
 
           # This has the effect of moving all the lower items up one.
           def decrement_positions_on_lower_items(position=nil)
             return unless in_list?
             position ||= send(position_column).to_i
-            acts_as_list_list.where("#{quoted_position_column} > #{position}").decrement_all
+            acts_as_list_list.where("#{quoted_table_name}.#{quoted_position_column} > #{position}").decrement_all
           end
 
           # This has the effect of moving all the higher items down one.
           def increment_positions_on_higher_items
             return unless in_list?
-            acts_as_list_list.where("#{quoted_position_column} < #{send(position_column).to_i}").increment_all
+            acts_as_list_list.where("#{quoted_table_name}.#{quoted_position_column} < #{send(position_column).to_i}").increment_all
           end
 
           # This has the effect of moving all the lower items down one.
           def increment_positions_on_lower_items(position, avoid_id = nil)
-            avoid_id_condition = avoid_id ? " AND #{self.class.primary_key} != #{self.class.connection.quote(avoid_id)}" : ''
+            avoid_id_condition = avoid_id ? " AND #{quoted_table_name}.#{self.class.primary_key} != #{self.class.connection.quote(avoid_id)}" : ''
 
-            acts_as_list_list.where("#{quoted_position_column} >= #{position}#{avoid_id_condition}").increment_all
+            acts_as_list_list.where("#{quoted_table_name}.#{quoted_position_column} >= #{position}#{avoid_id_condition}").increment_all
           end
 
           # Increments position (<tt>position_column</tt>) of all items in the list.
@@ -401,7 +401,7 @@ module ActiveRecord
           # Reorders intermediate items to support moving an item from old_position to new_position.
           def shuffle_positions_on_intermediate_items(old_position, new_position, avoid_id = nil)
             return if old_position == new_position
-            avoid_id_condition = avoid_id ? " AND #{self.class.primary_key} != #{self.class.connection.quote(avoid_id)}" : ''
+            avoid_id_condition = avoid_id ? " AND #{quoted_table_name}.#{self.class.primary_key} != #{self.class.connection.quote(avoid_id)}" : ''
 
             if old_position < new_position
               # Decrement position of intermediate items
@@ -409,9 +409,9 @@ module ActiveRecord
               # e.g., if moving an item from 2 to 5,
               # move [3, 4, 5] to [2, 3, 4]
               acts_as_list_list.where(
-                "#{quoted_position_column} > #{old_position}"
+                "#{quoted_table_name}.#{quoted_position_column} > #{old_position}"
               ).where(
-                "#{quoted_position_column} <= #{new_position}#{avoid_id_condition}"
+                "#{quoted_table_name}.#{quoted_position_column} <= #{new_position}#{avoid_id_condition}"
               ).decrement_all
             else
               # Increment position of intermediate items
@@ -419,9 +419,9 @@ module ActiveRecord
               # e.g., if moving an item from 5 to 2,
               # move [2, 3, 4] to [3, 4, 5]
               acts_as_list_list.where(
-                "#{quoted_position_column} >= #{new_position}"
+                "#{quoted_table_name}.#{quoted_position_column} >= #{new_position}"
               ).where(
-                "#{quoted_position_column} < #{old_position}#{avoid_id_condition}"
+                "#{quoted_table_name}.#{quoted_position_column} < #{old_position}#{avoid_id_condition}"
               ).increment_all
             end
           end
@@ -454,7 +454,7 @@ module ActiveRecord
             new_position = send(position_column).to_i
 
             return unless acts_as_list_list.where(
-              "#{quoted_position_column} = #{new_position}"
+              "#{quoted_table_name}.#{quoted_position_column} = #{new_position}"
             ).count > 1
             shuffle_positions_on_intermediate_items old_position, new_position, id
           end
