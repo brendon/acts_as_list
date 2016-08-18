@@ -1,5 +1,20 @@
 # Change Log
 
+## [v0.7.7](https://github.com/swanandp/acts_as_list/tree/v0.7.7) (2016-08-18)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.7.6...v0.7.7)
+
+**Closed issues:**
+
+- Issue after upgrading to 0.7.5: No connection pool with id primary found. [\#214](https://github.com/swanandp/acts_as_list/issues/214)
+- Changing scope is inconsistent based on add\_new\_at [\#138](https://github.com/swanandp/acts_as_list/issues/138)
+- Duplicate positions and lost items [\#76](https://github.com/swanandp/acts_as_list/issues/76)
+
+**Merged pull requests:**
+
+- Add quoted table names to some columns [\#221](https://github.com/swanandp/acts_as_list/pull/221) ([jpalumickas](https://github.com/jpalumickas))
+- Appraisals cleanup [\#217](https://github.com/swanandp/acts_as_list/pull/217) ([brendon](https://github.com/brendon))
+- Fix insert\_at\_position in race condition [\#195](https://github.com/swanandp/acts_as_list/pull/195) ([danielross](https://github.com/danielross))
+
 ## [v0.7.6](https://github.com/swanandp/acts_as_list/tree/v0.7.6) (2016-07-15)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.7.5...v0.7.6)
 
