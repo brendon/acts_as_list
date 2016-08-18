@@ -501,7 +501,7 @@ module ActiveRecord
           end
 
           def quoted_position_column_with_table_name
-            "#{quoted_table_name}.#{quoted_position_column}"
+            @_quoted_position_column_with_table_name ||= "#{quoted_table_name}.#{quoted_position_column}"
           end
       end
     end
