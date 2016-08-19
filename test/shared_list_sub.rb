@@ -79,9 +79,9 @@ module Shared
       assert_equal [li2, li3], li1.lower_items(2)
       assert_equal [], li4.lower_items
 
-      assert_equal [li1, li2], li3.higher_items
+      assert_equal [li2, li1], li3.higher_items
       assert_equal [li1], li2.higher_items
-      assert_equal [li2, li3], li4.higher_items(2)
+      assert_equal [li3, li2], li4.higher_items(2)
       assert_equal [], li1.higher_items
     end
 
