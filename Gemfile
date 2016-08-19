@@ -9,12 +9,12 @@ platforms :rbx do
   gem "rubysl-test-unit"
 end
 
-# Specify your gem"s dependencies in acts_as_list-rails3.gemspec
+gem "rack", "~> 1", platforms: [:ruby_19, :ruby_20, :ruby_21, :jruby]
+
 gemspec
 
 gem "rake"
 gem "appraisal"
-# Used to automatically generate changelog file
 gem "github_changelog_generator", "1.9.0"
 
 group :test do

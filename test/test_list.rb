@@ -1,7 +1,10 @@
 # NOTE: following now done in helper.rb (better Readability)
 require 'helper'
 
-ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
+ActiveRecord::Base.establish_connection(
+  adapter: "sqlite3",
+  database: 'file:memdb1?mode=memory&cache=shared'
+)
 ActiveRecord::Schema.verbose = false
 
 def setup_db(position_options = {})
@@ -160,6 +163,13 @@ end
 class TheBaseSubclass < TheBaseClass
 end
 
+class DBConfigTest < Minitest::Test
+  def test_db_config
+    # make sure sqlite3 accepts multi threaded access
+    assert_equal "file:memdb1?mode=memory&cache=shared", ActiveRecord::Base.connection.pool.spec.config[:database]
+  end
+end
+
 class QuotedList < ActiveRecord::Base
   self.table_name = 'table-name'
   acts_as_list column: :order
@@ -199,6 +209,37 @@ class ListTest < ActsAsListTestCase
   def setup
     setup_db
     super
+  end
+
+  def test_insert_race_condition
+    # the bigger n is the more likely we will have a race condition
+    n = 1000
+    (1..n).each do |counter|
+      node = ListMixin.new parent_id: 1
+      node.pos = counter
+      node.save!
+    end
+
+    wait_for_it  = true
+    threads = []
+    4.times do |i|
+      threads << Thread.new do
+        true while wait_for_it
+        ActiveRecord::Base.connection_pool.with_connection do |c|
+          n.times do
+            begin
+              ListMixin.where(parent_id: 1).order(:pos).last.insert_at(1)
+            rescue Exception
+              # ignore SQLite3::SQLException due to table locking
+            end
+          end
+        end
+      end
+    end
+    wait_for_it = false
+    threads.each(&:join)
+
+    assert_equal (1..n).to_a, ListMixin.where(parent_id: 1).order('pos').map(&:pos)
   end
 end
 
@@ -689,5 +730,21 @@ class TouchTest < ActsAsListTestCase
     updated_ats[2..2].each do |updated_at|
       assert_in_delta updated_at, now, 1.second
     end
+  end
+end
+
+class ActsAsListTopTest < ActsAsListTestCase
+  def setup
+    setup_db
+  end
+
+  def test_acts_as_list_top
+    assert_equal 1, TheBaseSubclass.new.acts_as_list_top
+    assert_equal 0, ZeroBasedMixin.new.acts_as_list_top
+  end
+
+  def test_class_acts_as_list_top
+    assert_equal 1, TheBaseSubclass.acts_as_list_top
+    assert_equal 0, ZeroBasedMixin.acts_as_list_top
   end
 end
