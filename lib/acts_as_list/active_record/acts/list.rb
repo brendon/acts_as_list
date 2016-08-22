@@ -75,6 +75,7 @@ module ActiveRecord
           end
 
           quoted_position_column = connection.quote_column_name(configuration[:column])
+          quoted_position_column_with_table_name = "#{quoted_table_name}.#{quoted_position_column}"
 
           class_eval <<-EOV, __FILE__, __LINE__ + 1
             def self.acts_as_list_top
@@ -115,14 +116,14 @@ module ActiveRecord
               attr_accessible :#{configuration[:column]}
             end
 
-            scope :in_list, lambda { where(%q{#{quoted_table_name}.#{quoted_position_column} IS NOT NULL}) }
+            scope :in_list, lambda { where(%q{#{quoted_position_column_with_table_name} IS NOT NULL}) }
 
             def self.decrement_all
-              update_all_with_touch %q(#{quoted_position_column} = (#{quoted_table_name}.#{quoted_position_column} - 1))
+              update_all_with_touch %q(#{quoted_position_column} = (#{quoted_position_column_with_table_name} - 1))
             end
 
             def self.increment_all
-              update_all_with_touch %q(#{quoted_position_column} = (#{quoted_table_name}.#{quoted_position_column} + 1))
+              update_all_with_touch %q(#{quoted_position_column} = (#{quoted_position_column_with_table_name} + 1))
             end
 
             def self.update_all_with_touch(updates)
@@ -141,10 +142,10 @@ module ActiveRecord
           attr_reader :position_changed
 
           before_validation :check_top_position
-          
+
           before_destroy :lock!
           after_destroy :decrement_positions_on_lower_items
-          
+
           before_update :check_scope
           after_update :update_positions
 
@@ -173,8 +174,12 @@ module ActiveRecord
           return unless lower_item
 
           acts_as_list_class.transaction do
-            lower_item.decrement_position
-            increment_position
+            if lower_item.send(position_column) != self.send(position_column)
+              swap_positions(lower_item, self)
+            else
+              lower_item.decrement_position
+              increment_position
+            end
           end
         end
 
@@ -183,8 +188,12 @@ module ActiveRecord
           return unless higher_item
 
           acts_as_list_class.transaction do
-            higher_item.increment_position
-            decrement_position
+            if higher_item.send(position_column) != self.send(position_column)
+              swap_positions(higher_item, self)
+            else
+              higher_item.increment_position
+              decrement_position
+            end
           end
         end
 
@@ -235,16 +244,14 @@ module ActiveRecord
           set_list_position(self.send(position_column).to_i - 1)
         end
 
-        # Return +true+ if this object is the first in the list.
         def first?
           return false unless in_list?
-          self.send(position_column) == acts_as_list_top
+          !higher_item
         end
 
-        # Return +true+ if this object is the last in the list.
         def last?
           return false unless in_list?
-          self.send(position_column) == bottom_position_in_list
+          !lower_item
         end
 
         # Return the next higher item in the list.
@@ -259,10 +266,9 @@ module ActiveRecord
           limit ||= acts_as_list_list.count
           position_value = send(position_column)
           acts_as_list_list.
-            where("#{quoted_table_name}.#{quoted_position_column} < ?", position_value).
-            where("#{quoted_table_name}.#{quoted_position_column} >= ?", position_value - limit).
-            limit(limit).
-            order("#{quoted_table_name}.#{quoted_position_column} ASC")
+            where("#{quoted_position_column_with_table_name} < ?", position_value).
+            order("#{quoted_position_column_with_table_name} DESC").
+            limit(limit)
         end
 
         # Return the next lower item in the list.
@@ -277,10 +283,9 @@ module ActiveRecord
           limit ||= acts_as_list_list.count
           position_value = send(position_column)
           acts_as_list_list.
-            where("#{quoted_table_name}.#{quoted_position_column} > ?", position_value).
-            where("#{quoted_table_name}.#{quoted_position_column} <= ?", position_value + limit).
-            limit(limit).
-            order("#{quoted_table_name}.#{quoted_position_column} ASC")
+            where("#{quoted_position_column_with_table_name} > ?", position_value).
+            order("#{quoted_position_column_with_table_name} ASC").
+            limit(limit)
         end
 
         # Test if this record is in a list
@@ -307,6 +312,12 @@ module ActiveRecord
         end
 
         private
+
+          def swap_positions(item1, item2)
+            item1.set_list_position(item2.send(position_column))
+            item2.set_list_position(item1.send("#{position_column}_was"))
+          end
+
           def acts_as_list_list
             acts_as_list_class.unscoped do
               acts_as_list_class.where(scope_condition)
@@ -357,11 +368,11 @@ module ActiveRecord
 
           # Returns the bottom item
           def bottom_item(except = nil)
-            conditions = except ? "#{self.class.primary_key} != #{self.class.connection.quote(except.id)}" : {}
+            conditions = except ? "#{quoted_table_name}.#{self.class.primary_key} != #{self.class.connection.quote(except.id)}" : {}
             acts_as_list_list.in_list.where(
               conditions
             ).order(
-              "#{quoted_table_name}.#{quoted_position_column} DESC"
+              "#{quoted_position_column_with_table_name} DESC"
             ).first
           end
 
@@ -377,27 +388,27 @@ module ActiveRecord
 
           # This has the effect of moving all the higher items up one.
           def decrement_positions_on_higher_items(position)
-            acts_as_list_list.where("#{quoted_position_column} <= #{position}").decrement_all
+            acts_as_list_list.where("#{quoted_position_column_with_table_name} <= ?", position).decrement_all
           end
 
           # This has the effect of moving all the lower items up one.
           def decrement_positions_on_lower_items(position=nil)
             return unless in_list?
             position ||= send(position_column).to_i
-            acts_as_list_list.where("#{quoted_position_column} > #{position}").decrement_all
+            acts_as_list_list.where("#{quoted_position_column_with_table_name} > ?", position).decrement_all
           end
 
           # This has the effect of moving all the higher items down one.
           def increment_positions_on_higher_items
             return unless in_list?
-            acts_as_list_list.where("#{quoted_position_column} < #{send(position_column).to_i}").increment_all
+            acts_as_list_list.where("#{quoted_position_column_with_table_name} < #{send(position_column).to_i}").increment_all
           end
 
           # This has the effect of moving all the lower items down one.
           def increment_positions_on_lower_items(position, avoid_id = nil)
-            avoid_id_condition = avoid_id ? " AND #{self.class.primary_key} != #{self.class.connection.quote(avoid_id)}" : ''
+            avoid_id_condition = avoid_id ? " AND #{quoted_table_name}.#{self.class.primary_key} != #{self.class.connection.quote(avoid_id)}" : ''
 
-            acts_as_list_list.where("#{quoted_position_column} >= #{position}#{avoid_id_condition}").increment_all
+            acts_as_list_list.where("#{quoted_position_column_with_table_name} >= #{position}#{avoid_id_condition}").increment_all
           end
 
           # Increments position (<tt>position_column</tt>) of all items in the list.
@@ -408,7 +419,7 @@ module ActiveRecord
           # Reorders intermediate items to support moving an item from old_position to new_position.
           def shuffle_positions_on_intermediate_items(old_position, new_position, avoid_id = nil)
             return if old_position == new_position
-            avoid_id_condition = avoid_id ? " AND #{self.class.primary_key} != #{self.class.connection.quote(avoid_id)}" : ''
+            avoid_id_condition = avoid_id ? " AND #{quoted_table_name}.#{self.class.primary_key} != #{self.class.connection.quote(avoid_id)}" : ''
 
             if old_position < new_position
               # Decrement position of intermediate items
@@ -416,9 +427,9 @@ module ActiveRecord
               # e.g., if moving an item from 2 to 5,
               # move [3, 4, 5] to [2, 3, 4]
               acts_as_list_list.where(
-                "#{quoted_position_column} > #{old_position}"
+                "#{quoted_position_column_with_table_name} > ?", old_position
               ).where(
-                "#{quoted_position_column} <= #{new_position}#{avoid_id_condition}"
+                "#{quoted_position_column_with_table_name} <= #{new_position}#{avoid_id_condition}"
               ).decrement_all
             else
               # Increment position of intermediate items
@@ -426,9 +437,9 @@ module ActiveRecord
               # e.g., if moving an item from 5 to 2,
               # move [2, 3, 4] to [3, 4, 5]
               acts_as_list_list.where(
-                "#{quoted_position_column} >= #{new_position}"
+                "#{quoted_position_column_with_table_name} >= ?", new_position
               ).where(
-                "#{quoted_position_column} < #{old_position}#{avoid_id_condition}"
+                "#{quoted_position_column_with_table_name} < #{old_position}#{avoid_id_condition}"
               ).increment_all
             end
           end
@@ -461,7 +472,7 @@ module ActiveRecord
             new_position = send(position_column).to_i
 
             return unless acts_as_list_list.where(
-              "#{quoted_position_column} = #{new_position}"
+              "#{quoted_position_column_with_table_name} = #{new_position}"
             ).count > 1
             shuffle_positions_on_intermediate_items old_position, new_position, id
           end
@@ -504,6 +515,10 @@ module ActiveRecord
           # Used in order clauses
           def quoted_table_name
             @_quoted_table_name ||= acts_as_list_class.quoted_table_name
+          end
+
+          def quoted_position_column_with_table_name
+            @_quoted_position_column_with_table_name ||= "#{quoted_table_name}.#{quoted_position_column}"
           end
       end
     end

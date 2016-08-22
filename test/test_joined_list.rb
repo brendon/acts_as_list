@@ -51,7 +51,7 @@ class TestHigherLowerItems < JoinedTestCase
     item1 = Item.create section: section
     item2 = Item.create section: section
     item3 = Item.create section: section
-    assert_equal item3.higher_items.visible, [item1, item2]
+    assert_equal item3.higher_items.visible, [item2, item1]
   end
 
   def test_lower_items
