@@ -8,8 +8,8 @@ This `acts_as` extension provides the capabilities for sorting and reordering a 
 
 There are a couple of changes of behaviour from `0.8.0` onwards:
 
-- If you specify `add_new_at: :top`, new items will be added to the top of the list like always. But now, if you specify a position at insert time: `.create(position: 3)`, the position will be respected. In this example, the item will end up at position `3` and will move other items further down the list. Before `0.8.0` the position would be ignored and the item would still be added to the top of the list. https://github.com/swanandp/acts_as_list/pull/220
-- `acts_as_list` now copes with disparate position integers (i.e. gaps between the numbers). There has been a change in behaviour for the `higher_items` method. It now returns items with the first item in the collection being the closest item to the reference item, and the last item in the collection being the furthest from the reference item (a.k.a. the first item in the list). https://github.com/swanandp/acts_as_list/pull/223
+- If you specify `add_new_at: :top`, new items will be added to the top of the list like always. But now, if you specify a position at insert time: `.create(position: 3)`, the position will be respected. In this example, the item will end up at position `3` and will move other items further down the list. Before `0.8.0` the position would be ignored and the item would still be added to the top of the list. [#220](https://github.com/swanandp/acts_as_list/pull/220)
+- `acts_as_list` now copes with disparate position integers (i.e. gaps between the numbers). There has been a change in behaviour for the `higher_items` method. It now returns items with the first item in the collection being the closest item to the reference item, and the last item in the collection being the furthest from the reference item (a.k.a. the first item in the list). [#223](https://github.com/swanandp/acts_as_list/pull/223)
 
 ## Installation
 
