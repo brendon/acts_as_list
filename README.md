@@ -4,6 +4,13 @@
 
 This `acts_as` extension provides the capabilities for sorting and reordering a number of objects in a list. The class that has this specified needs to have a `position` column defined as an integer on the mapped database table.
 
+## 0.8.0 Upgrade Notes
+
+There are a couple of changes of behaviour from `0.8.0` onwards:
+
+- If you specify `add_new_at: :top`, new items will be added to the top of the list like always. But now, if you specify a position at insert time: `.create(position: 3)`, the position will be respected. In this example, the item will end up at position `3` and will move other items further down the list. Before `0.8.0` the position would be ignored and the item would still be added to the top of the list. https://github.com/swanandp/acts_as_list/pull/220
+- `acts_as_list` now copes with disparate position integers (i.e. gaps between the numbers). There has been a change in behaviour for the `higher_items` method. It now returns items with the first item in the collection being the closest item to the reference item, and the last item in the collection being the furthest from the reference item (a.k.a. the first item in the list). https://github.com/swanandp/acts_as_list/pull/223
+
 ## Installation
 
 In your Gemfile:
@@ -71,8 +78,6 @@ In `acts_as_list`, "higher" means further up the list (a lower `position`), and 
 - `list_item.lower_items` will return all the items below `list_item` in the list (ordered by the position, ascending)
 
 ## Notes
-If the `position` column has a default value, then there is a slight change in behavior, i.e if you have 4 items in the list, and you insert 1, with a default position 0, it would be pushed to the bottom of the list. Please look at the tests for this and some recent pull requests for discussions related to this.
-
 All `position` queries (select, update, etc.) inside gem methods are executed without the default scope (i.e. `Model.unscoped`), this will prevent nasty issues when the default scope is different from `acts_as_list` scope.
 
 The `position` column is set after validations are called, so you should not put a `presence` validation on the `position` column.
@@ -88,11 +93,11 @@ end
 
 ## More Options
 - `column`
-default: 'position'. Use this option if the column name in your database is different from position.
+default: `position`. Use this option if the column name in your database is different from position.
 - `top_of_list`
-default: '1'. Use this option to define the top of the list. Use 0 to make the collection act more like an array in its indexing.
+default: `1`. Use this option to define the top of the list. Use 0 to make the collection act more like an array in its indexing.
 - `add_new_at`
-default: ':bottom'. Use this option to specify whether objects get added to the :top or :bottom of the list. `nil` will result in new items not being added to the list on create, i.e, position will be kept nil after create.
+default: `:bottom`. Use this option to specify whether objects get added to the `:top` or `:bottom` of the list. `nil` will result in new items not being added to the list on create, i.e, position will be kept nil after create.
 
 ## Versions
 As of version `0.7.5` Rails 5 is supported.
