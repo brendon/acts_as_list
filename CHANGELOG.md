@@ -1,5 +1,18 @@
 # Change Log
 
+## [v0.8.0](https://github.com/swanandp/acts_as_list/tree/v0.8.0) (2016-08-23)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.7.7...v0.8.0)
+
+**Closed issues:**
+
+- Behavior with DB default seems unclear [\#219](https://github.com/swanandp/acts_as_list/issues/219)
+
+**Merged pull requests:**
+
+- No longer a need specify additional rbx gems [\#225](https://github.com/swanandp/acts_as_list/pull/225) ([brendon](https://github.com/brendon))
+- Fix position when no serial positions [\#223](https://github.com/swanandp/acts_as_list/pull/223) ([jpalumickas](https://github.com/jpalumickas))
+- Bug: Specifying a position with add\_new\_at: :top fails to insert at that position [\#220](https://github.com/swanandp/acts_as_list/pull/220) ([brendon](https://github.com/brendon))
+
 ## [v0.7.7](https://github.com/swanandp/acts_as_list/tree/v0.7.7) (2016-08-18)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.7.6...v0.7.7)
 
@@ -70,6 +83,7 @@
 
 **Merged pull requests:**
 
+- Fix position when no serial positions [\#208](https://github.com/swanandp/acts_as_list/pull/208) ([PoslinskiNet](https://github.com/PoslinskiNet))
 - Removed duplicated assignment [\#207](https://github.com/swanandp/acts_as_list/pull/207) ([shunwen](https://github.com/shunwen))
 - Quote all identifiers [\#205](https://github.com/swanandp/acts_as_list/pull/205) ([fabn](https://github.com/fabn))
 - Start testing Rails 5 [\#203](https://github.com/swanandp/acts_as_list/pull/203) ([brendon](https://github.com/brendon))
