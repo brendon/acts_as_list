@@ -4,23 +4,26 @@ module Shared
       (1..4).each { |counter| TopAdditionMixin.create! pos: counter, parent_id: 5 }
     end
 
-    def test_reordering
-      assert_equal [4, 3, 2, 1], TopAdditionMixin.where(parent_id: 5).order('pos').map(&:id)
+    def test_setup_state
+      # If we explicitly define a position (as above) then that position is what gets applied
+      assert_equal [1, 2, 3, 4], TopAdditionMixin.where(parent_id: 5).order('pos').map(&:id)
+    end
 
+    def test_reordering
       TopAdditionMixin.where(id: 2).first.move_lower
-      assert_equal [4, 3, 1, 2], TopAdditionMixin.where(parent_id: 5).order('pos').map(&:id)
+      assert_equal [1, 3, 2, 4], TopAdditionMixin.where(parent_id: 5).order('pos').map(&:id)
 
       TopAdditionMixin.where(id: 2).first.move_higher
-      assert_equal [4, 3, 2, 1], TopAdditionMixin.where(parent_id: 5).order('pos').map(&:id)
+      assert_equal [1, 2, 3, 4], TopAdditionMixin.where(parent_id: 5).order('pos').map(&:id)
 
       TopAdditionMixin.where(id: 1).first.move_to_bottom
-      assert_equal [4, 3, 2, 1], TopAdditionMixin.where(parent_id: 5).order('pos').map(&:id)
+      assert_equal [2, 3, 4, 1], TopAdditionMixin.where(parent_id: 5).order('pos').map(&:id)
 
       TopAdditionMixin.where(id: 1).first.move_to_top
-      assert_equal [1, 4, 3, 2], TopAdditionMixin.where(parent_id: 5).order('pos').map(&:id)
+      assert_equal [1, 2, 3, 4], TopAdditionMixin.where(parent_id: 5).order('pos').map(&:id)
 
       TopAdditionMixin.where(id: 2).first.move_to_bottom
-      assert_equal [1, 4, 3, 2], TopAdditionMixin.where(parent_id: 5).order('pos').map(&:id)
+      assert_equal [1, 3, 4, 2], TopAdditionMixin.where(parent_id: 5).order('pos').map(&:id)
 
       TopAdditionMixin.where(id: 4).first.move_to_top
       assert_equal [4, 1, 3, 2], TopAdditionMixin.where(parent_id: 5).order('pos').map(&:id)
@@ -71,16 +74,19 @@ module Shared
       assert_equal 3, new4.pos
     end
 
-    def test_delete_middle
-      assert_equal [4, 3, 2, 1], TopAdditionMixin.where(parent_id: 5).order('pos').map(&:id)
+    def test_supplied_position
+      new = TopAdditionMixin.create(parent_id: 20, pos: 3)
+      assert_equal 3, new.pos
+    end
 
+    def test_delete_middle
       TopAdditionMixin.where(id: 2).first.destroy
 
-      assert_equal [4, 3, 1], TopAdditionMixin.where(parent_id: 5).order('pos').map(&:id)
+      assert_equal [1, 3, 4], TopAdditionMixin.where(parent_id: 5).order('pos').map(&:id)
 
-      assert_equal 3, TopAdditionMixin.where(id: 1).first.pos
+      assert_equal 1, TopAdditionMixin.where(id: 1).first.pos
       assert_equal 2, TopAdditionMixin.where(id: 3).first.pos
-      assert_equal 1, TopAdditionMixin.where(id: 4).first.pos
+      assert_equal 3, TopAdditionMixin.where(id: 4).first.pos
     end
 
   end
