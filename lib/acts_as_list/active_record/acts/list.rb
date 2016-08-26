@@ -108,16 +108,12 @@ module ActiveRecord
               attr_accessible :"#{configuration[:column]}"
             end
 
-            define_singleton_method :quoted_table_name do
-              @_quoted_table_name ||= acts_as_list_class.quoted_table_name
-            end
-
             define_singleton_method :quoted_position_column do
               @_quoted_position_column ||= connection.quote_column_name(configuration[:column])
             end
 
             define_singleton_method :quoted_position_column_with_table_name do
-              @_quoted_position_column_with_table_name ||= "#{quoted_table_name}.#{quoted_position_column}"
+              @_quoted_position_column_with_table_name ||= "#{caller_class.quoted_table_name}.#{quoted_position_column}"
             end
 
             scope :in_list, lambda { where("#{quoted_position_column_with_table_name} IS NOT NULL") }
