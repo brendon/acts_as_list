@@ -42,7 +42,7 @@ module ActiveRecord
             configuration[:scope] = :"#{configuration[:scope]}_id"
           end
 
-          class_calling_acts_as_list = self
+          caller_class = self
 
           class_eval do
             define_singleton_method :acts_as_list_top do
@@ -54,7 +54,7 @@ module ActiveRecord
             end
 
             define_method :acts_as_list_class do
-              class_calling_acts_as_list
+              caller_class
             end
 
             define_method :position_column do
