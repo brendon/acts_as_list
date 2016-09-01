@@ -16,10 +16,4 @@ group :test do
   gem "after_commit_exception_notification"
 end
 
-platforms :rbx do
-  gem "rubysl", "~> 2.0"
-  gem "rubinius-developer_tools"
-  gem "rubysl-test-unit"
-end
-
 gemspec :path => "../"

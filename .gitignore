@@ -9,3 +9,4 @@ pkg/*
 .ruby-version
 # Appraisal generated lockfiles
 *.gemfile.lock
+.DS_Store

@@ -3,12 +3,6 @@ source "http://rubygems.org"
 gem "sqlite3", platforms: [:ruby]
 gem "activerecord-jdbcsqlite3-adapter", platforms: [:jruby]
 
-platforms :rbx do
-  gem "rubysl", "~> 2.0"
-  gem "rubinius-developer_tools"
-  gem "rubysl-test-unit"
-end
-
 gem "rack", "~> 1", platforms: [:ruby_19, :ruby_20, :ruby_21, :jruby]
 
 gemspec
