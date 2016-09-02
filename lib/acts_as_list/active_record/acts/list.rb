@@ -35,21 +35,19 @@ module ActiveRecord
         # * +add_new_at+ - specifies whether objects get added to the :top or :bottom of the list. (default: +bottom+)
         #                   `nil` will result in new items not being added to the list on create
         def acts_as_list(column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom)
-          configuration = { column: column, scope: scope, top_of_list: top_of_list, add_new_at: add_new_at }
-
-          if configuration[:scope].is_a?(Symbol) && configuration[:scope].to_s !~ /_id$/
-            configuration[:scope] = :"#{configuration[:scope]}_id"
+          if scope.is_a?(Symbol) && scope.to_s !~ /_id$/
+            scope = :"#{scope}_id"
           end
 
           caller_class = self
 
           class_eval do
             define_singleton_method :acts_as_list_top do
-              configuration[:top_of_list].to_i
+              top_of_list.to_i
             end
 
             define_method :acts_as_list_top do
-              configuration[:top_of_list].to_i
+              top_of_list.to_i
             end
 
             define_method :acts_as_list_class do
@@ -57,33 +55,33 @@ module ActiveRecord
             end
 
             define_method :position_column do
-              configuration[:column]
+              column
             end
 
             define_method :scope_name do
-              configuration[:scope]
+              scope
             end
 
             define_method :add_new_at do
-              configuration[:add_new_at]
+              add_new_at
             end
 
-            define_method :"#{configuration[:column]}=" do |position|
-              write_attribute(configuration[:column], position)
+            define_method :"#{column}=" do |position|
+              write_attribute(column, position)
               @position_changed = true
             end
 
-            if configuration[:scope].is_a?(Symbol)
+            if scope.is_a?(Symbol)
               define_method :scope_condition do
-                { configuration[:scope] => send(:"#{configuration[:scope]}") }
+                { scope => send(:"#{scope}") }
               end
 
               define_method :scope_changed? do
                 changed.include?(scope_name.to_s)
               end
-            elsif configuration[:scope].is_a?(Array)
+            elsif scope.is_a?(Array)
               define_method :scope_condition do
-                configuration[:scope].inject({}) do |hash, column|
+                scope.inject({}) do |hash, column|
                   hash.merge!({ column.to_sym => read_attribute(column.to_sym) })
                 end
               end
@@ -93,7 +91,7 @@ module ActiveRecord
               end
             else
               define_method :scope_condition do
-                eval "%{#{configuration[:scope]}}"
+                eval "%{#{scope}}"
               end
 
               define_method :scope_changed? do
@@ -104,11 +102,11 @@ module ActiveRecord
             # only add to attr_accessible
             # if the class has some mass_assignment_protection
             if defined?(accessible_attributes) and !accessible_attributes.blank?
-              attr_accessible :"#{configuration[:column]}"
+              attr_accessible :"#{column}"
             end
 
             define_singleton_method :quoted_position_column do
-              @_quoted_position_column ||= connection.quote_column_name(configuration[:column])
+              @_quoted_position_column ||= connection.quote_column_name(column)
             end
 
             define_singleton_method :quoted_position_column_with_table_name do
@@ -150,8 +148,8 @@ module ActiveRecord
 
           after_commit :clear_scope_changed
 
-          if configuration[:add_new_at].present?
-            before_create "add_to_list_#{configuration[:add_new_at]}".to_sym
+          if add_new_at.present?
+            before_create "add_to_list_#{add_new_at}".to_sym
           end
 
           include ::ActiveRecord::Acts::List::InstanceMethods
