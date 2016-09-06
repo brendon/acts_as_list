@@ -1,5 +1,17 @@
 # Change Log
 
+## [v0.8.1](https://github.com/swanandp/acts_as_list/tree/v0.8.1) (2016-09-06)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.8.0...v0.8.1)
+
+**Closed issues:**
+
+- Rubinius Intermittent testing error [\#218](https://github.com/swanandp/acts_as_list/issues/218)
+- ActiveRecord dependency causes rake assets:compile to fail without access to a database [\#84](https://github.com/swanandp/acts_as_list/issues/84)
+
+**Merged pull requests:**
+
+- Refactor class\_eval with string into class\_eval with block [\#215](https://github.com/swanandp/acts_as_list/pull/215) ([rdvdijk](https://github.com/rdvdijk))
+
 ## [v0.8.0](https://github.com/swanandp/acts_as_list/tree/v0.8.0) (2016-08-23)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.7.7...v0.8.0)
 
@@ -75,7 +87,6 @@
 - Creating an item with a nil scope should not add it to the list [\#92](https://github.com/swanandp/acts_as_list/issues/92)
 - Performance Improvements  [\#88](https://github.com/swanandp/acts_as_list/issues/88)
 - has\_many :through or has\_many\_and\_belongs\_to\_many support [\#86](https://github.com/swanandp/acts_as_list/issues/86)
-- ActiveRecord dependency causes rake assets:compile to fail without access to a database [\#84](https://github.com/swanandp/acts_as_list/issues/84)
 - move\_higher/move\_lower vs move\_to\_top/move\_to\_bottom act differently when item is already at top or bottom [\#77](https://github.com/swanandp/acts_as_list/issues/77)
 - Limiting the list size [\#61](https://github.com/swanandp/acts_as_list/issues/61)
 - Adding multiple creates strange ordering [\#55](https://github.com/swanandp/acts_as_list/issues/55)
