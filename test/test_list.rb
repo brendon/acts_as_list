@@ -748,3 +748,59 @@ class ActsAsListTopTest < ActsAsListTestCase
     assert_equal 0, ZeroBasedMixin.acts_as_list_top
   end
 end
+
+class CircularAssociationsScopeTest < ActsAsListTestCase
+  class Foo < ActiveRecord::Base
+    if ActiveRecord::VERSION::MAJOR >= 4
+      has_many :cats, -> { order :position }, inverse_of: :foo
+    else
+      has_many :cats, order: :position, inverse_of: :foo
+    end
+    accepts_nested_attributes_for :cats
+  end
+
+  class Bat < ActiveRecord::Base
+    belongs_to :cat, inverse_of: :bats
+    has_many :cats, inverse_of: :bat
+  end
+
+  class Cat < ActiveRecord::Base
+    belongs_to :foo, inverse_of: :cats
+    belongs_to :bat, inverse_of: :cats
+    has_many :bats, inverse_of: :cat
+    acts_as_list scope: :bat
+  end
+
+  def setup
+    ActiveRecord::Base.connection.create_table :foos do |t|
+    end
+    ActiveRecord::Base.connection.create_table :bats do |t|
+      t.integer :cat_id
+    end
+    ActiveRecord::Base.connection.create_table :cats do |t|
+      t.integer :foo_id
+      t.integer :bat_id
+      t.integer :position
+      t.string :name
+    end
+  end
+
+  def test_position
+    ActiveRecord::Base.logger = ::Logger.new STDOUT
+    foo = Foo.new
+
+    cat1 = foo.cats.build(position: 1, name: '1')
+    cat2 = foo.cats.build(position: 2, name: '2')
+
+    bat = Bat.new
+    bat.cat = cat2
+    cat1.bat = bat
+    cat2.bat = bat
+
+    foo.save!
+    foo.reload
+
+    assert_equal [1,2], foo.cats.map(&:position)
+    assert_equal ['1','2'], foo.cats.map(&:name)
+  end
+end
