@@ -786,7 +786,7 @@ class CircularAssociationsScopeTest < ActsAsListTestCase
   end
 
   def test_position
-    ActiveRecord::Base.logger = Logger.new STDOUT
+    ActiveRecord::Base.logger = ::Logger.new STDOUT
     foo = Foo.new
 
     cat1 = foo.cats.build(position: 1, name: '1')
