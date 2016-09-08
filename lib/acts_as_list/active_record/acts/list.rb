@@ -37,9 +37,7 @@ module ActiveRecord
         # * +add_new_at+ - specifies whether objects get added to the :top or :bottom of the list. (default: +bottom+)
         #                   `nil` will result in new items not being added to the list on create
         def acts_as_list(column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom)
-          if scope.is_a?(Symbol) && scope.to_s !~ /_id$/
-            scope = foreign_key(scope).to_sym
-          end
+          scope = idify(scope) if scope.is_a?(Symbol)
 
           caller_class = self
 
@@ -155,6 +153,12 @@ module ActiveRecord
           end
 
           include ::ActiveRecord::Acts::List::InstanceMethods
+        end
+
+        def idify(name)
+          return name if name.to_s =~ /_id$/
+
+          foreign_key(name).to_sym
         end
       end
 
