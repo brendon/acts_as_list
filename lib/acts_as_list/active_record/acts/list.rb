@@ -23,6 +23,8 @@ module ActiveRecord
       #   todo_list.first.move_to_bottom
       #   todo_list.last.move_higher
       module ClassMethods
+        include ActiveSupport::Inflector
+
         # Configuration options are:
         #
         # * +column+ - specifies the column name to use for keeping the position integer (default: +position+)
@@ -36,7 +38,7 @@ module ActiveRecord
         #                   `nil` will result in new items not being added to the list on create
         def acts_as_list(column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom)
           if scope.is_a?(Symbol) && scope.to_s !~ /_id$/
-            scope = :"#{scope}_id"
+            scope = foreign_key(scope).to_sym
           end
 
           caller_class = self
