@@ -50,10 +50,8 @@ module ActiveRecord
           AddNewAtDefiner.call(caller_class, add_new_at)
           UpdatePositonDefiner.call(caller_class)
 
-          class_eval do
-            define_method :acts_as_list_class do
-              caller_class
-            end
+          define_method :acts_as_list_class do
+            caller_class
           end
 
           before_validation :check_top_position
