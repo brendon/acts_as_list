@@ -1,6 +1,7 @@
 require_relative "column_definer"
 require_relative "scope_definer"
 require_relative "top_of_list_definer"
+require_relative "add_new_at_definer"
 
 module ActiveRecord
   module Acts #:nodoc:
@@ -45,14 +46,11 @@ module ActiveRecord
           ColumnDefiner.call(caller_class, column)
           ScopeDefiner.call(caller_class, scope)
           TopOfListDefiner.call(caller_class, top_of_list)
+          AddNewAtDefiner.call(caller_class, add_new_at)
 
           class_eval do
             define_method :acts_as_list_class do
               caller_class
-            end
-
-            define_method :add_new_at do
-              add_new_at
             end
 
             define_singleton_method :decrement_all do
