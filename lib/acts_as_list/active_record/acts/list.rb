@@ -1,3 +1,5 @@
+require_relative "scope_definer"
+
 module ActiveRecord
   module Acts #:nodoc:
     module List #:nodoc:
@@ -23,7 +25,6 @@ module ActiveRecord
       #   todo_list.first.move_to_bottom
       #   todo_list.last.move_higher
       module ClassMethods
-        include ActiveSupport::Inflector
 
         # Configuration options are:
         #
@@ -37,9 +38,9 @@ module ActiveRecord
         # * +add_new_at+ - specifies whether objects get added to the :top or :bottom of the list. (default: +bottom+)
         #                   `nil` will result in new items not being added to the list on create
         def acts_as_list(column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom)
-          scope = idify(scope) if scope.is_a?(Symbol)
-
           caller_class = self
+
+          ScopeDefiner.call(caller_class, scope)
 
           class_eval do
             define_singleton_method :acts_as_list_top do
@@ -58,10 +59,6 @@ module ActiveRecord
               column
             end
 
-            define_method :scope_name do
-              scope
-            end
-
             define_method :add_new_at do
               add_new_at
             end
@@ -69,34 +66,6 @@ module ActiveRecord
             define_method :"#{column}=" do |position|
               write_attribute(column, position)
               @position_changed = true
-            end
-
-            if scope.is_a?(Symbol)
-              define_method :scope_condition do
-                { scope => send(:"#{scope}") }
-              end
-
-              define_method :scope_changed? do
-                changed.include?(scope_name.to_s)
-              end
-            elsif scope.is_a?(Array)
-              define_method :scope_condition do
-                scope.inject({}) do |hash, column|
-                  hash.merge!({ column.to_sym => read_attribute(column.to_sym) })
-                end
-              end
-
-              define_method :scope_changed? do
-                (scope_condition.keys & changed.map(&:to_sym)).any?
-              end
-            else
-              define_method :scope_condition do
-                eval "%{#{scope}}"
-              end
-
-              define_method :scope_changed? do
-                false
-              end
             end
 
             # only add to attr_accessible
@@ -112,8 +81,6 @@ module ActiveRecord
             define_singleton_method :quoted_position_column_with_table_name do
               @_quoted_position_column_with_table_name ||= "#{caller_class.quoted_table_name}.#{quoted_position_column}"
             end
-
-            self.scope :in_list, lambda { where("#{quoted_position_column_with_table_name} IS NOT NULL") }
 
             define_singleton_method :decrement_all do
               update_all_with_touch "#{quoted_position_column} = (#{quoted_position_column_with_table_name} - 1)"
@@ -153,12 +120,6 @@ module ActiveRecord
           end
 
           include ::ActiveRecord::Acts::List::InstanceMethods
-        end
-
-        def idify(name)
-          return name if name.to_s =~ /_id$/
-
-          foreign_key(name).to_sym
         end
       end
 
