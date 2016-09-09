@@ -1,4 +1,5 @@
 require_relative "scope_definer"
+require_relative "top_of_list_definer"
 
 module ActiveRecord
   module Acts #:nodoc:
@@ -41,16 +42,9 @@ module ActiveRecord
           caller_class = self
 
           ScopeDefiner.call(caller_class, scope)
+          TopOfListDefiner.call(caller_class, top_of_list)
 
           class_eval do
-            define_singleton_method :acts_as_list_top do
-              top_of_list.to_i
-            end
-
-            define_method :acts_as_list_top do
-              top_of_list.to_i
-            end
-
             define_method :acts_as_list_class do
               caller_class
             end
