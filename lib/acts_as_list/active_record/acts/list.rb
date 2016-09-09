@@ -1,3 +1,4 @@
+require_relative "column_definer"
 require_relative "scope_definer"
 require_relative "top_of_list_definer"
 
@@ -41,6 +42,7 @@ module ActiveRecord
         def acts_as_list(column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom)
           caller_class = self
 
+          ColumnDefiner.call(caller_class, column)
           ScopeDefiner.call(caller_class, scope)
           TopOfListDefiner.call(caller_class, top_of_list)
 
@@ -49,31 +51,8 @@ module ActiveRecord
               caller_class
             end
 
-            define_method :position_column do
-              column
-            end
-
             define_method :add_new_at do
               add_new_at
-            end
-
-            define_method :"#{column}=" do |position|
-              write_attribute(column, position)
-              @position_changed = true
-            end
-
-            # only add to attr_accessible
-            # if the class has some mass_assignment_protection
-            if defined?(accessible_attributes) and !accessible_attributes.blank?
-              attr_accessible :"#{column}"
-            end
-
-            define_singleton_method :quoted_position_column do
-              @_quoted_position_column ||= connection.quote_column_name(column)
-            end
-
-            define_singleton_method :quoted_position_column_with_table_name do
-              @_quoted_position_column_with_table_name ||= "#{caller_class.quoted_table_name}.#{quoted_position_column}"
             end
 
             define_singleton_method :decrement_all do
@@ -96,8 +75,6 @@ module ActiveRecord
               update_all([query, now: now])
             end
           end
-
-          attr_reader :position_changed
 
           before_validation :check_top_position
 
