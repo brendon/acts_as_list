@@ -2,6 +2,7 @@ require_relative "column_definer"
 require_relative "scope_definer"
 require_relative "top_of_list_definer"
 require_relative "add_new_at_definer"
+require_relative "update_position_definer"
 
 module ActiveRecord
   module Acts #:nodoc:
@@ -47,30 +48,11 @@ module ActiveRecord
           ScopeDefiner.call(caller_class, scope)
           TopOfListDefiner.call(caller_class, top_of_list)
           AddNewAtDefiner.call(caller_class, add_new_at)
+          UpdatePositonDefiner.call(caller_class)
 
           class_eval do
             define_method :acts_as_list_class do
               caller_class
-            end
-
-            define_singleton_method :decrement_all do
-              update_all_with_touch "#{quoted_position_column} = (#{quoted_position_column_with_table_name} - 1)"
-            end
-
-            define_singleton_method :increment_all do
-              update_all_with_touch "#{quoted_position_column} = (#{quoted_position_column_with_table_name} + 1)"
-            end
-
-            define_singleton_method :update_all_with_touch do |updates|
-              record = new
-              attrs = record.send(:timestamp_attributes_for_update_in_model)
-              now = record.send(:current_time_from_proper_timezone)
-
-              query = attrs.map { |attr| "#{connection.quote_column_name(attr)} = :now" }
-              query.push updates
-              query = query.join(", ")
-
-              update_all([query, now: now])
             end
           end
 
