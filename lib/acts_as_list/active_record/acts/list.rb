@@ -42,20 +42,23 @@ module ActiveRecord
         #   act more like an array in its indexing.
         # * +add_new_at+ - specifies whether objects get added to the :top or :bottom of the list. (default: +bottom+)
         #                   `nil` will result in new items not being added to the list on create
-        def acts_as_list(column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom)
+        def acts_as_list(options = {})
+          configuration = { column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom}
+          configuration.update(options) if options.is_a?(Hash)
+
           caller_class = self
 
-          ColumnMethodDefiner.call(caller_class, column)
-          ScopeMethodDefiner.call(caller_class, scope)
-          TopOfListMethodDefiner.call(caller_class, top_of_list)
-          AddNewAtMethodDefiner.call(caller_class, add_new_at)
+          ColumnMethodDefiner.call(caller_class, configuration[:column])
+          ScopeMethodDefiner.call(caller_class, configuration[:scope])
+          TopOfListMethodDefiner.call(caller_class, configuration[:top_of_list])
+          AddNewAtMethodDefiner.call(caller_class, configuration[:add_new_at])
           UpdatePositonMethodDefiner.call(caller_class)
 
           define_method :acts_as_list_class do
             caller_class
           end
 
-          CallbackDefiner.call(caller_class, add_new_at)
+          CallbackDefiner.call(caller_class, configuration[:add_new_at])
 
           include ::ActiveRecord::Acts::List::InstanceMethods
         end
