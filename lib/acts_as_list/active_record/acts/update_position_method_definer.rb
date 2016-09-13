@@ -1,4 +1,4 @@
-module ActiveRecord::Acts::List::UpdatePositonDefiner #:nodoc:
+module ActiveRecord::Acts::List::UpdatePositonMethodDefiner #:nodoc:
   def self.call(caller_class)
     caller_class.class_eval do
       define_singleton_method :decrement_all do

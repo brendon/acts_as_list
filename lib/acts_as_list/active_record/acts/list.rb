@@ -1,8 +1,8 @@
-require_relative "column_definer"
-require_relative "scope_definer"
-require_relative "top_of_list_definer"
-require_relative "add_new_at_definer"
-require_relative "update_position_definer"
+require_relative "column_method_definer"
+require_relative "scope_method_definer"
+require_relative "top_of_list_method_definer"
+require_relative "add_new_at_method_definer"
+require_relative "update_position_method_definer"
 
 module ActiveRecord
   module Acts #:nodoc:
@@ -44,11 +44,11 @@ module ActiveRecord
         def acts_as_list(column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom)
           caller_class = self
 
-          ColumnDefiner.call(caller_class, column)
-          ScopeDefiner.call(caller_class, scope)
-          TopOfListDefiner.call(caller_class, top_of_list)
-          AddNewAtDefiner.call(caller_class, add_new_at)
-          UpdatePositonDefiner.call(caller_class)
+          ColumnMethodDefiner.call(caller_class, column)
+          ScopeMethodDefiner.call(caller_class, scope)
+          TopOfListMethodDefiner.call(caller_class, top_of_list)
+          AddNewAtMethodDefiner.call(caller_class, add_new_at)
+          UpdatePositonMethodDefiner.call(caller_class)
 
           define_method :acts_as_list_class do
             caller_class

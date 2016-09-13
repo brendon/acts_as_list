@@ -1,4 +1,4 @@
-module ActiveRecord::Acts::List::ScopeDefiner #:nodoc:
+module ActiveRecord::Acts::List::ScopeMethodDefiner #:nodoc:
   extend ActiveSupport::Inflector
 
   def self.call(caller_class, scope)
