@@ -758,7 +758,7 @@ class NilPositionTest < ActsAsListTestCase
     new1 = DefaultScopedMixin.create pos: nil
     new2 = DefaultScopedMixin.create pos: nil
     new3 = DefaultScopedMixin.create pos: nil
-    DefaultScopedMixin.find_each { |mixin| mixin.update_attributes(pos: nil) }
+    DefaultScopedMixin.update_all(pos: nil)
 
     assert_equal [nil, nil, nil], DefaultScopedMixin.all.map(&:pos)
 
