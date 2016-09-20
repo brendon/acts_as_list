@@ -15,8 +15,18 @@ module Shared
       assert !new.first?
       assert new.last?
 
+      new = ZeroBasedMixin.act_as_list_no_update do
+        ZeroBasedMixin.create(parent_id: 20)
+      end
+      assert_equal @default_pos, new.pos
+
+      new = ZeroBasedMixin.act_as_list_no_update do
+        ZeroBasedMixin.create(parent_id: 20, pos: 60)
+      end
+      assert_equal 60, new.pos
+
       new = ZeroBasedMixin.create(parent_id: 20)
-      assert_equal 2, new.pos
+      assert_equal 61, new.pos
       assert !new.first?
       assert new.last?
 
@@ -60,6 +70,11 @@ module Shared
       new = ZeroBasedMixin.create(parent_id: 20)
       assert_equal 1, new.pos
 
+      new = ZeroBasedMixin.act_as_list_no_update do
+        ZeroBasedMixin.create(parent_id: 20)
+      end
+      assert_equal @default_pos, new.pos
+
       new = ZeroBasedMixin.create(parent_id: 20)
       assert_equal 2, new.pos
 
@@ -77,6 +92,11 @@ module Shared
 
       new4.reload
       assert_equal 3, new4.pos
+
+      new = ZeroBasedMixin.act_as_list_no_update do
+        ZeroBasedMixin.create(parent_id: 20)
+      end
+      assert_equal @default_pos, new.pos
 
       new5 = ListMixin.create(parent_id: 20)
       assert_equal 4, new5.pos

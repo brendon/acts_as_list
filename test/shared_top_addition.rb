@@ -46,6 +46,11 @@ module Shared
       assert new.first?
       assert !new.last?
 
+      new = TopAdditionMixin.act_as_list_no_update do
+        TopAdditionMixin.create(parent_id: 20)
+      end
+      assert_equal @default_pos, new.pos
+
       new = TopAdditionMixin.create(parent_id: 20)
       assert_equal 1, new.pos
       assert new.first?
@@ -63,6 +68,11 @@ module Shared
 
       new = TopAdditionMixin.create(parent_id: 20)
       assert_equal 1, new.pos
+
+      new = TopAdditionMixin.act_as_list_no_update do
+        TopAdditionMixin.create(parent_id: 20)
+      end
+      assert_equal @default_pos, new.pos
 
       new = TopAdditionMixin.create(parent_id: 20)
       assert_equal 1, new.pos

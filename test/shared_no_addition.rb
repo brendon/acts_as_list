@@ -9,6 +9,11 @@ module Shared
       assert_equal nil, new.pos
       assert !new.in_list?
 
+      new = NoAdditionMixin.act_as_list_no_update do
+        NoAdditionMixin.create(parent_id: 20)
+      end
+      assert_equal nil, new.pos
+
       new = NoAdditionMixin.create(parent_id: 20)
       assert_equal nil, new.pos
     end
