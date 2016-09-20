@@ -748,3 +748,33 @@ class ActsAsListTopTest < ActsAsListTestCase
     assert_equal 0, ZeroBasedMixin.acts_as_list_top
   end
 end
+
+class NilPositionTest < ActsAsListTestCase
+  def setup
+    setup_db
+  end
+
+  def test_nil_position_ordering
+    new1 = DefaultScopedMixin.create pos: nil
+    new2 = DefaultScopedMixin.create pos: nil
+    new3 = DefaultScopedMixin.create pos: nil
+    DefaultScopedMixin.update_all(pos: nil)
+
+    assert_equal [nil, nil, nil], DefaultScopedMixin.all.map(&:pos)
+
+    new1.reload.pos = 1
+    new1.save
+
+    new3.reload.pos = 1
+    new3.save
+
+    assert_equal [nil, 1, 2], DefaultScopedMixin.all.map(&:pos)
+    assert_equal [2, 3, 1], DefaultScopedMixin.all.map(&:id)
+
+    new2.reload.pos = 1
+    new2.save
+
+    assert_equal [1, 2, 3], DefaultScopedMixin.all.map(&:pos)
+    assert_equal [2, 3, 1], DefaultScopedMixin.all.map(&:id)
+  end
+end
