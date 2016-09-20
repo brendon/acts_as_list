@@ -262,11 +262,12 @@ module ActiveRecord
 
         # Return the next n higher items in the list
         # selects all higher items by default
-        def higher_items(limit=nil)
+        def higher_items(limit = nil)
           limit ||= acts_as_list_list.count
           position_value = send(position_column)
           acts_as_list_list.
-            where("#{quoted_position_column_with_table_name} < ?", position_value).
+            where("#{quoted_position_column_with_table_name} <= ?", position_value).
+            where("#{quoted_table_name}.#{self.class.primary_key} != ?", self.send(self.class.primary_key)).
             order("#{quoted_position_column_with_table_name} DESC").
             limit(limit)
         end
@@ -279,11 +280,12 @@ module ActiveRecord
 
         # Return the next n lower items in the list
         # selects all lower items by default
-        def lower_items(limit=nil)
+        def lower_items(limit = nil)
           limit ||= acts_as_list_list.count
           position_value = send(position_column)
           acts_as_list_list.
-            where("#{quoted_position_column_with_table_name} > ?", position_value).
+            where("#{quoted_position_column_with_table_name} >= ?", position_value).
+            where("#{quoted_table_name}.#{self.class.primary_key} != ?", self.send(self.class.primary_key)).
             order("#{quoted_position_column_with_table_name} ASC").
             limit(limit)
         end
