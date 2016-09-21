@@ -91,7 +91,7 @@ module Shared
       li3 = ListMixin.where(id: 3).first
       li4 = ListMixin.where(id: 4).first
 
-      li3.update_columns(pos: 2) # Make the same position as li2
+      li3.update_column(:pos, 2) # Make the same position as li2
 
       assert_equal [1, 2, 2, 4], ListMixin.pluck(:pos)
 
