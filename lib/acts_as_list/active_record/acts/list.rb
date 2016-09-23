@@ -2,7 +2,6 @@ require_relative "column_method_definer"
 require_relative "scope_method_definer"
 require_relative "top_of_list_method_definer"
 require_relative "add_new_at_method_definer"
-require_relative "update_position_method_definer"
 require_relative "callback_definer"
 
 module ActiveRecord
@@ -52,7 +51,6 @@ module ActiveRecord
           ScopeMethodDefiner.call(caller_class, configuration[:scope])
           TopOfListMethodDefiner.call(caller_class, configuration[:top_of_list])
           AddNewAtMethodDefiner.call(caller_class, configuration[:add_new_at])
-          UpdatePositonMethodDefiner.call(caller_class)
 
           define_method :acts_as_list_class do
             caller_class
