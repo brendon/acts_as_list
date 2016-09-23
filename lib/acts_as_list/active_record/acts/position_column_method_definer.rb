@@ -1,4 +1,4 @@
-module ActiveRecord::Acts::List::ColumnMethodDefiner #:nodoc:
+module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
   def self.call(caller_class, position_column)
     caller_class.class_eval do
       attr_reader :position_changed
