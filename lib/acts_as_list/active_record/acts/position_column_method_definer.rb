@@ -1,7 +1,7 @@
 module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
   def self.call(caller_class, position_column)
-    define_instance_methods(caller_class, position_column)
     define_class_methods(caller_class, position_column)
+    define_instance_methods(caller_class, position_column)
 
     caller_class.class_eval do
       # only add to attr_accessible
