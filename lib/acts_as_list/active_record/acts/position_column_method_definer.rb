@@ -7,7 +7,7 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
       # only add to attr_accessible
       # if the class has some mass_assignment_protection
       if defined?(accessible_attributes) and !accessible_attributes.blank?
-        attr_accessible :"#{position_column}"
+        attr_accessible position_column.to_sym
       end
     end
   end
