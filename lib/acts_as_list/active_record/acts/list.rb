@@ -2,6 +2,7 @@ require_relative "column_method_definer"
 require_relative "scope_method_definer"
 require_relative "top_of_list_method_definer"
 require_relative "add_new_at_method_definer"
+require_relative "aux_method_definer"
 require_relative "callback_definer"
 
 module ActiveRecord
@@ -52,10 +53,7 @@ module ActiveRecord
           TopOfListMethodDefiner.call(caller_class, configuration[:top_of_list])
           AddNewAtMethodDefiner.call(caller_class, configuration[:add_new_at])
 
-          define_method :acts_as_list_class do
-            caller_class
-          end
-
+          AuxMethodDefiner.call(caller_class)
           CallbackDefiner.call(caller_class, configuration[:add_new_at])
 
           include ::ActiveRecord::Acts::List::InstanceMethods
