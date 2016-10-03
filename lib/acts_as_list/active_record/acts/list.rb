@@ -1,3 +1,10 @@
+require_relative "column_method_definer"
+require_relative "scope_method_definer"
+require_relative "top_of_list_method_definer"
+require_relative "add_new_at_method_definer"
+require_relative "aux_method_definer"
+require_relative "callback_definer"
+
 module ActiveRecord
   module Acts #:nodoc:
     module List #:nodoc:
@@ -23,6 +30,7 @@ module ActiveRecord
       #   todo_list.first.move_to_bottom
       #   todo_list.last.move_higher
       module ClassMethods
+
         # Configuration options are:
         #
         # * +column+ - specifies the column name to use for keeping the position integer (default: +position+)
@@ -33,127 +41,20 @@ module ActiveRecord
         # * +top_of_list+ - defines the integer used for the top of the list. Defaults to 1. Use 0 to make the collection
         #   act more like an array in its indexing.
         # * +add_new_at+ - specifies whether objects get added to the :top or :bottom of the list. (default: +bottom+)
-        #                   `nil` will result in new items not being added to the list on create
+        #                   `nil` will result in new items not being added to the list on create.
         def acts_as_list(options = {})
           configuration = { column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom}
           configuration.update(options) if options.is_a?(Hash)
 
-          if configuration[:scope].is_a?(Symbol) && configuration[:scope].to_s !~ /_id$/
-            configuration[:scope] = :"#{configuration[:scope]}_id"
-          end
-
           caller_class = self
 
-          class_eval do
-            define_singleton_method :acts_as_list_top do
-              configuration[:top_of_list].to_i
-            end
+          ColumnMethodDefiner.call(caller_class, configuration[:column])
+          ScopeMethodDefiner.call(caller_class, configuration[:scope])
+          TopOfListMethodDefiner.call(caller_class, configuration[:top_of_list])
+          AddNewAtMethodDefiner.call(caller_class, configuration[:add_new_at])
 
-            define_method :acts_as_list_top do
-              configuration[:top_of_list].to_i
-            end
-
-            define_method :acts_as_list_class do
-              caller_class
-            end
-
-            define_method :position_column do
-              configuration[:column]
-            end
-
-            define_method :scope_name do
-              configuration[:scope]
-            end
-
-            define_method :add_new_at do
-              configuration[:add_new_at]
-            end
-
-            define_method :"#{configuration[:column]}=" do |position|
-              write_attribute(configuration[:column], position)
-              @position_changed = true
-            end
-
-            if configuration[:scope].is_a?(Symbol)
-              define_method :scope_condition do
-                { configuration[:scope] => send(:"#{configuration[:scope]}") }
-              end
-
-              define_method :scope_changed? do
-                changed.include?(scope_name.to_s)
-              end
-            elsif configuration[:scope].is_a?(Array)
-              define_method :scope_condition do
-                configuration[:scope].inject({}) do |hash, column|
-                  hash.merge!({ column.to_sym => read_attribute(column.to_sym) })
-                end
-              end
-
-              define_method :scope_changed? do
-                (scope_condition.keys & changed.map(&:to_sym)).any?
-              end
-            else
-              define_method :scope_condition do
-                eval "%{#{configuration[:scope]}}"
-              end
-
-              define_method :scope_changed? do
-                false
-              end
-            end
-
-            # only add to attr_accessible
-            # if the class has some mass_assignment_protection
-            if defined?(accessible_attributes) and !accessible_attributes.blank?
-              attr_accessible :"#{configuration[:column]}"
-            end
-
-            define_singleton_method :quoted_position_column do
-              @_quoted_position_column ||= connection.quote_column_name(configuration[:column])
-            end
-
-            define_singleton_method :quoted_position_column_with_table_name do
-              @_quoted_position_column_with_table_name ||= "#{caller_class.quoted_table_name}.#{quoted_position_column}"
-            end
-
-            scope :in_list, lambda { where("#{quoted_position_column_with_table_name} IS NOT NULL") }
-
-            define_singleton_method :decrement_all do
-              update_all_with_touch "#{quoted_position_column} = (#{quoted_position_column_with_table_name} - 1)"
-            end
-
-            define_singleton_method :increment_all do
-              update_all_with_touch "#{quoted_position_column} = (#{quoted_position_column_with_table_name} + 1)"
-            end
-
-            define_singleton_method :update_all_with_touch do |updates|
-              record = new
-              attrs = record.send(:timestamp_attributes_for_update_in_model)
-              now = record.send(:current_time_from_proper_timezone)
-
-              query = attrs.map { |attr| "#{connection.quote_column_name(attr)} = :now" }
-              query.push updates
-              query = query.join(", ")
-
-              update_all([query, now: now])
-            end
-          end
-
-          attr_reader :position_changed
-
-          before_validation :check_top_position
-
-          before_destroy :lock!
-          after_destroy :decrement_positions_on_lower_items
-
-          before_update :check_scope
-          after_update :update_positions
-
-          after_commit :clear_scope_changed
-
-          if configuration[:add_new_at].present?
-            before_create "add_to_list_#{configuration[:add_new_at]}".to_sym
-          end
+          AuxMethodDefiner.call(caller_class)
+          CallbackDefiner.call(caller_class, configuration[:add_new_at])
 
           include ::ActiveRecord::Acts::List::InstanceMethods
         end
