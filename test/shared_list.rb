@@ -175,8 +175,6 @@ module Shared
 
       ListMixin.where(id: 2).first.remove_from_list
 
-      assert_equal [2, 1, 3, 4], ListMixin.where(parent_id: 5).order('pos').map(&:id)
-
       assert_equal 1,   ListMixin.where(id: 1).first.pos
       assert_equal nil, ListMixin.where(id: 2).first.pos
       assert_equal 2,   ListMixin.where(id: 3).first.pos

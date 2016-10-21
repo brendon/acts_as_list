@@ -25,7 +25,7 @@ module Shared
 
       ArrayScopeListMixin.where(id: 4).first.move_to_top
       assert_equal [4, 1, 3, 2], ArrayScopeListMixin.where(parent_id: 5, parent_type: 'ParentClass').order('pos').map(&:id)
-      
+
       ArrayScopeListMixin.where(id: 4).first.insert_at(4)
       assert_equal [1, 3, 2, 4], ArrayScopeListMixin.where(parent_id: 5, parent_type: 'ParentClass').order('pos').map(&:id)
       assert_equal [1, 2, 3, 4], ArrayScopeListMixin.where(parent_id: 5, parent_type: 'ParentClass').order('pos').map(&:pos)
@@ -135,8 +135,6 @@ module Shared
       assert_equal [1, 2, 3, 4], ArrayScopeListMixin.where(parent_id: 5, parent_type: 'ParentClass').order('pos').map(&:id)
 
       ArrayScopeListMixin.where(id: 2).first.remove_from_list
-
-      assert_equal [2, 1, 3, 4], ArrayScopeListMixin.where(parent_id: 5, parent_type: 'ParentClass').order('pos').map(&:id)
 
       assert_equal 1,   ArrayScopeListMixin.where(id: 1).first.pos
       assert_equal nil, ArrayScopeListMixin.where(id: 2).first.pos

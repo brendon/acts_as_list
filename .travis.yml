@@ -1,10 +1,14 @@
 language: ruby
+cache: bundler
 # Explicit usage of containerized builds, should provide faster feedback
 # see https://docs.travis-ci.com/user/workers/container-based-infrastructure/
 # and https://docs.travis-ci.com/user/ci-environment/#Virtualization-environments
 sudo: false
 before_install:
   - gem update bundler
+before_script:
+  - mysql -e 'create database acts_as_list;'
+  - psql -c 'create database acts_as_list;' -U postgres
 rvm:
   - 1.9.3
   - 2.0.0
@@ -12,12 +16,19 @@ rvm:
   - 2.2.2
   - jruby-19mode
   - rbx-2
+env:
+  - DB=sqlite
+  - DB=mysql
+  - DB=postgresql
 gemfile:
   - gemfiles/rails_3_2.gemfile
   - gemfiles/rails_4_1.gemfile
   - gemfiles/rails_4_2.gemfile
   - gemfiles/rails_5_0.gemfile
 matrix:
+  # Travis is failing to install rbx-2 right now, so allow these failures without breaking the build.
+  allow_failures:
+    - rvm: rbx-2
   exclude:
     - rvm: 1.9.3
       gemfile: gemfiles/rails_5_0.gemfile
@@ -29,4 +40,3 @@ matrix:
       gemfile: gemfiles/rails_5_0.gemfile
     - rvm: rbx-2
       gemfile: gemfiles/rails_5_0.gemfile
-

@@ -1,6 +1,7 @@
 require 'helper'
 
-ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
+db_config = YAML.load_file(File.expand_path("../database.yml", __FILE__)).fetch(ENV["DB"] || "sqlite")
+ActiveRecord::Base.establish_connection(db_config)
 ActiveRecord::Schema.verbose = false
 
 class Section < ActiveRecord::Base

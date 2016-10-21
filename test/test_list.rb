@@ -1,10 +1,8 @@
 # NOTE: following now done in helper.rb (better Readability)
 require 'helper'
 
-ActiveRecord::Base.establish_connection(
-  adapter: "sqlite3",
-  database: 'file:memdb1?mode=memory&cache=shared'
-)
+db_config = YAML.load_file(File.expand_path("../database.yml", __FILE__)).fetch(ENV["DB"] || "sqlite")
+ActiveRecord::Base.establish_connection(db_config)
 ActiveRecord::Schema.verbose = false
 
 def setup_db(position_options = {})
@@ -161,13 +159,6 @@ class TheBaseClass < ActiveRecord::Base
 end
 
 class TheBaseSubclass < TheBaseClass
-end
-
-class DBConfigTest < Minitest::Test
-  def test_db_config
-    # make sure sqlite3 accepts multi threaded access
-    assert_equal "file:memdb1?mode=memory&cache=shared", ActiveRecord::Base.connection.pool.spec.config[:database]
-  end
 end
 
 class QuotedList < ActiveRecord::Base
@@ -677,15 +668,15 @@ class TouchTest < ActsAsListTestCase
   end
 
   def now
-    Time.now.utc
+    @now ||= Time.now.utc
   end
 
   def yesterday
-    1.day.ago
+    @yesterday ||= 1.day.ago
   end
 
   def updated_ats
-    ListMixin.pluck(:updated_at)
+    ListMixin.order(:id).pluck(:updated_at)
   end
 
   def test_moving_item_lower_touches_self_and_lower_item
@@ -768,8 +759,8 @@ class NilPositionTest < ActsAsListTestCase
     new3.reload.pos = 1
     new3.save
 
-    assert_equal [nil, 1, 2], DefaultScopedMixin.all.map(&:pos)
-    assert_equal [2, 3, 1], DefaultScopedMixin.all.map(&:id)
+    assert_equal [1, 2], DefaultScopedMixin.where("pos IS NOT NULL").map(&:pos)
+    assert_equal [3, 1], DefaultScopedMixin.where("pos IS NOT NULL").map(&:id)
 
     new2.reload.pos = 1
     new2.save
