@@ -761,6 +761,7 @@ class NilPositionTest < ActsAsListTestCase
 
     assert_equal [1, 2], DefaultScopedMixin.where("pos IS NOT NULL").map(&:pos)
     assert_equal [3, 1], DefaultScopedMixin.where("pos IS NOT NULL").map(&:id)
+    assert_nil new2.reload.pos
 
     new2.reload.pos = 1
     new2.save
