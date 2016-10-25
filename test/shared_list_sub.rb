@@ -93,7 +93,7 @@ module Shared
 
       li3.update_column(:pos, 2) # Make the same position as li2
 
-      assert_equal [1, 2, 2, 4], ListMixin.pluck(:pos)
+      assert_equal [1, 2, 2, 4], ListMixin.order(:pos).pluck(:pos)
 
       assert_equal [li3, li4], li2.lower_items
       assert_equal [li2, li4], li3.lower_items
