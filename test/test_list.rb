@@ -661,14 +661,14 @@ class MultipleListsArrayScopeTest < ActsAsListTestCase
   end
 end
 
+require 'timecop'
+
 class TouchTest < ActsAsListTestCase
   def setup
     setup_db
-    4.times { ListMixin.create! updated_at: yesterday }
-  end
-
-  def now
-    @now ||= Time.now.utc
+    Timecop.freeze(yesterday) do
+      4.times { ListMixin.create! }
+    end
   end
 
   def yesterday
@@ -680,46 +680,56 @@ class TouchTest < ActsAsListTestCase
   end
 
   def test_moving_item_lower_touches_self_and_lower_item
-    ListMixin.first.move_lower
-    updated_ats[0..1].each do |updated_at|
-      assert_in_delta updated_at, now, 1.second
-    end
-    updated_ats[2..3].each do |updated_at|
-      assert_in_delta updated_at, yesterday, 1.second
+    Timecop.freeze do
+      ListMixin.first.move_lower
+      updated_ats[0..1].each do |updated_at|
+        assert_equal updated_at, Time.now.utc
+      end
+      updated_ats[2..3].each do |updated_at|
+        assert_equal updated_at, yesterday
+      end
     end
   end
 
   def test_moving_item_higher_touches_self_and_higher_item
-    ListMixin.all.second.move_higher
-    updated_ats[0..1].each do |updated_at|
-      assert_in_delta updated_at, now, 1.second
-    end
-    updated_ats[2..3].each do |updated_at|
-      assert_in_delta updated_at, yesterday, 1.second
+    Timecop.freeze do
+      ListMixin.all.second.move_higher
+      updated_ats[0..1].each do |updated_at|
+        assert_equal updated_at, Time.now.utc
+      end
+      updated_ats[2..3].each do |updated_at|
+        assert_equal updated_at, yesterday
+      end
     end
   end
 
   def test_moving_item_to_bottom_touches_all_other_items
-    ListMixin.first.move_to_bottom
-    updated_ats.each do |updated_at|
-      assert_in_delta updated_at, now, 1.second
+    Timecop.freeze do
+      ListMixin.first.move_to_bottom
+      updated_ats.each do |updated_at|
+        assert_equal updated_at, Time.now.utc
+      end
     end
   end
 
   def test_moving_item_to_top_touches_all_other_items
-    ListMixin.last.move_to_top
-    updated_ats.each do |updated_at|
-      assert_in_delta updated_at, now, 1.second
+    Timecop.freeze do
+      ListMixin.last.move_to_top
+      updated_ats.each do |updated_at|
+        assert_equal updated_at, Time.now.utc
+      end
     end
   end
 
   def test_removing_item_touches_all_lower_items
-    ListMixin.all.third.remove_from_list
-    updated_ats[0..1].each do |updated_at|
-      assert_in_delta updated_at, yesterday, 1.second
-    end
-    updated_ats[2..2].each do |updated_at|
-      assert_in_delta updated_at, now, 1.second
+    Timecop.freeze do
+      ListMixin.all.third.remove_from_list
+      updated_ats[0..1].each do |updated_at|
+        assert_equal updated_at, yesterday
+      end
+      updated_ats[2..2].each do |updated_at|
+        assert_equal updated_at, Time.now.utc
+      end
     end
   end
 end
