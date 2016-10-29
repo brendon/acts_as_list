@@ -683,7 +683,7 @@ class TouchTest < ActsAsListTestCase
     Timecop.freeze do
       ListMixin.first.move_lower
       updated_ats[0..1].each do |updated_at|
-        assert_equal updated_at, Time.now.utc
+        assert_equal updated_at, Time.current
       end
       updated_ats[2..3].each do |updated_at|
         assert_equal updated_at, yesterday
@@ -695,7 +695,7 @@ class TouchTest < ActsAsListTestCase
     Timecop.freeze do
       ListMixin.all.second.move_higher
       updated_ats[0..1].each do |updated_at|
-        assert_equal updated_at, Time.now.utc
+        assert_equal updated_at, Time.current
       end
       updated_ats[2..3].each do |updated_at|
         assert_equal updated_at, yesterday
@@ -707,7 +707,7 @@ class TouchTest < ActsAsListTestCase
     Timecop.freeze do
       ListMixin.first.move_to_bottom
       updated_ats.each do |updated_at|
-        assert_equal updated_at, Time.now.utc
+        assert_equal updated_at, Time.current
       end
     end
   end
@@ -716,7 +716,7 @@ class TouchTest < ActsAsListTestCase
     Timecop.freeze do
       ListMixin.last.move_to_top
       updated_ats.each do |updated_at|
-        assert_equal updated_at, Time.now.utc
+        assert_equal updated_at, Time.current
       end
     end
   end
@@ -728,7 +728,7 @@ class TouchTest < ActsAsListTestCase
         assert_equal updated_at, yesterday
       end
       updated_ats[2..2].each do |updated_at|
-        assert_equal updated_at, Time.now.utc
+        assert_equal updated_at, Time.current
       end
     end
   end
