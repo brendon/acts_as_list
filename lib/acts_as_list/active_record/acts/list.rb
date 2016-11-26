@@ -206,8 +206,10 @@ module ActiveRecord
         private
 
         def swap_positions(item1, item2)
+          item1_position = item1.send(position_column)
+
           item1.set_list_position(item2.send(position_column))
-          item2.set_list_position(item1.send("#{position_column}_was"))
+          item2.set_list_position(item1_position)
         end
 
         def acts_as_list_list
