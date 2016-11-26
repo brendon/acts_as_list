@@ -304,14 +304,18 @@ module ActiveRecord
           # This has the effect of moving all the higher items down one.
           def increment_positions_on_higher_items
             return unless in_list?
-            acts_as_list_list.where("#{quoted_position_column_with_table_name} < #{send(position_column).to_i}").increment_all
+            acts_as_list_list.where("#{quoted_position_column_with_table_name} < ?", send(position_column).to_i).increment_all
           end
 
           # This has the effect of moving all the lower items down one.
           def increment_positions_on_lower_items(position, avoid_id = nil)
-            avoid_id_condition = avoid_id ? " AND #{quoted_table_name}.#{self.class.primary_key} != #{self.class.connection.quote(avoid_id)}" : ''
+            scope = acts_as_list_list
 
-            acts_as_list_list.where("#{quoted_position_column_with_table_name} >= #{position}#{avoid_id_condition}").increment_all
+            if avoid_id
+              scope = scope.where("#{quoted_table_name}.#{self.class.primary_key} != ?", self.class.connection.quote(avoid_id))
+            end
+
+            scope.where("#{quoted_position_column_with_table_name} >= ?", position).increment_all
           end
 
           # Increments position (<tt>position_column</tt>) of all items in the list.
@@ -322,27 +326,31 @@ module ActiveRecord
           # Reorders intermediate items to support moving an item from old_position to new_position.
           def shuffle_positions_on_intermediate_items(old_position, new_position, avoid_id = nil)
             return if old_position == new_position
-            avoid_id_condition = avoid_id ? " AND #{quoted_table_name}.#{self.class.primary_key} != #{self.class.connection.quote(avoid_id)}" : ''
+            scope = acts_as_list_list
+
+            if avoid_id
+              scope = scope.where("#{quoted_table_name}.#{self.class.primary_key} != ?", self.class.connection.quote(avoid_id))
+            end
 
             if old_position < new_position
               # Decrement position of intermediate items
               #
               # e.g., if moving an item from 2 to 5,
               # move [3, 4, 5] to [2, 3, 4]
-              acts_as_list_list.where(
+              scope.where(
                 "#{quoted_position_column_with_table_name} > ?", old_position
               ).where(
-                "#{quoted_position_column_with_table_name} <= #{new_position}#{avoid_id_condition}"
+                "#{quoted_position_column_with_table_name} <= ?", new_position
               ).decrement_all
             else
               # Increment position of intermediate items
               #
               # e.g., if moving an item from 5 to 2,
               # move [2, 3, 4] to [3, 4, 5]
-              acts_as_list_list.where(
+              scope.where(
                 "#{quoted_position_column_with_table_name} >= ?", new_position
               ).where(
-                "#{quoted_position_column_with_table_name} < #{old_position}#{avoid_id_condition}"
+                "#{quoted_position_column_with_table_name} < ?", old_position
               ).increment_all
             end
           end
