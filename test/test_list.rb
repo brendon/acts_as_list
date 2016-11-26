@@ -230,7 +230,7 @@ class ListTest < ActsAsListTestCase
     wait_for_it = false
     threads.each(&:join)
 
-    assert_equal (1..n).to_a, ListMixin.where(parent_id: 1).order('pos').map(&:pos)
+    assert_equal((1..n).to_a, ListMixin.where(parent_id: 1).order('pos').map(&:pos))
   end
 end
 
