@@ -39,11 +39,11 @@ module ActiveRecord::Acts::List::ColumnMethodDefiner #:nodoc:
         attrs = record.send(:timestamp_attributes_for_update_in_model)
         now = record.send(:current_time_from_proper_timezone)
 
-        query = attrs.map { |attr| "#{connection.quote_column_name(attr)} = :now" }
-        query.push updates
-        query = query.join(", ")
+        attrs.each do |attr|
+          updates << ", #{connection.quote_column_name(attr)} = #{connection.quote(connection.quoted_date(now))}"
+        end
 
-        update_all([query, now: now])
+        update_all(updates)
       end
     end
   end
