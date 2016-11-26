@@ -49,16 +49,16 @@ module Shared
       end
 
       assert_equal [1, 2, 3, 4], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
-      assert_equal [5, 10, 15, 20], ListMixin.where(parent_id: 5000).map(&:pos)
+      assert_equal [5, 10, 15, 20], ListMixin.where(parent_id: 5000).order('id').map(&:pos)
 
       ListMixin.where(id: 2).first.move_lower
       assert_equal [1, 3, 2, 4], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
-      assert_equal [5, 15, 10, 20], ListMixin.where(parent_id: 5000).map(&:pos)
+      assert_equal [5, 15, 10, 20], ListMixin.where(parent_id: 5000).order('id').map(&:pos)
 
 
       ListMixin.where(id: 2).first.move_higher
       assert_equal [1, 2, 3, 4], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
-      assert_equal [5, 10, 15, 20], ListMixin.where(parent_id: 5000).map(&:pos)
+      assert_equal [5, 10, 15, 20], ListMixin.where(parent_id: 5000).order('id').map(&:pos)
 
       ListMixin.where(id: 1).first.move_to_bottom
       assert_equal [2, 3, 4, 1], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
