@@ -12,10 +12,10 @@ before_script:
 rvm:
   - 1.9.3
   - 2.0.0
-  - 2.1.0
-  - 2.2.2
+  - 2.1.9
+  - 2.2.6
+  - 2.3.3
   - jruby-19mode
-  - rbx-2
 env:
   - DB=sqlite
   - DB=mysql
@@ -26,9 +26,6 @@ gemfile:
   - gemfiles/rails_4_2.gemfile
   - gemfiles/rails_5_0.gemfile
 matrix:
-  # Travis is failing to install rbx-2 right now, so allow these failures without breaking the build.
-  allow_failures:
-    - rvm: rbx-2
   exclude:
     - rvm: 1.9.3
       gemfile: gemfiles/rails_5_0.gemfile
@@ -37,6 +34,4 @@ matrix:
     - rvm: 2.1.0
       gemfile: gemfiles/rails_5_0.gemfile
     - rvm: jruby-19mode
-      gemfile: gemfiles/rails_5_0.gemfile
-    - rvm: rbx-2
       gemfile: gemfiles/rails_5_0.gemfile
