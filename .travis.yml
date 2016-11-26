@@ -31,7 +31,7 @@ matrix:
       gemfile: gemfiles/rails_5_0.gemfile
     - rvm: 2.0.0
       gemfile: gemfiles/rails_5_0.gemfile
-    - rvm: 2.1.0
+    - rvm: 2.1.9
       gemfile: gemfiles/rails_5_0.gemfile
     - rvm: jruby-19mode
       gemfile: gemfiles/rails_5_0.gemfile
