@@ -77,6 +77,30 @@ In `acts_as_list`, "higher" means further up the list (a lower `position`), and 
 - `list_item.lower_item`
 - `list_item.lower_items` will return all the items below `list_item` in the list (ordered by the position, ascending)
 
+## Adding `acts_as_list` To An Existing Model
+As it stands `acts_as_list` requires position values to be set on the model before the instance methods above will work. Adding something like the below to your migration will set the default position. Change the parameters to order if you want a different initial ordering.
+
+```ruby
+class AddPositionToTodoItem < ActiveRecord::Migration
+  def change
+    add_column :todo_items, :position, :integer
+    TodoItem.order(:updated_at).each.with_index(1) do |todo_item, index|
+      todo_item.update_column :position, index
+    end
+  end
+end
+```
+
+If you are using the scope option things can get a bit more complicated. Let's say you have `acts_as_list scope: :todo_list`, you might instead need something like this:
+
+```ruby
+TodoList.each do |todo_list|
+  todo_list.todo_items.order(:updated_at).each.with_index(1) do |todo_item, index|
+    todo_item.update_column :position, index
+  end
+end
+```
+
 ## Notes
 All `position` queries (select, update, etc.) inside gem methods are executed without the default scope (i.e. `Model.unscoped`), this will prevent nasty issues when the default scope is different from `acts_as_list` scope.
 
