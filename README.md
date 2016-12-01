@@ -94,7 +94,7 @@ end
 If you are using the scope option things can get a bit more complicated. Let's say you have `acts_as_list scope: :todo_list`, you might instead need something like this:
 
 ```ruby
-TodoList.each do |todo_list|
+TodoList.all.each do |todo_list|
   todo_list.todo_items.order(:updated_at).each.with_index(1) do |todo_item, index|
     todo_item.update_column :position, index
   end
