@@ -25,7 +25,7 @@ module Shared
 
       ArrayScopeListMixin.where(id: 4).first.move_to_top
       assert_equal [4, 1, 3, 2], ArrayScopeListMixin.where(parent_id: 5, parent_type: 'ParentClass').order('pos').map(&:id)
-
+      
       ArrayScopeListMixin.where(id: 4).first.insert_at(4)
       assert_equal [1, 3, 2, 4], ArrayScopeListMixin.where(parent_id: 5, parent_type: 'ParentClass').order('pos').map(&:id)
       assert_equal [1, 2, 3, 4], ArrayScopeListMixin.where(parent_id: 5, parent_type: 'ParentClass').order('pos').map(&:pos)
@@ -60,11 +60,6 @@ module Shared
       assert !new.first?
       assert new.last?
 
-      new = ArrayScopeListMixin.act_as_list_no_update do
-        ArrayScopeListMixin.create(parent_id: 20, parent_type: 'ParentClass')
-      end
-      assert_equal @default_pos, new.pos
-
       new = ArrayScopeListMixin.create(parent_id: 20, parent_type: 'ParentClass')
       assert_equal 3, new.pos
       assert !new.first?
@@ -83,11 +78,6 @@ module Shared
       new = ArrayScopeListMixin.create(parent_id: 20, parent_type: 'ParentClass')
       assert_equal 2, new.pos
 
-      new = ArrayScopeListMixin.act_as_list_no_update do
-        ArrayScopeListMixin.create(parent_id: 20, parent_type: 'ParentClass')
-      end
-      assert_equal @default_pos, new.pos
-
       new = ArrayScopeListMixin.create(parent_id: 20, parent_type: 'ParentClass')
       assert_equal 3, new.pos
 
@@ -105,11 +95,6 @@ module Shared
 
       new4.reload
       assert_equal 4, new4.pos
-
-      new = ArrayScopeListMixin.act_as_list_no_update do
-        ArrayScopeListMixin.create(parent_id: 20, parent_type: 'ParentClass')
-      end
-      assert_equal @default_pos, new.pos
 
       new5 = ArrayScopeListMixin.create(parent_id: 20, parent_type: 'ParentClass')
       assert_equal 5, new5.pos
@@ -150,6 +135,8 @@ module Shared
       assert_equal [1, 2, 3, 4], ArrayScopeListMixin.where(parent_id: 5, parent_type: 'ParentClass').order('pos').map(&:id)
 
       ArrayScopeListMixin.where(id: 2).first.remove_from_list
+
+      assert_equal [2, 1, 3, 4], ArrayScopeListMixin.where(parent_id: 5, parent_type: 'ParentClass').order('pos').map(&:id)
 
       assert_equal 1,   ArrayScopeListMixin.where(id: 1).first.pos
       assert_equal nil, ArrayScopeListMixin.where(id: 2).first.pos

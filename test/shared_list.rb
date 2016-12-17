@@ -60,18 +60,8 @@ module Shared
       assert !new.first?
       assert new.last?
 
-      new = ListMixin.act_as_list_no_update do
-        ListMixin.create(parent_id: 20)
-      end
-      assert_equal @default_pos, new.pos
-
-      new = ListMixin.act_as_list_no_update do
-        ListMixin.create(parent_id: 20, pos: 60)
-      end
-      assert_equal 60, new.pos
-
       new = ListMixin.create(parent_id: 20)
-      assert_equal 61, new.pos
+      assert_equal 3, new.pos
       assert !new.first?
       assert new.last?
 
@@ -87,11 +77,6 @@ module Shared
 
       new = ListMixin.create(parent_id: 20)
       assert_equal 2, new.pos
-
-      new = ListMixin.act_as_list_no_update do
-        ListMixin.create(parent_id: 20)
-      end
-      assert_equal @default_pos, new.pos
 
       new = ListMixin.create(parent_id: 20)
       assert_equal 3, new.pos
@@ -111,11 +96,6 @@ module Shared
       new4.reload
       assert_equal 4, new4.pos
 
-      new = ListMixin.act_as_list_no_update do
-        ListMixin.create(parent_id: 20)
-      end
-      assert_equal @default_pos, new.pos
-
       new5 = ListMixin.create(parent_id: 20)
       assert_equal 5, new5.pos
 
@@ -129,7 +109,7 @@ module Shared
       last2 = ListMixin.order('pos').last
       last1.insert_at(1)
       last2.insert_at(1)
-      assert_equal [@default_pos, @default_pos, 1, 2, 3, 4, 5], ListMixin.where(parent_id: 20).order('pos').map(&:pos)
+      assert_equal [1, 2, 3, 4, 5], ListMixin.where(parent_id: 20).order('pos').map(&:pos)
     end
 
     def test_delete_middle
@@ -194,6 +174,8 @@ module Shared
       assert_equal [1, 2, 3, 4], ListMixin.where(parent_id: 5).order('pos').map(&:id)
 
       ListMixin.where(id: 2).first.remove_from_list
+
+      assert_equal [2, 1, 3, 4], ListMixin.where(parent_id: 5).order('pos').map(&:id)
 
       assert_equal 1,   ListMixin.where(id: 1).first.pos
       assert_equal nil, ListMixin.where(id: 2).first.pos

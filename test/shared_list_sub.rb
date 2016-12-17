@@ -49,16 +49,12 @@ module Shared
       end
 
       assert_equal [1, 2, 3, 4], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
-      assert_equal [5, 10, 15, 20], ListMixin.where(parent_id: 5000).order('id').map(&:pos)
 
       ListMixin.where(id: 2).first.move_lower
       assert_equal [1, 3, 2, 4], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
-      assert_equal [5, 15, 10, 20], ListMixin.where(parent_id: 5000).order('id').map(&:pos)
-
 
       ListMixin.where(id: 2).first.move_higher
       assert_equal [1, 2, 3, 4], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
-      assert_equal [5, 10, 15, 20], ListMixin.where(parent_id: 5000).order('id').map(&:pos)
 
       ListMixin.where(id: 1).first.move_to_bottom
       assert_equal [2, 3, 4, 1], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
@@ -89,23 +85,6 @@ module Shared
       assert_equal [], li1.higher_items
     end
 
-    def test_next_prev_groups_with_same_position
-      li1 = ListMixin.where(id: 1).first
-      li2 = ListMixin.where(id: 2).first
-      li3 = ListMixin.where(id: 3).first
-      li4 = ListMixin.where(id: 4).first
-
-      li3.update_column(:pos, 2) # Make the same position as li2
-
-      assert_equal [1, 2, 2, 4], ListMixin.order(:pos).pluck(:pos)
-
-      assert_equal [li3, li4], li2.lower_items
-      assert_equal [li2, li4], li3.lower_items
-
-      assert_equal [li3, li1], li2.higher_items
-      assert_equal [li2, li1], li3.higher_items
-    end
-
     def test_injection
       item = ListMixin.new("parent_id"=>1)
       assert_equal({ parent_id: 1 }, item.scope_condition)
@@ -118,11 +97,6 @@ module Shared
 
       new = ListMixinSub1.create("parent_id" => 20)
       assert_equal 2, new.pos
-
-      new = ListMixinSub1.act_as_list_no_update do
-        ListMixinSub1.create("parent_id" => 20)
-      end
-      assert_equal @default_pos, new.pos
 
       new = ListMixinSub1.create("parent_id" => 20)
       assert_equal 3, new.pos
@@ -141,11 +115,6 @@ module Shared
 
       new4.reload
       assert_equal 4, new4.pos
-
-      new = ListMixinSub1.act_as_list_no_update do
-        ListMixinSub1.create("parent_id" => 20)
-      end
-      assert_equal @default_pos, new.pos
 
       new5 = ListMixinSub1.create("parent_id" => 20)
       assert_equal 5, new5.pos

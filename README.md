@@ -77,30 +77,6 @@ In `acts_as_list`, "higher" means further up the list (a lower `position`), and 
 - `list_item.lower_item`
 - `list_item.lower_items` will return all the items below `list_item` in the list (ordered by the position, ascending)
 
-## Adding `acts_as_list` To An Existing Model
-As it stands `acts_as_list` requires position values to be set on the model before the instance methods above will work. Adding something like the below to your migration will set the default position. Change the parameters to order if you want a different initial ordering.
-
-```ruby
-class AddPositionToTodoItem < ActiveRecord::Migration
-  def change
-    add_column :todo_items, :position, :integer
-    TodoItem.order(:updated_at).each.with_index(1) do |todo_item, index|
-      todo_item.update_column :position, index
-    end
-  end
-end
-```
-
-If you are using the scope option things can get a bit more complicated. Let's say you have `acts_as_list scope: :todo_list`, you might instead need something like this:
-
-```ruby
-TodoList.all.each do |todo_list|
-  todo_list.todo_items.order(:updated_at).each.with_index(1) do |todo_item, index|
-    todo_item.update_column :position, index
-  end
-end
-```
-
 ## Notes
 All `position` queries (select, update, etc.) inside gem methods are executed without the default scope (i.e. `Model.unscoped`), this will prevent nasty issues when the default scope is different from `acts_as_list` scope.
 
@@ -122,18 +98,6 @@ default: `position`. Use this option if the column name in your database is diff
 default: `1`. Use this option to define the top of the list. Use 0 to make the collection act more like an array in its indexing.
 - `add_new_at`
 default: `:bottom`. Use this option to specify whether objects get added to the `:top` or `:bottom` of the list. `nil` will result in new items not being added to the list on create, i.e, position will be kept nil after create.
-
-## Bulk update
-To perform a bulk update and manually set the `position` value without act_as_list callbacks to kick in,
-you can call your database operations in a `act_as_list_no_update` block.
-Note: you are responsible when using `act_as_list_no_update` block to ensure that `position` values are correct and unique.
-```ruby
-# Will not trigger act_as_list callbacks
-ActiveRecord::Base.act_as_list_no_update do
-  TodoItem.find(5).update position: 17
-  TodoItem.find(8).update position: 11
-end
-```
 
 ## Versions
 As of version `0.7.5` Rails 5 is supported.
