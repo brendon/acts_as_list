@@ -1,8 +1,10 @@
 # NOTE: following now done in helper.rb (better Readability)
 require 'helper'
 
-db_config = YAML.load_file(File.expand_path("../database.yml", __FILE__)).fetch(ENV["DB"] || "sqlite")
-ActiveRecord::Base.establish_connection(db_config)
+ActiveRecord::Base.establish_connection(
+  adapter: "sqlite3",
+  database: 'file:memdb1?mode=memory&cache=shared'
+)
 ActiveRecord::Schema.verbose = false
 
 def setup_db(position_options = {})
@@ -161,6 +163,13 @@ end
 class TheBaseSubclass < TheBaseClass
 end
 
+class DBConfigTest < Minitest::Test
+  def test_db_config
+    # make sure sqlite3 accepts multi threaded access
+    assert_equal "file:memdb1?mode=memory&cache=shared", ActiveRecord::Base.connection.pool.spec.config[:database]
+  end
+end
+
 class QuotedList < ActiveRecord::Base
   self.table_name = 'table-name'
   acts_as_list column: :order
@@ -230,7 +239,7 @@ class ListTest < ActsAsListTestCase
     wait_for_it = false
     threads.each(&:join)
 
-    assert_equal((1..n).to_a, ListMixin.where(parent_id: 1).order('pos').map(&:pos))
+    assert_equal (1..n).to_a, ListMixin.where(parent_id: 1).order('pos').map(&:pos)
   end
 end
 
@@ -661,79 +670,65 @@ class MultipleListsArrayScopeTest < ActsAsListTestCase
   end
 end
 
-require 'timecop'
-
 class TouchTest < ActsAsListTestCase
   def setup
     setup_db
-    Timecop.freeze(yesterday) do
-      4.times { ListMixin.create! }
-    end
+    4.times { ListMixin.create! updated_at: yesterday }
   end
 
   def now
-    @now ||= Time.current
+    Time.now.utc
   end
 
   def yesterday
-    @yesterday ||= 1.day.ago
+    1.day.ago
   end
 
   def updated_ats
-    ListMixin.order(:id).pluck(:updated_at)
+    ListMixin.pluck(:updated_at)
   end
 
   def test_moving_item_lower_touches_self_and_lower_item
-    Timecop.freeze(now) do
-      ListMixin.first.move_lower
-      updated_ats[0..1].each do |updated_at|
-        assert_equal updated_at.to_i, now.to_i
-      end
-      updated_ats[2..3].each do |updated_at|
-        assert_equal updated_at.to_i, yesterday.to_i
-      end
+    ListMixin.first.move_lower
+    updated_ats[0..1].each do |updated_at|
+      assert_in_delta updated_at, now, 1.second
+    end
+    updated_ats[2..3].each do |updated_at|
+      assert_in_delta updated_at, yesterday, 1.second
     end
   end
 
   def test_moving_item_higher_touches_self_and_higher_item
-    Timecop.freeze(now) do
-      ListMixin.all.second.move_higher
-      updated_ats[0..1].each do |updated_at|
-        assert_equal updated_at.to_i, now.to_i
-      end
-      updated_ats[2..3].each do |updated_at|
-        assert_equal updated_at.to_i, yesterday.to_i
-      end
+    ListMixin.all.second.move_higher
+    updated_ats[0..1].each do |updated_at|
+      assert_in_delta updated_at, now, 1.second
+    end
+    updated_ats[2..3].each do |updated_at|
+      assert_in_delta updated_at, yesterday, 1.second
     end
   end
 
   def test_moving_item_to_bottom_touches_all_other_items
-    Timecop.freeze(now) do
-      ListMixin.first.move_to_bottom
-      updated_ats.each do |updated_at|
-        assert_equal updated_at.to_i, now.to_i
-      end
+    ListMixin.first.move_to_bottom
+    updated_ats.each do |updated_at|
+      assert_in_delta updated_at, now, 1.second
     end
   end
 
   def test_moving_item_to_top_touches_all_other_items
-    Timecop.freeze(now) do
-      ListMixin.last.move_to_top
-      updated_ats.each do |updated_at|
-        assert_equal updated_at.to_i, now.to_i
-      end
+    ListMixin.last.move_to_top
+    updated_ats.each do |updated_at|
+      assert_in_delta updated_at, now, 1.second
     end
   end
 
   def test_removing_item_touches_all_lower_items
-    Timecop.freeze(now) do
-      ListMixin.all.third.remove_from_list
-      updated_ats[0..1].each do |updated_at|
-        assert_equal updated_at.to_i, yesterday.to_i
-      end
-      updated_ats[2..2].each do |updated_at|
-        assert_equal updated_at.to_i, now.to_i
-      end
+    ListMixin.all.third.remove_from_list
+    updated_ats[0..1].each do |updated_at|
+      assert_in_delta updated_at, yesterday, 1.second
+    end
+    updated_ats[2..2].each do |updated_at|
+      assert_in_delta updated_at, now, 1.second
     end
   end
 end
@@ -751,36 +746,5 @@ class ActsAsListTopTest < ActsAsListTestCase
   def test_class_acts_as_list_top
     assert_equal 1, TheBaseSubclass.acts_as_list_top
     assert_equal 0, ZeroBasedMixin.acts_as_list_top
-  end
-end
-
-class NilPositionTest < ActsAsListTestCase
-  def setup
-    setup_db
-  end
-
-  def test_nil_position_ordering
-    new1 = DefaultScopedMixin.create pos: nil
-    new2 = DefaultScopedMixin.create pos: nil
-    new3 = DefaultScopedMixin.create pos: nil
-    DefaultScopedMixin.update_all(pos: nil)
-
-    assert_equal [nil, nil, nil], DefaultScopedMixin.all.map(&:pos)
-
-    new1.reload.pos = 1
-    new1.save
-
-    new3.reload.pos = 1
-    new3.save
-
-    assert_equal [1, 2], DefaultScopedMixin.where("pos IS NOT NULL").map(&:pos)
-    assert_equal [3, 1], DefaultScopedMixin.where("pos IS NOT NULL").map(&:id)
-    assert_nil new2.reload.pos
-
-    new2.reload.pos = 1
-    new2.save
-
-    assert_equal [1, 2, 3], DefaultScopedMixin.all.map(&:pos)
-    assert_equal [2, 3, 1], DefaultScopedMixin.all.map(&:id)
   end
 end

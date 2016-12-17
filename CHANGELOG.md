@@ -1,19 +1,5 @@
 # Change Log
 
-## [v0.8.2](https://github.com/swanandp/acts_as_list/tree/v0.8.2) (2016-09-23)
-[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.8.1...v0.8.2)
-
-**Closed issues:**
-
-- We're a repo now, no longer a fork attached to rails/acts\_as\_list [\#232](https://github.com/swanandp/acts_as_list/issues/232)
-- Break away from rails/acts\_as\_list [\#224](https://github.com/swanandp/acts_as_list/issues/224)
-- Problem when inserting straight at top of list [\#109](https://github.com/swanandp/acts_as_list/issues/109)
-
-**Merged pull requests:**
-
-- Show items with same position in higher and lower items [\#231](https://github.com/swanandp/acts_as_list/pull/231) ([jpalumickas](https://github.com/jpalumickas))
-- fix setting position when previous position was nil [\#230](https://github.com/swanandp/acts_as_list/pull/230) ([StoneFrog](https://github.com/StoneFrog))
-
 ## [v0.8.1](https://github.com/swanandp/acts_as_list/tree/v0.8.1) (2016-09-06)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.8.0...v0.8.1)
 

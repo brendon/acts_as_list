@@ -1,5 +1,3 @@
-# $DEBUG = true
-
 require "rubygems"
 require "bundler/setup"
 begin
@@ -21,5 +19,3 @@ if defined?(ActiveRecord::VERSION) &&
 end
 
 require "shared"
-
-# ActiveRecord::Base.logger = Logger.new(STDOUT)
