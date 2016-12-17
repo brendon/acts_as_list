@@ -414,6 +414,15 @@ module ActiveRecord
             self[position_column] = acts_as_list_top
           end
         end
+          # This check is skipped if the position is currently the default position from the table
+          # as modifying the default position on creation is handled elsewhere
+          def check_top_position
+            return if act_as_list_callbacks_disabled?
+
+            if send(position_column) && !default_position? && send(position_column) < acts_as_list_top
+              self[position_column] = acts_as_list_top
+            end
+          end
 
         # When using raw column name it must be quoted otherwise it can raise syntax errors with SQL keywords (e.g. order)
         def quoted_position_column
