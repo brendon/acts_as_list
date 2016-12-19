@@ -25,6 +25,7 @@ class << ActiveRecord::Base
     ActiveRecord::Acts::List::CallbackDefiner.call(caller_class, configuration[:add_new_at])
 
     include ActiveRecord::Acts::List::InstanceMethods
+    include ActiveRecord::Acts::List::NoUpdate
   end
 end
 

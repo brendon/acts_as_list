@@ -60,6 +60,11 @@ module Shared
       assert !new.first?
       assert new.last?
 
+      new = ArrayScopeListMixin.acts_as_list_no_update { ArrayScopeListMixin.create(parent_id: 20, parent_type: 'ParentClass') }
+      assert_equal $default_position,new.pos
+      assert_equal $default_position.is_a?(Fixnum), new.first?
+      assert !new.last?
+
       new = ArrayScopeListMixin.create(parent_id: 20, parent_type: 'ParentClass')
       assert_equal 3, new.pos
       assert !new.first?
@@ -80,6 +85,9 @@ module Shared
 
       new = ArrayScopeListMixin.create(parent_id: 20, parent_type: 'ParentClass')
       assert_equal 3, new.pos
+
+      new_noup = ArrayScopeListMixin.acts_as_list_no_update { ArrayScopeListMixin.create(parent_id: 20, parent_type: 'ParentClass') }
+      assert_equal $default_position,new_noup.pos
 
       new4 = ArrayScopeListMixin.create(parent_id: 20, parent_type: 'ParentClass')
       assert_equal 4, new4.pos
@@ -104,6 +112,9 @@ module Shared
 
       new4.reload
       assert_equal 5, new4.pos
+
+      new_noup.reload
+      assert_equal $default_position, new_noup.pos
     end
 
     def test_delete_middle
@@ -122,6 +133,12 @@ module Shared
       assert_equal [3, 4], ArrayScopeListMixin.where(parent_id: 5, parent_type: 'ParentClass').order('pos').map(&:id)
 
       assert_equal 1, ArrayScopeListMixin.where(id: 3).first.pos
+      assert_equal 2, ArrayScopeListMixin.where(id: 4).first.pos
+
+      ArrayScopeListMixin.acts_as_list_no_update { ArrayScopeListMixin.where(id: 3).first.destroy }
+
+      assert_equal [4], ArrayScopeListMixin.where(parent_id: 5, parent_type: 'ParentClass').order('pos').map(&:id)
+
       assert_equal 2, ArrayScopeListMixin.where(id: 4).first.pos
     end
 
