@@ -352,7 +352,12 @@ module ActiveRecord
             if in_list?
               old_position = send(position_column).to_i
               return if position == old_position
-              shuffle_positions_on_intermediate_items(old_position, position)
+              # temporary move after bottom with gap, avoiding duplicate values
+              # gap is required to leave room for position increments
+              # positive number will be valid with unique not null check (>= 0) db constraint
+              tmp_position_after_everything = acts_as_list_class.unscoped.maximum(position_column).to_i + 2
+              set_list_position(tmp_position_after_everything)
+              shuffle_positions_on_intermediate_items(old_position, position, id)
             else
               increment_positions_on_lower_items(position)
             end
