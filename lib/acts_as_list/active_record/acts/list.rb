@@ -365,15 +365,6 @@ module ActiveRecord
           end
         end
 
-        # used by insert_at_position instead of remove_from_list, as postgresql raises error if position_column has non-null constraint
-        def store_at_0
-          if in_list?
-            old_position = send(position_column).to_i
-            set_list_position(0)
-            decrement_positions_on_lower_items(old_position)
-          end
-        end
-
         def update_positions
           old_position = send("#{position_column}_was") || bottom_position_in_list + 1
           new_position = send(position_column).to_i
