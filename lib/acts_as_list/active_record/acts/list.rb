@@ -338,11 +338,22 @@ module ActiveRecord
             #
             # e.g., if moving an item from 5 to 2,
             # move [2, 3, 4] to [3, 4, 5]
-            scope.where(
+            items = scope.where(
               "#{quoted_position_column_with_table_name} >= ?", new_position
             ).where(
               "#{quoted_position_column_with_table_name} < ?", old_position
-            ).increment_all
+            )
+
+            if acts_as_list_list.connection.index_exists?(acts_as_list_list.table_name, position_column, unique: true)
+              # unique constraint prevents regular increment_all, so we increment positions one by one
+              # http://stackoverflow.com/questions/7703196/sqlite-increment-unique-integer-field
+              # it's not specific to SQLite only, PostgreSQL has same issue
+              items.order("#{quoted_position_column_with_table_name} DESC").ids.each do |id|
+                acts_as_list_list.find(id).increment!(position_column)
+              end
+            else
+              items.increment_all
+            end
           end
         end
 
