@@ -6,9 +6,12 @@ ActiveRecord::Base.establish_connection(db_config)
 ActiveRecord::Schema.verbose = false
 
 def setup_db(position_options = {})
+  # sqlite cannot drop/rename/alter columns and add constraints after table creation
+  sqlite = ENV.fetch("DB", "sqlite") == "sqlite"
+
   # AR caches columns options like defaults etc. Clear them!
   ActiveRecord::Base.connection.create_table :mixins do |t|
-    t.column :pos, :integer, position_options
+    t.column :pos, :integer, position_options unless position_options[:positive] && sqlite
     t.column :active, :boolean, default: true
     t.column :parent_id, :integer
     t.column :parent_type, :string
@@ -16,7 +19,17 @@ def setup_db(position_options = {})
     t.column :updated_at, :datetime
     t.column :state, :integer
 
-    t.index :pos, unique: true if position_options[:unique]
+    t.index :pos, unique: true if position_options[:unique] && !(sqlite && position_options[:positive])
+  end
+  
+  if position_options[:positive]
+    if sqlite
+      # SQLite cannot add constraint after table creation, also cannot add unique inside ADD COLUMN
+      ActiveRecord::Base.connection.execute('ALTER TABLE mixins ADD COLUMN pos integer8 NOT NULL CHECK (pos > 0) DEFAULT 1')
+      ActiveRecord::Base.connection.execute('CREATE UNIQUE INDEX pos_unique ON mixins(pos)')
+    else
+      ActiveRecord::Base.connection.execute('ALTER TABLE mixins ADD CONSTRAINT pos_check CHECK (pos > 0)')
+    end
   end
 
   # This table is used to test table names and column names quoting
@@ -787,9 +800,9 @@ class NilPositionTest < ActsAsListTestCase
   end
 end
 
-class DefaultScopedUniqueTest < ActsAsListTestCase
+class DefaultScopedNotNullUniquePositiveConstraintsTest < ActsAsListTestCase
   def setup
-    setup_db null: false, unique: true
+    setup_db null: false, unique: true, positive: true
     (1..4).each { |counter| DefaultScopedMixin.create!({pos: counter}) }
   end
 
