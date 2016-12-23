@@ -317,22 +317,35 @@ module ActiveRecord
         # Reorders intermediate items to support moving an item from old_position to new_position.
         def shuffle_positions_on_intermediate_items(old_position, new_position, avoid_id = nil)
           return if old_position == new_position
-          scope = acts_as_list_list
+          scope = acts_as_list_list.select(:id)
 
           if avoid_id
             scope = scope.where("#{quoted_table_name}.#{self.class.primary_key} != ?", self.class.connection.quote(avoid_id))
           end
+
+          # unique constraint prevents regular increment_all and forces to do increments one by one
+          # http://stackoverflow.com/questions/7703196/sqlite-increment-unique-integer-field
+          # both SQLite and PostgreSQL (and most probably MySQL too) has same issue
+          update_one_by_one = acts_as_list_list.connection.index_exists?(acts_as_list_list.table_name, position_column, unique: true)
 
           if old_position < new_position
             # Decrement position of intermediate items
             #
             # e.g., if moving an item from 2 to 5,
             # move [3, 4, 5] to [2, 3, 4]
-            scope.where(
+            items = scope.where(
               "#{quoted_position_column_with_table_name} > ?", old_position
             ).where(
               "#{quoted_position_column_with_table_name} <= ?", new_position
-            ).decrement_all
+            )
+
+            if update_one_by_one
+              items.order("#{quoted_position_column_with_table_name} ASC").ids.each do |id|
+                acts_as_list_list.find(id).decrement!(position_column)
+              end
+            else
+              items.decrement_all
+            end
           else
             # Increment position of intermediate items
             #
@@ -344,10 +357,7 @@ module ActiveRecord
               "#{quoted_position_column_with_table_name} < ?", old_position
             )
 
-            if acts_as_list_list.connection.index_exists?(acts_as_list_list.table_name, position_column, unique: true)
-              # unique constraint prevents regular increment_all, so we increment positions one by one
-              # http://stackoverflow.com/questions/7703196/sqlite-increment-unique-integer-field
-              # it's not specific to SQLite only, PostgreSQL has same issue
+            if update_one_by_one
               items.order("#{quoted_position_column_with_table_name} DESC").ids.each do |id|
                 acts_as_list_list.find(id).increment!(position_column)
               end
