@@ -326,7 +326,9 @@ module ActiveRecord
           # unique constraint prevents regular increment_all and forces to do increments one by one
           # http://stackoverflow.com/questions/7703196/sqlite-increment-unique-integer-field
           # both SQLite and PostgreSQL (and most probably MySQL too) has same issue
-          update_one_by_one = acts_as_list_list.connection.index_exists?(acts_as_list_list.table_name, position_column, unique: true)
+          
+          # we cannot reliably detect unique and other constraints across all environments (Rails 3, sqlite, etc)
+          # thus will sequentially update every item one by one
 
           if old_position < new_position
             # Decrement position of intermediate items
@@ -337,14 +339,8 @@ module ActiveRecord
               "#{quoted_position_column_with_table_name} > ?", old_position
             ).where(
               "#{quoted_position_column_with_table_name} <= ?", new_position
-            )
-
-            if update_one_by_one
-              items.order("#{quoted_position_column_with_table_name} ASC").ids.each do |id|
-                acts_as_list_list.find(id).decrement!(position_column)
-              end
-            else
-              items.decrement_all
+            ).order("#{quoted_position_column_with_table_name} ASC").pluck(:id).each do |id|
+              acts_as_list_list.find(id).decrement!(position_column)
             end
           else
             # Increment position of intermediate items
@@ -355,14 +351,8 @@ module ActiveRecord
               "#{quoted_position_column_with_table_name} >= ?", new_position
             ).where(
               "#{quoted_position_column_with_table_name} < ?", old_position
-            )
-
-            if update_one_by_one
-              items.order("#{quoted_position_column_with_table_name} DESC").ids.each do |id|
-                acts_as_list_list.find(id).increment!(position_column)
-              end
-            else
-              items.increment_all
+            ).order("#{quoted_position_column_with_table_name} DESC").pluck(:id).each do |id|
+              acts_as_list_list.find(id).increment!(position_column)
             end
           end
         end
