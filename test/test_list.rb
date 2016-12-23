@@ -28,7 +28,7 @@ def setup_db(position_options = {})
     if sqlite
       # SQLite cannot add constraint after table creation, also cannot add unique inside ADD COLUMN
       ActiveRecord::Base.connection.execute('ALTER TABLE mixins ADD COLUMN pos integer8 NOT NULL CHECK (pos > 0) DEFAULT 1')
-      ActiveRecord::Base.connection.execute('CREATE UNIQUE INDEX pos_unique ON mixins(pos)')
+      ActiveRecord::Base.connection.execute('CREATE UNIQUE INDEX index_mixins_on_pos ON mixins(pos)')
     else
       ActiveRecord::Base.connection.execute('ALTER TABLE mixins ADD CONSTRAINT pos_check CHECK (pos > 0)')
     end
