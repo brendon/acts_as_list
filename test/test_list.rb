@@ -15,6 +15,8 @@ def setup_db(position_options = {})
     t.column :created_at, :datetime
     t.column :updated_at, :datetime
     t.column :state, :integer
+
+    t.index :pos, unique: true if position_options[:unique]
   end
 
   # This table is used to test table names and column names quoting

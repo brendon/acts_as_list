@@ -11,7 +11,7 @@ task default: :test
 desc "Test the acts_as_list plugin."
 Rake::TestTask.new(:test) do |t|
   t.libs << "lib" << "test"
-  t.pattern = "test/**/test_*.rb"
+  t.pattern = "test/**/test_list.rb"
   t.verbose = false
 end
 
