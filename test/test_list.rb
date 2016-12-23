@@ -18,8 +18,10 @@ def setup_db(position_options = {})
     t.column :created_at, :datetime
     t.column :updated_at, :datetime
     t.column :state, :integer
+  end
 
-    t.index :pos, unique: true if position_options[:unique] && !(sqlite && position_options[:positive])
+  if position_options[:unique] && !(sqlite && position_options[:positive])
+    ActiveRecord::Base.connection.add_index :mixins, :pos, unique: true
   end
   
   if position_options[:positive]
