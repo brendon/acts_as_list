@@ -31,7 +31,7 @@ module ActiveRecord::Acts::List::ColumnMethodDefiner #:nodoc:
       end
 
       define_singleton_method :increment_all do
-        update_all_with_touch_unique_workaround "#{quoted_position_column} = (#{quoted_position_column_with_table_name} + 1)"
+        update_all_with_touch "#{quoted_position_column} = (#{quoted_position_column_with_table_name} + 1)"
       end
 
       define_singleton_method :update_all_with_touch do |updates|
@@ -44,18 +44,6 @@ module ActiveRecord::Acts::List::ColumnMethodDefiner #:nodoc:
         end
 
         update_all(updates)
-      end
-
-      define_singleton_method :update_all_with_touch_unique_workaround do |updates|
-        if connection.index_exists?(caller_class.table_name, column, unique: true)
-          # unique constraint prevents regular increment_all, so we use work-around with negative values
-          # http://stackoverflow.com/questions/7703196/sqlite-increment-unique-integer-field
-          # it's not specific to SQLite only, PostgreSQL has same issue
-          update_all_with_touch "#{quoted_position_column} = -#{quoted_position_column_with_table_name}"
-          update_all_with_touch updates.sub('= (', '= (-')
-        else
-          update_all_with_touch updates
-        end
       end
     end
   end
