@@ -786,3 +786,24 @@ class NilPositionTest < ActsAsListTestCase
     assert_equal [2, 3, 1], DefaultScopedMixin.all.map(&:id)
   end
 end
+
+class DefaultScopedUniqueTest < ActsAsListTestCase
+  def setup
+    setup_db null: false, unique: true
+    (1..4).each { |counter| DefaultScopedMixin.create!({pos: counter}) }
+  end
+
+  def test_insert_at
+    new = DefaultScopedMixin.create
+    assert_equal 5, new.pos
+
+    new.insert_at(1)
+    assert_equal 1, new.pos
+
+    new.insert_at(5)
+    assert_equal 5, new.pos
+
+    new.insert_at(3)
+    assert_equal 3, new.pos
+  end
+end
