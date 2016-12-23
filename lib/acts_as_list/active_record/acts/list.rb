@@ -340,7 +340,7 @@ module ActiveRecord
             )
 
             if update_one_by_one
-              items.order("#{quoted_position_column_with_table_name} ASC").ids.each do |id|
+              items.order("#{quoted_position_column_with_table_name} ASC").pluck(:id).each do |id|
                 acts_as_list_list.find(id).decrement!(position_column)
               end
             else
@@ -358,7 +358,7 @@ module ActiveRecord
             )
 
             if update_one_by_one
-              items.order("#{quoted_position_column_with_table_name} DESC").ids.each do |id|
+              items.order("#{quoted_position_column_with_table_name} DESC").pluck(:id).each do |id|
                 acts_as_list_list.find(id).increment!(position_column)
               end
             else
