@@ -19,7 +19,7 @@ class << ActiveRecord::Base
     configuration.update(options) if options.is_a?(Hash)
 
     if options[:sequential_updates].nil?
-      if connection.index_exists?(table_name, configuration[:column], unique: true)
+      if connection.table_exists?(table_name) && connection.index_exists?(table_name, configuration[:column], unique: true)
         configuration[:sequential_updates] = true
       end
     end
