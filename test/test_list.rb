@@ -130,6 +130,10 @@ class DefaultScopedWhereMixin < Mixin
   end
 end
 
+class SequentialUpdatesDefault < Mixin
+  acts_as_list column: "pos"
+end
+
 class SequentialUpdatesMixin < Mixin
   acts_as_list column: "pos", sequential_updates: true
 end
@@ -814,10 +818,10 @@ class SequentialUpdatesOptionDefaultTest < ActsAsListTestCase
 
   def test_sequential_updates_default_to_false
     mocked_definer_call = MiniTest::Mock.new
-    mocked_definer_call.expect :call, true, [Mixin, false]
+    mocked_definer_call.expect :call, true, [SequentialUpdatesDefault, false]
 
     ActiveRecord::Acts::List::ShufflePositionsOnintermediateItemsDefiner.stub :call, mocked_definer_call do
-      Mixin.class_eval do
+      SequentialUpdatesDefault.class_eval do
         acts_as_list column: 'pos'
       end
     end
@@ -834,10 +838,10 @@ class SequentialUpdatesMixinNotNullUniquePositiveConstraintsTest < ActsAsListTes
 
   def test_sequential_updates_option_true_by_default
     mocked_definer_call = MiniTest::Mock.new
-    mocked_definer_call.expect :call, true, [Mixin, true]
+    mocked_definer_call.expect :call, true, [SequentialUpdatesDefault, true]
 
     ActiveRecord::Acts::List::ShufflePositionsOnintermediateItemsDefiner.stub :call, mocked_definer_call do
-      Mixin.class_eval do
+      SequentialUpdatesDefault.class_eval do
         acts_as_list column: 'pos'
       end
     end
@@ -847,10 +851,10 @@ class SequentialUpdatesMixinNotNullUniquePositiveConstraintsTest < ActsAsListTes
 
   def test_sequential_updates_option_override_with_false
     mocked_definer_call = MiniTest::Mock.new
-    mocked_definer_call.expect :call, true, [Mixin, false]
+    mocked_definer_call.expect :call, true, [SequentialUpdatesDefault, false]
 
     ActiveRecord::Acts::List::ShufflePositionsOnintermediateItemsDefiner.stub :call, mocked_definer_call do
-      Mixin.class_eval do
+      SequentialUpdatesDefault.class_eval do
         acts_as_list column: 'pos', sequential_updates: false
       end
     end
