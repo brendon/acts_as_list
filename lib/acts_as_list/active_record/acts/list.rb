@@ -11,7 +11,7 @@ class << ActiveRecord::Base
   # * +add_new_at+ - specifies whether objects get added to the :top or :bottom of the list. (default: +bottom+)
   #                   `nil` will result in new items not being added to the list on create.
   def acts_as_list(options = {})
-    configuration = { column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom}
+    configuration = { column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom, sequential_updates: false }
     configuration.update(options) if options.is_a?(Hash)
 
     caller_class = self
@@ -23,6 +23,7 @@ class << ActiveRecord::Base
 
     ActiveRecord::Acts::List::AuxMethodDefiner.call(caller_class)
     ActiveRecord::Acts::List::CallbackDefiner.call(caller_class, configuration[:add_new_at])
+    ActiveRecord::Acts::List::ShufflePositionsOnintermediateItemsDefiner.call(caller_class, configuration[:sequential_updates])
 
     include ActiveRecord::Acts::List::InstanceMethods
   end
@@ -313,60 +314,7 @@ module ActiveRecord
         def increment_positions_on_all_items
           acts_as_list_list.increment_all
         end
-
-        # Reorders intermediate items to support moving an item from old_position to new_position.
-        def shuffle_positions_on_intermediate_items(old_position, new_position, avoid_id = nil)
-          return if old_position == new_position
-          scope = acts_as_list_list.select(:id)
-
-          if avoid_id
-            scope = scope.where("#{quoted_table_name}.#{self.class.primary_key} != ?", self.class.connection.quote(avoid_id))
-          end
-
-          # unique constraint prevents regular increment_all and forces to do increments one by one
-          # http://stackoverflow.com/questions/7703196/sqlite-increment-unique-integer-field
-          # both SQLite and PostgreSQL (and most probably MySQL too) has same issue
-          update_one_by_one = acts_as_list_list.connection.index_exists?(acts_as_list_list.table_name, position_column, unique: true)
-
-          if old_position < new_position
-            # Decrement position of intermediate items
-            #
-            # e.g., if moving an item from 2 to 5,
-            # move [3, 4, 5] to [2, 3, 4]
-            items = scope.where(
-              "#{quoted_position_column_with_table_name} > ?", old_position
-            ).where(
-              "#{quoted_position_column_with_table_name} <= ?", new_position
-            )
-
-            if update_one_by_one
-              items.order("#{quoted_position_column_with_table_name} ASC").each do |item|
-                item.decrement!(position_column)
-              end
-            else
-              items.decrement_all
-            end
-          else
-            # Increment position of intermediate items
-            #
-            # e.g., if moving an item from 5 to 2,
-            # move [2, 3, 4] to [3, 4, 5]
-            items = scope.where(
-              "#{quoted_position_column_with_table_name} >= ?", new_position
-            ).where(
-              "#{quoted_position_column_with_table_name} < ?", old_position
-            )
-
-            if update_one_by_one
-              items.order("#{quoted_position_column_with_table_name} DESC").each do |item|
-                item.increment!(position_column)
-              end
-            else
-              items.increment_all
-            end
-          end
-        end
-
+        
         def insert_at_position(position)
           return set_list_position(position) if new_record?
           with_lock do

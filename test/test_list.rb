@@ -40,7 +40,7 @@ def setup_db(position_options = {})
   end
 
   mixins = [ Mixin, ListMixin, ListMixinSub1, ListMixinSub2, ListWithStringScopeMixin,
-    ArrayScopeListMixin, ZeroBasedMixin, DefaultScopedMixin,
+    ArrayScopeListMixin, ZeroBasedMixin, DefaultScopedMixin, SequentialUpdatesMixin,
     DefaultScopedWhereMixin, TopAdditionMixin, NoAdditionMixin, QuotedList ]
 
   mixins << EnumArrayScopeListMixin if rails_4
@@ -128,6 +128,10 @@ class DefaultScopedWhereMixin < Mixin
   def self.for_active_false_tests
     unscoped.order('pos ASC').where(active: false)
   end
+end
+
+class SequentialUpdatesMixin < Mixin
+  acts_as_list column: "pos", sequential_updates: true
 end
 
 class TopAdditionMixin < Mixin
@@ -802,14 +806,14 @@ class NilPositionTest < ActsAsListTestCase
   end
 end
 
-class DefaultScopedNotNullUniquePositiveConstraintsTest < ActsAsListTestCase
+class SequentialUpdatesMixinNotNullUniquePositiveConstraintsTest < ActsAsListTestCase
   def setup
     setup_db null: false, unique: true, positive: true
-    (1..4).each { |counter| DefaultScopedMixin.create!({pos: counter}) }
+    (1..4).each { |counter| SequentialUpdatesMixin.create!({pos: counter}) }
   end
 
   def test_insert_at
-    new = DefaultScopedMixin.create
+    new = SequentialUpdatesMixin.create
     assert_equal 5, new.pos
 
     new.insert_at(1)
