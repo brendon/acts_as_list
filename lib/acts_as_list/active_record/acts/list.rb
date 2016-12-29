@@ -10,11 +10,19 @@ class << ActiveRecord::Base
   #   act more like an array in its indexing.
   # * +add_new_at+ - specifies whether objects get added to the :top or :bottom of the list. (default: +bottom+)
   #                   `nil` will result in new items not being added to the list on create.
-  # * +sequential_updates+ - specifies whether insert_at should update objects positions one by one
-  #   to respect unique not null table constraints
+  # * +sequential_updates+ - specifies whether insert_at should update objects positions during shuffling
+  #   one by one to respect position column unique not null constraint. 
+  #   Defaults to true if position column has unique index, otherwise false.
+  #   If constraint is <tt>deferrable initially deferred<tt>, overriding it with false will speed up insert_at.
   def acts_as_list(options = {})
     configuration = { column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom, sequential_updates: false }
     configuration.update(options) if options.is_a?(Hash)
+
+    if options[:sequential_updates].nil?
+      if connection.index_exists?(table_name, configuration[:column], unique: true)
+        configuration[:sequential_updates] = true
+      end
+    end
 
     caller_class = self
 

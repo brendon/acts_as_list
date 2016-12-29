@@ -806,10 +806,56 @@ class NilPositionTest < ActsAsListTestCase
   end
 end
 
+
+class SequentialUpdatesOptionDefaultTest < ActsAsListTestCase
+  def setup
+    setup_db
+  end
+
+  def test_sequential_updates_default_to_false
+    mocked_definer_call = MiniTest::Mock.new
+    mocked_definer_call.expect :call, true, [Mixin, false]
+
+    ActiveRecord::Acts::List::ShufflePositionsOnintermediateItemsDefiner.stub :call, mocked_definer_call do
+      Mixin.class_eval do
+        acts_as_list column: 'pos'
+      end
+    end
+
+    mocked_definer_call.verify
+  end
+end
+
 class SequentialUpdatesMixinNotNullUniquePositiveConstraintsTest < ActsAsListTestCase
   def setup
     setup_db null: false, unique: true, positive: true
     (1..4).each { |counter| SequentialUpdatesMixin.create!({pos: counter}) }
+  end
+
+  def test_sequential_updates_option_true_by_default
+    mocked_definer_call = MiniTest::Mock.new
+    mocked_definer_call.expect :call, true, [Mixin, true]
+
+    ActiveRecord::Acts::List::ShufflePositionsOnintermediateItemsDefiner.stub :call, mocked_definer_call do
+      Mixin.class_eval do
+        acts_as_list column: 'pos'
+      end
+    end
+
+    mocked_definer_call.verify
+  end
+
+  def test_sequential_updates_option_override_with_false
+    mocked_definer_call = MiniTest::Mock.new
+    mocked_definer_call.expect :call, true, [Mixin, false]
+
+    ActiveRecord::Acts::List::ShufflePositionsOnintermediateItemsDefiner.stub :call, mocked_definer_call do
+      Mixin.class_eval do
+        acts_as_list column: 'pos', sequential_updates: false
+      end
+    end
+
+    mocked_definer_call.verify
   end
 
   def test_insert_at
