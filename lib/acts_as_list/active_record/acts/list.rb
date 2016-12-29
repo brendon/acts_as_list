@@ -340,8 +340,8 @@ module ActiveRecord
             )
 
             if update_one_by_one
-              items.order("#{quoted_position_column_with_table_name} ASC").pluck(:id).each do |id|
-                acts_as_list_list.find(id).decrement!(position_column)
+              items.order("#{quoted_position_column_with_table_name} ASC").each do |item|
+                item.decrement!(position_column)
               end
             else
               items.decrement_all
@@ -358,8 +358,8 @@ module ActiveRecord
             )
 
             if update_one_by_one
-              items.order("#{quoted_position_column_with_table_name} DESC").pluck(:id).each do |id|
-                acts_as_list_list.find(id).increment!(position_column)
+              items.order("#{quoted_position_column_with_table_name} DESC").each do |item|
+                item.increment!(position_column)
               end
             else
               items.increment_all
@@ -376,7 +376,7 @@ module ActiveRecord
               # temporary move after bottom with gap, avoiding duplicate values
               # gap is required to leave room for position increments
               # positive number will be valid with unique not null check (>= 0) db constraint
-              tmp_position_after_everything = acts_as_list_class.unscoped.maximum(position_column).to_i + 2
+              tmp_position_after_everything = acts_as_list_class.maximum(position_column).to_i + 2
               set_list_position(tmp_position_after_everything)
               shuffle_positions_on_intermediate_items(old_position, position, id)
             else
