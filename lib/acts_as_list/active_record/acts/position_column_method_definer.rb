@@ -3,10 +3,8 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
     define_class_methods(caller_class, position_column)
     define_instance_methods(caller_class, position_column)
 
-    caller_class.class_eval do
-      # only add to attr_accessible
-      # if the class has some mass_assignment_protection
-      if defined?(accessible_attributes) and !accessible_attributes.blank?
+    if mass_assignment_protection_was_used_by_user?(caller_class)
+      caller_class.class_eval do
         attr_accessible position_column.to_sym
       end
     end
@@ -58,6 +56,12 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
         write_attribute(position_column, position)
         @position_changed = true
       end
+    end
+  end
+
+  def self.mass_assignment_protection_was_used_by_user?(caller_class)
+    caller_class.class_eval do
+      defined?(accessible_attributes) and !accessible_attributes.blank?
     end
   end
 end
