@@ -52,6 +52,8 @@ module ActiveRecord::Acts::List::ShufflePositionsOnintermediateItemsDefiner #:no
           end
         end
       end
+
+      private :shuffle_positions_on_intermediate_items
     end
   end
 end
