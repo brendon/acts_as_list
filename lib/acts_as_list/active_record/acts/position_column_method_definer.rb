@@ -59,7 +59,7 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
 
   def self.mass_assignment_protection_was_used_by_user?(caller_class)
     caller_class.class_eval do
-      defined?(accessible_attributes) and !accessible_attributes.blank?
+      respond_to?(:accessible_attributes) and !accessible_attributes.blank?
     end
   end
 
