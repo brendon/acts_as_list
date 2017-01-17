@@ -116,11 +116,16 @@ module Shared
       new_noup.reload
       assert_equal $default_position, new_noup.pos
 
-      last1 = ListMixin.order('pos').last
-      last2 = ListMixin.order('pos').last
+      last1 = ListMixin.where('pos IS NOT NULL').order('pos').last
+      last2 = ListMixin.where('pos IS NOT NULL').order('pos').last
       last1.insert_at(1)
       last2.insert_at(1)
-      assert_equal [$default_position, 1, 2, 3, 4, 5], ListMixin.where(parent_id: 20).order('pos').map(&:pos)
+      if ENV['DB'] == 'postgresql' and $default_position.nil?
+        expected = [1, 2, 3, 4, 5, nil] # postgreSQL sorts nil after numbers
+      else
+        expected = [$default_position, 1, 2, 3, 4, 5]
+      end
+      assert_equal expected, ListMixin.where(parent_id: 20).order('pos').map(&:pos)
     end
 
     def test_delete_middle
