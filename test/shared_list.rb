@@ -61,7 +61,7 @@ module Shared
       assert new.last?
 
       new = ListMixin.acts_as_list_no_update { ListMixin.create(parent_id: 20) }
-      assert_equal $default_position, new.pos
+      assert_equal_or_nil $default_position, new.pos
       assert_equal $default_position.is_a?(Fixnum), new.first?
       assert !new.last?
 
@@ -87,7 +87,7 @@ module Shared
       assert_equal 3, new.pos
 
       new_noup = ListMixin.acts_as_list_no_update { ListMixin.create(parent_id: 20) }
-      assert_equal $default_position, new_noup.pos
+      assert_equal_or_nil $default_position, new_noup.pos
 
       new4 = ListMixin.create(parent_id: 20)
       assert_equal 4, new4.pos
@@ -114,7 +114,7 @@ module Shared
       assert_equal 5, new4.pos
 
       new_noup.reload
-      assert_equal $default_position, new_noup.pos
+      assert_equal_or_nil $default_position, new_noup.pos
 
       last1 = ListMixin.where('pos IS NOT NULL').order('pos').last
       last2 = ListMixin.where('pos IS NOT NULL').order('pos').last
@@ -192,7 +192,7 @@ module Shared
       ListMixin.where(id: 2).first.remove_from_list
 
       assert_equal 1,   ListMixin.where(id: 1).first.pos
-      assert_equal nil, ListMixin.where(id: 2).first.pos
+      assert_nil        ListMixin.where(id: 2).first.pos
       assert_equal 2,   ListMixin.where(id: 3).first.pos
       assert_equal 3,   ListMixin.where(id: 4).first.pos
     end

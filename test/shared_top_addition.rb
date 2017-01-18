@@ -47,7 +47,7 @@ module Shared
       assert !new.last?
 
       new = TopAdditionMixin.acts_as_list_no_update { TopAdditionMixin.create(parent_id: 20) }
-      assert_equal $default_position, new.pos
+      assert_equal_or_nil $default_position, new.pos
       assert_equal $default_position.is_a?(Fixnum), new.first?
       assert !new.last?
 
@@ -73,7 +73,7 @@ module Shared
       assert_equal 1, new.pos
 
       new = TopAdditionMixin.acts_as_list_no_update { TopAdditionMixin.create(parent_id: 20) }
-      assert_equal $default_position, new.pos
+      assert_equal_or_nil $default_position, new.pos
 
       new4 = TopAdditionMixin.create(parent_id: 20)
       assert_equal 1, new4.pos

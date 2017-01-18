@@ -320,7 +320,7 @@ class DefaultScopedTest < ActsAsListTestCase
     assert new.last?
 
     new = DefaultScopedMixin.acts_as_list_no_update { DefaultScopedMixin.create }
-    assert_equal $default_position, new.pos
+    assert_equal_or_nil $default_position, new.pos
     assert_equal $default_position.is_a?(Fixnum), new.first?
     assert !new.last?
 
@@ -360,7 +360,7 @@ class DefaultScopedTest < ActsAsListTestCase
     assert_equal 6, new.pos
 
     new_noup = DefaultScopedMixin.acts_as_list_no_update { DefaultScopedMixin.create }
-    assert_equal $default_position, new_noup.pos
+    assert_equal_or_nil $default_position, new_noup.pos
 
     new = DefaultScopedMixin.create
     assert_equal 7, new.pos
@@ -390,7 +390,7 @@ class DefaultScopedTest < ActsAsListTestCase
     assert_equal 4, new4.pos
 
     new_noup.reload
-    assert_equal $default_position, new_noup.pos
+    assert_equal_or_nil $default_position, new_noup.pos
   end
 
   def test_update_position
@@ -424,7 +424,7 @@ class DefaultScopedWhereTest < ActsAsListTestCase
     assert new.last?
 
     new = DefaultScopedWhereMixin.acts_as_list_no_update { DefaultScopedWhereMixin.create }
-    assert_equal $default_position, new.pos
+    assert_equal_or_nil $default_position, new.pos
     assert_equal $default_position.is_a?(Fixnum), new.first?
     assert !new.last?
 
@@ -467,7 +467,7 @@ class DefaultScopedWhereTest < ActsAsListTestCase
     assert_equal 7, new.pos
 
     new_noup = DefaultScopedWhereMixin.acts_as_list_no_update { DefaultScopedWhereMixin.create }
-    assert_equal $default_position, new_noup.pos
+    assert_equal_or_nil $default_position, new_noup.pos
 
     new4 = DefaultScopedWhereMixin.create
     assert_equal 8, new4.pos
@@ -494,7 +494,7 @@ class DefaultScopedWhereTest < ActsAsListTestCase
     assert_equal 4, new4.pos
 
     new_noup.reload
-    assert_equal $default_position, new_noup.pos
+    assert_equal_or_nil $default_position, new_noup.pos
   end
 
   def test_update_position

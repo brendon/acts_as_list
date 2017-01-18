@@ -37,7 +37,12 @@ class JoinedTestCase < Minitest::Test
   end
 
   def teardown
-    ActiveRecord::Base.connection.tables.each do |table|
+    if ActiveRecord::VERSION::MAJOR >= 5
+      tables = ActiveRecord::Base.connection.data_sources
+    else
+      tables = ActiveRecord::Base.connection.tables
+    end
+    tables.each do |table|
       ActiveRecord::Base.connection.drop_table(table)
     end
     super
