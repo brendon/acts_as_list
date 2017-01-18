@@ -123,7 +123,7 @@ module Shared
       assert_equal 3, new.pos
 
       new_noup = ListMixinSub1.acts_as_list_no_update { ListMixinSub1.create("parent_id" => 20) }
-      assert_equal $default_position, new_noup.pos
+      assert_equal_or_nil $default_position, new_noup.pos
 
       new4 = ListMixin.create("parent_id" => 20)
       assert_equal 4, new4.pos
@@ -150,7 +150,7 @@ module Shared
       assert_equal 5, new4.pos
 
       new_noup.reload
-      assert_equal $default_position, new_noup.pos
+      assert_equal_or_nil $default_position, new_noup.pos
     end
 
     def test_delete_middle

@@ -23,3 +23,11 @@ end
 require "shared"
 
 # ActiveRecord::Base.logger = Logger.new(STDOUT)
+
+def assert_equal_or_nil(a, b)
+  if a.nil?
+    assert_nil b
+  else
+    assert_equal a, b
+  end
+end
