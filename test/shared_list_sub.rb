@@ -122,6 +122,9 @@ module Shared
       new = ListMixinSub1.create("parent_id" => 20)
       assert_equal 3, new.pos
 
+      new_noup = ListMixinSub1.acts_as_list_no_update { ListMixinSub1.create("parent_id" => 20) }
+      assert_equal $default_position, new_noup.pos
+
       new4 = ListMixin.create("parent_id" => 20)
       assert_equal 4, new4.pos
 
@@ -145,6 +148,9 @@ module Shared
 
       new4.reload
       assert_equal 5, new4.pos
+
+      new_noup.reload
+      assert_equal $default_position, new_noup.pos
     end
 
     def test_delete_middle
@@ -163,6 +169,12 @@ module Shared
       assert_equal [3, 4], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
 
       assert_equal 1, ListMixin.where(id: 3).first.pos
+      assert_equal 2, ListMixin.where(id: 4).first.pos
+
+      ListMixin.acts_as_list_no_update { ListMixin.where(id: 3).first.destroy }
+
+      assert_equal [4], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
+
       assert_equal 2, ListMixin.where(id: 4).first.pos
     end
 

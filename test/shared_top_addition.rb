@@ -46,9 +46,14 @@ module Shared
       assert new.first?
       assert !new.last?
 
+      new = TopAdditionMixin.acts_as_list_no_update { TopAdditionMixin.create(parent_id: 20) }
+      assert_equal $default_position, new.pos
+      assert_equal $default_position.is_a?(Fixnum), new.first?
+      assert !new.last?
+
       new = TopAdditionMixin.create(parent_id: 20)
       assert_equal 1, new.pos
-      assert new.first?
+      assert_equal $default_position.nil?, new.first?
       assert !new.last?
 
       new = TopAdditionMixin.create(parent_id: 0)
@@ -66,6 +71,9 @@ module Shared
 
       new = TopAdditionMixin.create(parent_id: 20)
       assert_equal 1, new.pos
+
+      new = TopAdditionMixin.acts_as_list_no_update { TopAdditionMixin.create(parent_id: 20) }
+      assert_equal $default_position, new.pos
 
       new4 = TopAdditionMixin.create(parent_id: 20)
       assert_equal 1, new4.pos
@@ -86,6 +94,13 @@ module Shared
 
       assert_equal 1, TopAdditionMixin.where(id: 1).first.pos
       assert_equal 2, TopAdditionMixin.where(id: 3).first.pos
+      assert_equal 3, TopAdditionMixin.where(id: 4).first.pos
+
+      TopAdditionMixin.acts_as_list_no_update { TopAdditionMixin.where(id: 3).first.destroy }
+
+      assert_equal [1, 4], TopAdditionMixin.where(parent_id: 5).order('pos').map(&:id)
+
+      assert_equal 1, TopAdditionMixin.where(id: 1).first.pos
       assert_equal 3, TopAdditionMixin.where(id: 4).first.pos
     end
 
