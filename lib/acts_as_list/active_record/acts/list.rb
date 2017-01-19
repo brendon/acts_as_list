@@ -5,7 +5,7 @@ class << ActiveRecord::Base
   # * +scope+ - restricts what is to be considered a list. Given a symbol, it'll attach <tt>_id</tt>
   #   (if it hasn't already been added) and use that as the foreign key restriction. It's also possible
   #   to give it an entire string that is interpolated if you need a tighter scope than just a foreign key.
-  #   Example: <tt>acts_as_list scope: "todo_list_id = #{todo_list_id} AND completed = 0"</tt>
+  #   Example: <tt>acts_as_list scope: 'todo_list_id = #{todo_list_id} AND completed = 0'</tt>
   # * +top_of_list+ - defines the integer used for the top of the list. Defaults to 1. Use 0 to make the collection
   #   act more like an array in its indexing.
   # * +add_new_at+ - specifies whether objects get added to the :top or :bottom of the list. (default: +bottom+)
