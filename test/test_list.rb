@@ -40,7 +40,7 @@ def setup_db(position_options = {})
   end
 
   mixins = [ Mixin, ListMixin, ListMixinSub1, ListMixinSub2, ListWithStringScopeMixin,
-    ArrayScopeListMixin, ZeroBasedMixin, DefaultScopedMixin, SequentialUpdatesMixin,
+    ArrayScopeListMixin, ZeroBasedMixin, DefaultScopedMixin,
     DefaultScopedWhereMixin, TopAdditionMixin, NoAdditionMixin, QuotedList ]
 
   mixins << EnumArrayScopeListMixin if rails_4
@@ -134,8 +134,8 @@ class SequentialUpdatesDefault < Mixin
   acts_as_list column: "pos"
 end
 
-class SequentialUpdatesMixin < Mixin
-  acts_as_list column: "pos", sequential_updates: true
+class SequentialUpdatesFalseMixin < Mixin
+  acts_as_list column: "pos", sequential_updates: false
 end
 
 class TopAdditionMixin < Mixin
@@ -810,60 +810,32 @@ class NilPositionTest < ActsAsListTestCase
   end
 end
 
-
 class SequentialUpdatesOptionDefaultTest < ActsAsListTestCase
   def setup
     setup_db
   end
 
-  def test_sequential_updates_default_to_false
-    mocked_definer_call = MiniTest::Mock.new
-    mocked_definer_call.expect :call, true, [SequentialUpdatesDefault, false]
-
-    ActiveRecord::Acts::List::ShufflePositionsOnintermediateItemsDefiner.stub :call, mocked_definer_call do
-      SequentialUpdatesDefault.class_eval do
-        acts_as_list column: 'pos'
-      end
-    end
-
-    mocked_definer_call.verify
+  def test_sequential_updates_default_to_false_without_unique_index
+    assert_equal false, SequentialUpdatesDefault.new.send(:sequential_updates?)
   end
 end
 
 class SequentialUpdatesMixinNotNullUniquePositiveConstraintsTest < ActsAsListTestCase
   def setup
     setup_db null: false, unique: true, positive: true
-    (1..4).each { |counter| SequentialUpdatesMixin.create!({pos: counter}) }
+    (1..4).each { |counter| SequentialUpdatesDefault.create!({pos: counter}) }
   end
 
-  def test_sequential_updates_option_true_by_default
-    mocked_definer_call = MiniTest::Mock.new
-    mocked_definer_call.expect :call, true, [SequentialUpdatesDefault, true]
-
-    ActiveRecord::Acts::List::ShufflePositionsOnintermediateItemsDefiner.stub :call, mocked_definer_call do
-      SequentialUpdatesDefault.class_eval do
-        acts_as_list column: 'pos'
-      end
-    end
-
-    mocked_definer_call.verify
+  def test_sequential_updates_default_to_true_with_unique_index
+    assert_equal true, SequentialUpdatesDefault.new.send(:sequential_updates?)
   end
 
   def test_sequential_updates_option_override_with_false
-    mocked_definer_call = MiniTest::Mock.new
-    mocked_definer_call.expect :call, true, [SequentialUpdatesDefault, false]
-
-    ActiveRecord::Acts::List::ShufflePositionsOnintermediateItemsDefiner.stub :call, mocked_definer_call do
-      SequentialUpdatesDefault.class_eval do
-        acts_as_list column: 'pos', sequential_updates: false
-      end
-    end
-
-    mocked_definer_call.verify
+    assert_equal false, SequentialUpdatesFalseMixin.new.send(:sequential_updates?)
   end
 
   def test_insert_at
-    new = SequentialUpdatesMixin.create
+    new = SequentialUpdatesDefault.create
     assert_equal 5, new.pos
 
     new.insert_at(1)
