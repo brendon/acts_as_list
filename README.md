@@ -123,6 +123,17 @@ default: `1`. Use this option to define the top of the list. Use 0 to make the c
 - `add_new_at`
 default: `:bottom`. Use this option to specify whether objects get added to the `:top` or `:bottom` of the list. `nil` will result in new items not being added to the list on create, i.e, position will be kept nil after create.
 
+## Disabling temporarily
+
+If you need to temporarily disable `acts_as_list` during specific operations such as mass-update or imports:
+```ruby
+TodoItem.acts_as_list_no_update do
+  perform_mass_update
+end
+```
+In an `acts_as_list_no_update` block, all callbacks are disabled, and positions are not updated. New records will be created with
+ the default value from the database. It is your responsibility to correctly manage `positions` values. 
+
 ## Versions
 As of version `0.7.5` Rails 5 is supported.
 

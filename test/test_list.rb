@@ -6,6 +6,8 @@ ActiveRecord::Base.establish_connection(db_config)
 ActiveRecord::Schema.verbose = false
 
 def setup_db(position_options = {})
+  $default_position = position_options[:default]
+  
   # sqlite cannot drop/rename/alter columns and add constraints after table creation
   sqlite = ENV.fetch("DB", "sqlite") == "sqlite"
 
@@ -342,6 +344,11 @@ class DefaultScopedTest < ActsAsListTestCase
     assert !new.first?
     assert new.last?
 
+    new = DefaultScopedMixin.acts_as_list_no_update { DefaultScopedMixin.create }
+    assert_equal_or_nil $default_position, new.pos
+    assert_equal $default_position.is_a?(Fixnum), new.first?
+    assert !new.last?
+
     new = DefaultScopedMixin.create
     assert_equal 7, new.pos
     assert !new.first?
@@ -377,6 +384,9 @@ class DefaultScopedTest < ActsAsListTestCase
     new = DefaultScopedMixin.create
     assert_equal 6, new.pos
 
+    new_noup = DefaultScopedMixin.acts_as_list_no_update { DefaultScopedMixin.create }
+    assert_equal_or_nil $default_position, new_noup.pos
+
     new = DefaultScopedMixin.create
     assert_equal 7, new.pos
 
@@ -403,6 +413,9 @@ class DefaultScopedTest < ActsAsListTestCase
 
     new4.reload
     assert_equal 4, new4.pos
+
+    new_noup.reload
+    assert_equal_or_nil $default_position, new_noup.pos
   end
 
   def test_update_position
@@ -434,6 +447,11 @@ class DefaultScopedWhereTest < ActsAsListTestCase
     assert_equal 6, new.pos
     assert !new.first?
     assert new.last?
+
+    new = DefaultScopedWhereMixin.acts_as_list_no_update { DefaultScopedWhereMixin.create }
+    assert_equal_or_nil $default_position, new.pos
+    assert_equal $default_position.is_a?(Fixnum), new.first?
+    assert !new.last?
 
     new = DefaultScopedWhereMixin.create
     assert_equal 7, new.pos
@@ -473,6 +491,9 @@ class DefaultScopedWhereTest < ActsAsListTestCase
     new = DefaultScopedWhereMixin.create
     assert_equal 7, new.pos
 
+    new_noup = DefaultScopedWhereMixin.acts_as_list_no_update { DefaultScopedWhereMixin.create }
+    assert_equal_or_nil $default_position, new_noup.pos
+
     new4 = DefaultScopedWhereMixin.create
     assert_equal 8, new4.pos
 
@@ -496,6 +517,9 @@ class DefaultScopedWhereTest < ActsAsListTestCase
 
     new4.reload
     assert_equal 4, new4.pos
+
+    new_noup.reload
+    assert_equal_or_nil $default_position, new_noup.pos
   end
 
   def test_update_position
@@ -550,10 +574,20 @@ class MultiDestroyTest < ActsAsListTestCase
     new3 = DefaultScopedMixin.create
     assert_equal 3, new3.pos
 
+    new4 = DefaultScopedMixin.create
+    assert_equal 4, new4.pos
+
     new1.destroy
     new2.destroy
     new3.reload
+    new4.reload
     assert_equal 1, new3.pos
+    assert_equal 2, new4.pos
+
+    DefaultScopedMixin.acts_as_list_no_update { new3.destroy }
+
+    new4.reload
+    assert_equal 2, new4.pos
   end
 end
 
