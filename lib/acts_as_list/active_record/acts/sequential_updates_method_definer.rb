@@ -1,4 +1,4 @@
-module ActiveRecord::Acts::List::SequentialUpdatesDefiner #:nodoc:
+module ActiveRecord::Acts::List::SequentialUpdatesMethodDefiner #:nodoc:
   def self.call(caller_class, column, sequential_updates_option)
     caller_class.class_eval do
       define_method :sequential_updates? do

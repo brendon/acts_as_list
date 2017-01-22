@@ -27,7 +27,7 @@ class << ActiveRecord::Base
 
     ActiveRecord::Acts::List::AuxMethodDefiner.call(caller_class)
     ActiveRecord::Acts::List::CallbackDefiner.call(caller_class, configuration[:add_new_at])
-    ActiveRecord::Acts::List::SequentialUpdatesDefiner.call(caller_class, configuration[:column], configuration[:sequential_updates])
+    ActiveRecord::Acts::List::SequentialUpdatesMethodDefiner.call(caller_class, configuration[:column], configuration[:sequential_updates])
 
     include ActiveRecord::Acts::List::InstanceMethods
     include ActiveRecord::Acts::List::NoUpdate
