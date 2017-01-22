@@ -1,9 +1,9 @@
 module ActiveRecord::Acts::List::SequentialUpdatesDefiner #:nodoc:
   def self.call(caller_class, column, sequential_updates_option)
     caller_class.class_eval do
-      @sequential_updates = nil
-
       define_method :sequential_updates? do
+        @sequential_updates = nil unless defined?(@sequential_updates)
+        
         if @sequential_updates.nil?
           if sequential_updates_option.nil?
             table_exists = caller_class.connection.table_exists?(caller_class.table_name)
