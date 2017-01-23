@@ -135,6 +135,8 @@ In an `acts_as_list_no_update` block, all callbacks are disabled, and positions 
  the default value from the database. It is your responsibility to correctly manage `positions` values. 
 
 ## Versions
+Version `0.9.0` adds `acts_as_list_no_update` (https://github.com/swanandp/acts_as_list/pull/244) and compatibility with not-null and uniqueness constraints on the database (https://github.com/swanandp/acts_as_list/pull/246). These additions shouldn't break compatibility with existing implementations.
+
 As of version `0.7.5` Rails 5 is supported.
 
 All versions `0.1.5` onwards require Rails 3.0.x and higher.
