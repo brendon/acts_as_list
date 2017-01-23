@@ -1,5 +1,43 @@
 # Change Log
 
+## [Unreleased](https://github.com/swanandp/acts_as_list/tree/HEAD)
+
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.0...HEAD)
+
+**Closed issues:**
+
+- highter\_items returns items with the same position value [\#247](https://github.com/swanandp/acts_as_list/issues/247)
+- Broken with unique constraint on position [\#245](https://github.com/swanandp/acts_as_list/issues/245)
+
+## [v0.9.0](https://github.com/swanandp/acts_as_list/tree/v0.9.0) (2017-01-23)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.8.2...v0.9.0)
+
+**Closed issues:**
+
+- warning: too many arguments for format string [\#239](https://github.com/swanandp/acts_as_list/issues/239)
+- Broken tests related to time comparison [\#238](https://github.com/swanandp/acts_as_list/issues/238)
+- Shuffling positions is halting the callback chain [\#234](https://github.com/swanandp/acts_as_list/issues/234)
+- Reorder positions [\#233](https://github.com/swanandp/acts_as_list/issues/233)
+- Tests break when upgrading from 0.7.2 to 0.7.4 [\#228](https://github.com/swanandp/acts_as_list/issues/228)
+- RE \#221 needing a test [\#226](https://github.com/swanandp/acts_as_list/issues/226)
+- Adding to existing model with data and methods don't work [\#209](https://github.com/swanandp/acts_as_list/issues/209)
+- Position is set incorrectly when circular dependencies exist [\#153](https://github.com/swanandp/acts_as_list/issues/153)
+
+**Merged pull requests:**
+
+- Revert "Updates documentation with valid string interpolation syntax" [\#250](https://github.com/swanandp/acts_as_list/pull/250) ([brendon](https://github.com/brendon))
+- Updates documentation with valid string interpolation syntax [\#249](https://github.com/swanandp/acts_as_list/pull/249) ([naveedkakal](https://github.com/naveedkakal))
+- Comply to tests warnings [\#248](https://github.com/swanandp/acts_as_list/pull/248) ([randoum](https://github.com/randoum))
+- insert\_at respects unique not null check \(\>= 0\) db constraints [\#246](https://github.com/swanandp/acts_as_list/pull/246) ([zharikovpro](https://github.com/zharikovpro))
+- acts\_as\_list\_no\_update [\#244](https://github.com/swanandp/acts_as_list/pull/244) ([randoum](https://github.com/randoum))
+- Update README.md [\#243](https://github.com/swanandp/acts_as_list/pull/243) ([rahuldstiwari](https://github.com/rahuldstiwari))
+- Fixed tests to prevent warning: too many arguments for format string [\#242](https://github.com/swanandp/acts_as_list/pull/242) ([brendon](https://github.com/brendon))
+- Be explicit about ordering when mapping :pos [\#241](https://github.com/swanandp/acts_as_list/pull/241) ([brendon](https://github.com/brendon))
+- Improve load method [\#240](https://github.com/swanandp/acts_as_list/pull/240) ([brendon](https://github.com/brendon))
+- Fix non regular sequence movement [\#237](https://github.com/swanandp/acts_as_list/pull/237) ([tiagotex](https://github.com/tiagotex))
+- Add travis config for testing against multiple databases [\#236](https://github.com/swanandp/acts_as_list/pull/236) ([fschwahn](https://github.com/fschwahn))
+- Extract modules [\#229](https://github.com/swanandp/acts_as_list/pull/229) ([ledestin](https://github.com/ledestin))
+
 ## [v0.8.2](https://github.com/swanandp/acts_as_list/tree/v0.8.2) (2016-09-23)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.8.1...v0.8.2)
 
