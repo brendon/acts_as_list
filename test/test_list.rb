@@ -7,16 +7,33 @@ ActiveRecord::Schema.verbose = false
 
 def setup_db(position_options = {})
   $default_position = position_options[:default]
+  
+  # sqlite cannot drop/rename/alter columns and add constraints after table creation
+  sqlite = ENV.fetch("DB", "sqlite") == "sqlite"
 
   # AR caches columns options like defaults etc. Clear them!
   ActiveRecord::Base.connection.create_table :mixins do |t|
-    t.column :pos, :integer, position_options
+    t.column :pos, :integer, position_options unless position_options[:positive] && sqlite
     t.column :active, :boolean, default: true
     t.column :parent_id, :integer
     t.column :parent_type, :string
     t.column :created_at, :datetime
     t.column :updated_at, :datetime
     t.column :state, :integer
+  end
+
+  if position_options[:unique] && !(sqlite && position_options[:positive])
+    ActiveRecord::Base.connection.add_index :mixins, :pos, unique: true
+  end
+  
+  if position_options[:positive]
+    if sqlite
+      # SQLite cannot add constraint after table creation, also cannot add unique inside ADD COLUMN
+      ActiveRecord::Base.connection.execute('ALTER TABLE mixins ADD COLUMN pos integer8 NOT NULL CHECK (pos > 0) DEFAULT 1')
+      ActiveRecord::Base.connection.execute('CREATE UNIQUE INDEX index_mixins_on_pos ON mixins(pos)')
+    else
+      ActiveRecord::Base.connection.execute('ALTER TABLE mixins ADD CONSTRAINT pos_check CHECK (pos > 0)')
+    end
   end
 
   # This table is used to test table names and column names quoting
@@ -113,6 +130,14 @@ class DefaultScopedWhereMixin < Mixin
   def self.for_active_false_tests
     unscoped.order('pos ASC').where(active: false)
   end
+end
+
+class SequentialUpdatesDefault < Mixin
+  acts_as_list column: "pos"
+end
+
+class SequentialUpdatesFalseMixin < Mixin
+  acts_as_list column: "pos", sequential_updates: false
 end
 
 class TopAdditionMixin < Mixin
@@ -816,5 +841,44 @@ class NilPositionTest < ActsAsListTestCase
 
     assert_equal [1, 2, 3], DefaultScopedMixin.all.map(&:pos)
     assert_equal [2, 3, 1], DefaultScopedMixin.all.map(&:id)
+  end
+end
+
+class SequentialUpdatesOptionDefaultTest < ActsAsListTestCase
+  def setup
+    setup_db
+  end
+
+  def test_sequential_updates_default_to_false_without_unique_index
+    assert_equal false, SequentialUpdatesDefault.new.send(:sequential_updates?)
+  end
+end
+
+class SequentialUpdatesMixinNotNullUniquePositiveConstraintsTest < ActsAsListTestCase
+  def setup
+    setup_db null: false, unique: true, positive: true
+    (1..4).each { |counter| SequentialUpdatesDefault.create!({pos: counter}) }
+  end
+
+  def test_sequential_updates_default_to_true_with_unique_index
+    assert_equal true, SequentialUpdatesDefault.new.send(:sequential_updates?)
+  end
+
+  def test_sequential_updates_option_override_with_false
+    assert_equal false, SequentialUpdatesFalseMixin.new.send(:sequential_updates?)
+  end
+
+  def test_insert_at
+    new = SequentialUpdatesDefault.create
+    assert_equal 5, new.pos
+
+    new.insert_at(1)
+    assert_equal 1, new.pos
+
+    new.insert_at(5)
+    assert_equal 5, new.pos
+
+    new.insert_at(3)
+    assert_equal 3, new.pos
   end
 end

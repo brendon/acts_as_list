@@ -10,8 +10,12 @@ class << ActiveRecord::Base
   #   act more like an array in its indexing.
   # * +add_new_at+ - specifies whether objects get added to the :top or :bottom of the list. (default: +bottom+)
   #                   `nil` will result in new items not being added to the list on create.
+  # * +sequential_updates+ - specifies whether insert_at should update objects positions during shuffling
+  #   one by one to respect position column unique not null constraint. 
+  #   Defaults to true if position column has unique index, otherwise false.
+  #   If constraint is <tt>deferrable initially deferred<tt>, overriding it with false will speed up insert_at.
   def acts_as_list(options = {})
-    configuration = { column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom}
+    configuration = { column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom }
     configuration.update(options) if options.is_a?(Hash)
 
     caller_class = self
@@ -23,6 +27,7 @@ class << ActiveRecord::Base
 
     ActiveRecord::Acts::List::AuxMethodDefiner.call(caller_class)
     ActiveRecord::Acts::List::CallbackDefiner.call(caller_class, configuration[:add_new_at])
+    ActiveRecord::Acts::List::SequentialUpdatesMethodDefiner.call(caller_class, configuration[:column], configuration[:sequential_updates])
 
     include ActiveRecord::Acts::List::InstanceMethods
     include ActiveRecord::Acts::List::NoUpdate
@@ -316,6 +321,10 @@ module ActiveRecord
         end
 
         # Reorders intermediate items to support moving an item from old_position to new_position.
+        # unique constraint prevents regular increment_all and forces to do increments one by one
+        # http://stackoverflow.com/questions/7703196/sqlite-increment-unique-integer-field
+        # both SQLite and PostgreSQL (and most probably MySQL too) has same issue
+        # that's why *sequential_updates?* check alters implementation behavior
         def shuffle_positions_on_intermediate_items(old_position, new_position, avoid_id = nil)
           return if old_position == new_position
           scope = acts_as_list_list
@@ -329,44 +338,56 @@ module ActiveRecord
             #
             # e.g., if moving an item from 2 to 5,
             # move [3, 4, 5] to [2, 3, 4]
-            scope.where(
+            items = scope.where(
               "#{quoted_position_column_with_table_name} > ?", old_position
             ).where(
               "#{quoted_position_column_with_table_name} <= ?", new_position
-            ).decrement_all
+            )
+
+            if sequential_updates?
+              items.order("#{quoted_position_column_with_table_name} ASC").each do |item|
+                item.decrement!(position_column)
+              end
+            else
+              items.decrement_all
+            end
           else
             # Increment position of intermediate items
             #
             # e.g., if moving an item from 5 to 2,
             # move [2, 3, 4] to [3, 4, 5]
-            scope.where(
+            items = scope.where(
               "#{quoted_position_column_with_table_name} >= ?", new_position
             ).where(
               "#{quoted_position_column_with_table_name} < ?", old_position
-            ).increment_all
+            )
+
+            if sequential_updates?
+              items.order("#{quoted_position_column_with_table_name} DESC").each do |item|
+                item.increment!(position_column)
+              end
+            else
+              items.increment_all
+            end
           end
         end
-
+        
         def insert_at_position(position)
           return set_list_position(position) if new_record?
           with_lock do
             if in_list?
               old_position = send(position_column).to_i
               return if position == old_position
-              shuffle_positions_on_intermediate_items(old_position, position)
+              # temporary move after bottom with gap, avoiding duplicate values
+              # gap is required to leave room for position increments
+              # positive number will be valid with unique not null check (>= 0) db constraint
+              temporary_position = acts_as_list_class.maximum(position_column).to_i + 2
+              set_list_position(temporary_position)
+              shuffle_positions_on_intermediate_items(old_position, position, id)
             else
               increment_positions_on_lower_items(position)
             end
             set_list_position(position)
-          end
-        end
-
-        # used by insert_at_position instead of remove_from_list, as postgresql raises error if position_column has non-null constraint
-        def store_at_0
-          if in_list?
-            old_position = send(position_column).to_i
-            set_list_position(0)
-            decrement_positions_on_lower_items(old_position)
           end
         end
 
