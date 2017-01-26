@@ -1,13 +1,17 @@
 # Change Log
 
-## [Unreleased](https://github.com/swanandp/acts_as_list/tree/HEAD)
-
-[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.0...HEAD)
+## [v0.9.1](https://github.com/swanandp/acts_as_list/tree/v0.9.1) (2017-01-26)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.0...v0.9.1)
 
 **Closed issues:**
 
+- DEPRECATION WARNING on rails 5.0 as of acts\_as\_list 0.9 [\#251](https://github.com/swanandp/acts_as_list/issues/251)
 - highter\_items returns items with the same position value [\#247](https://github.com/swanandp/acts_as_list/issues/247)
 - Broken with unique constraint on position [\#245](https://github.com/swanandp/acts_as_list/issues/245)
+
+**Merged pull requests:**
+
+- fixes \#251 table\_exists? deprecation warning with Rails 5.0 [\#252](https://github.com/swanandp/acts_as_list/pull/252) ([zharikovpro](https://github.com/zharikovpro))
 
 ## [v0.9.0](https://github.com/swanandp/acts_as_list/tree/v0.9.0) (2017-01-23)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.8.2...v0.9.0)
