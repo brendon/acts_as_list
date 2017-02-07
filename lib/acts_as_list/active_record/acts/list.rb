@@ -268,12 +268,13 @@ module ActiveRecord
 
         # Returns the bottom item
         def bottom_item(except = nil)
-          conditions = except ? "#{quoted_table_name}.#{self.class.primary_key} != #{self.class.connection.quote(except.id)}" : {}
-          acts_as_list_list.in_list.where(
-            conditions
-          ).order(
-            "#{quoted_position_column_with_table_name} DESC"
-          ).first
+          scope = acts_as_list_list
+
+          if except
+            scope = scope.where("#{quoted_table_name}.#{self.class.primary_key} != ?", except.id)
+          end
+
+          scope.in_list.order("#{quoted_position_column_with_table_name} DESC").first
         end
 
         # Forces item to assume the bottom position in the list.
@@ -297,7 +298,7 @@ module ActiveRecord
           scope = acts_as_list_list
 
           if avoid_id
-            scope = scope.where("#{quoted_table_name}.#{self.class.primary_key} != ?", self.class.connection.quote(avoid_id))
+            scope = scope.where("#{quoted_table_name}.#{self.class.primary_key} != ?", avoid_id)
           end
 
           scope.where("#{quoted_position_column_with_table_name} >= ?", position).increment_all
@@ -330,7 +331,7 @@ module ActiveRecord
           scope = acts_as_list_list
 
           if avoid_id
-            scope = scope.where("#{quoted_table_name}.#{self.class.primary_key} != ?", self.class.connection.quote(avoid_id))
+            scope = scope.where("#{quoted_table_name}.#{self.class.primary_key} != ?", avoid_id)
           end
 
           if old_position < new_position
