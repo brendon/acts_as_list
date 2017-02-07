@@ -1,5 +1,12 @@
 # Change Log
 
+## [v0.9.2](https://github.com/swanandp/acts_as_list/tree/v0.9.2) (2017-02-07)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.1...v0.9.2)
+
+**Closed issues:**
+
+- Getting invalid input syntax for uuid [\#253](https://github.com/swanandp/acts_as_list/issues/253)
+
 ## [v0.9.1](https://github.com/swanandp/acts_as_list/tree/v0.9.1) (2017-01-26)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.0...v0.9.1)
 
