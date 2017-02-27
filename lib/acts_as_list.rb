@@ -1,5 +1,5 @@
 require 'acts_as_list/active_record/acts/list'
-require "acts_as_list/active_record/acts/column_method_definer"
+require "acts_as_list/active_record/acts/position_column_method_definer"
 require "acts_as_list/active_record/acts/scope_method_definer"
 require "acts_as_list/active_record/acts/top_of_list_method_definer"
 require "acts_as_list/active_record/acts/add_new_at_method_definer"

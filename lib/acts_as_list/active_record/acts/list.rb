@@ -20,7 +20,7 @@ class << ActiveRecord::Base
 
     caller_class = self
 
-    ActiveRecord::Acts::List::ColumnMethodDefiner.call(caller_class, configuration[:column])
+    ActiveRecord::Acts::List::PositionColumnMethodDefiner.call(caller_class, configuration[:column])
     ActiveRecord::Acts::List::ScopeMethodDefiner.call(caller_class, configuration[:scope])
     ActiveRecord::Acts::List::TopOfListMethodDefiner.call(caller_class, configuration[:top_of_list])
     ActiveRecord::Acts::List::AddNewAtMethodDefiner.call(caller_class, configuration[:add_new_at])
