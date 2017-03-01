@@ -20,7 +20,7 @@ class << ActiveRecord::Base
 
     caller_class = self
 
-    ActiveRecord::Acts::List::ColumnMethodDefiner.call(caller_class, configuration[:column])
+    ActiveRecord::Acts::List::PositionColumnMethodDefiner.call(caller_class, configuration[:column])
     ActiveRecord::Acts::List::ScopeMethodDefiner.call(caller_class, configuration[:scope])
     ActiveRecord::Acts::List::TopOfListMethodDefiner.call(caller_class, configuration[:top_of_list])
     ActiveRecord::Acts::List::AddNewAtMethodDefiner.call(caller_class, configuration[:add_new_at])
@@ -393,13 +393,21 @@ module ActiveRecord
         end
 
         def update_positions
-          old_position = send("#{position_column}_was") || bottom_position_in_list + 1
+          old_position = position_before_save || bottom_position_in_list + 1
           new_position = send(position_column).to_i
 
           return unless acts_as_list_list.where(
             "#{quoted_position_column_with_table_name} = #{new_position}"
           ).count > 1
           shuffle_positions_on_intermediate_items old_position, new_position, id
+        end
+
+        def position_before_save
+          if ActiveRecord::VERSION::MAJOR >= 5 && ActiveRecord::VERSION::MINOR >= 1
+            send("#{position_column}_before_last_save")
+          else
+            send("#{position_column}_was")
+          end
         end
 
         def internal_scope_changed?
