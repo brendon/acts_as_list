@@ -892,7 +892,7 @@ class NoUpdateForCollectionClassesTest < ActsAsListTestCase
   end
 
   def test_no_update_for_single_class
-    ListMixin.acts_as_list_no_update { @mixin_1.update(pos: 2) }
+    ListMixin.acts_as_list_no_update { @mixin_1.update_attributes(pos: 2) }
     assert_equal @mixin_1.pos, 2
     assert_equal @mixin_2.pos, 2
   end
@@ -927,7 +927,7 @@ class NoUpdateForCollectionClassesTest < ActsAsListTestCase
   private
 
   def udpate_mixin_and_sub_mixin
-    @mixin_1.update(pos: 2)
-    @sub_mixin_1.update(pos: 2)
+    @mixin_1.update_attributes(pos: 2)
+    @sub_mixin_1.update_attributes(pos: 2)
   end
 end
