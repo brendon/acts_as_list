@@ -36,14 +36,14 @@ module ActiveRecord
           #   TodoList.first.update(position: 2)
           # end
           #
-          # Also you can pass an argument as array of extracted calsses
-          # to disable from database updates.
-          # It might be any class that is able to acts as list.
+          # You can also pass an array of classes as an argument to disable database updates on just those classes.
+          # It can be any ActiveRecord class that has acts_as_list enabled.
           #
           # ==== Examples
           #
           # class TodoList < ActiveRecord::Base
           #   has_many :todo_items, -> { order(position: :asc) }
+          #   acts_as_list
           # end
           #
           # class TodoItem < ActiveRecord::Base
@@ -62,22 +62,23 @@ module ActiveRecord
           #   TodoItem.find(10).update(position: 2)
           #   TodoAttachment.find(10).update(position: 1)
           #   TodoAttachment.find(11).update(position: 2)
+          #   TodoList.find(2).update(position: 3) # For this instance the callbacks will be called because we haven't passed the class as an argument
           # end
 
-          def acts_as_list_no_update(extra_klasses = [], &block)
-            return raise ArrayTypeError unless extra_klasses.is_a?(Array)
+          def acts_as_list_no_update(extra_classes = [], &block)
+            return raise ArrayTypeError unless extra_classes.is_a?(Array)
 
-            extra_klasses << self
+            extra_classes << self
 
-            return raise DisparityClassesError unless active_record_objects?(extra_klasses)
+            return raise DisparityClassesError unless active_record_objects?(extra_classes)
 
-            NoUpdate.apply_to(extra_klasses, &block)
+            NoUpdate.apply_to(extra_classes, &block)
           end
 
           private
 
-          def active_record_objects?(extra_klasses)
-            extra_klasses.all? { |klass| klass.ancestors.include? ActiveRecord::Base }
+          def active_record_objects?(extra_classes)
+            extra_classes.all? { |klass| klass.ancestors.include? ActiveRecord::Base }
           end
         end
 

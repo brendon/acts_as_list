@@ -134,10 +134,11 @@ end
 In an `acts_as_list_no_update` block, all callbacks are disabled, and positions are not updated. New records will be created with
  the default value from the database. It is your responsibility to correctly manage `positions` values.
 
-Also you can pass an argument as array of extracted calsses to disable from database updates. It might be any ActiveRecord class that is able to acts as list.
+You can also pass an array of classes as an argument to disable database updates on just those classes. It can be any ActiveRecord class that has acts_as_list enabled.
 ```ruby
 class TodoList < ActiveRecord::Base
   has_many :todo_items, -> { order(position: :asc) }
+  acts_as_list
 end
 
 class TodoItem < ActiveRecord::Base
@@ -156,6 +157,7 @@ TodoItem.acts_as_list_no_update([TodoAttachment]) do
   TodoItem.find(10).update(position: 2)
   TodoAttachment.find(10).update(position: 1)
   TodoAttachment.find(11).update(position: 2)
+  TodoList.find(2).update(position: 3) # For this instance the callbacks will be called because we haven't passed the class as an argument
 end
 ```
 

@@ -1,10 +1,6 @@
 # NOTE: following now done in helper.rb (better Readability)
 require 'helper'
 
-db_config = YAML.load_file(File.expand_path("../database.yml", __FILE__)).fetch(ENV["DB"] || "sqlite")
-ActiveRecord::Base.establish_connection(db_config)
-ActiveRecord::Schema.verbose = false
-
 def setup_db(position_options = {})
   $default_position = position_options[:default]
 
@@ -55,27 +51,6 @@ end
 
 def setup_db_with_default
   setup_db default: 0
-end
-
-# Returns true if ActiveRecord is rails3,4 version
-def rails_3
-  defined?(ActiveRecord::VERSION) && ActiveRecord::VERSION::MAJOR >= 3
-end
-
-def rails_4
-  defined?(ActiveRecord::VERSION) && ActiveRecord::VERSION::MAJOR >= 4
-end
-
-def teardown_db
-  if ActiveRecord::VERSION::MAJOR >= 5
-    tables = ActiveRecord::Base.connection.data_sources
-  else
-    tables = ActiveRecord::Base.connection.tables
-  end
-
-  tables.each do |table|
-    ActiveRecord::Base.connection.drop_table(table)
-  end
 end
 
 class Mixin < ActiveRecord::Base
@@ -880,54 +855,5 @@ class SequentialUpdatesMixinNotNullUniquePositiveConstraintsTest < ActsAsListTes
 
     new.insert_at(3)
     assert_equal 3, new.pos
-  end
-end
-
-class NoUpdateForCollectionClassesTest < ActsAsListTestCase
-  def setup
-    setup_db
-
-    @mixin_1, @mixin_2 = (1..2).map { |counter| ListMixin.create!(pos: counter) }
-    @sub_mixin_1, @sub_mixin_2 = (1..2).map { |counter| ListMixinSub1.create!(pos: counter) }
-  end
-
-  def test_no_update_for_single_class
-    ListMixin.acts_as_list_no_update { @mixin_1.update_attributes(pos: 2) }
-    assert_equal @mixin_1.pos, 2
-    assert_equal @mixin_2.pos, 2
-  end
-
-  def test_no_update_for_different_class
-    ListMixin.acts_as_list_no_update([ListMixinSub1]) do
-      udpate_mixin_and_sub_mixin
-    end
-
-    assert_equal @mixin_1.pos, 2
-    assert_equal @mixin_2.pos, 2
-    assert_equal @sub_mixin_1.pos, 2
-    assert_equal @sub_mixin_2.pos, 2
-  end
-
-  def test_raising_array_type_error
-    exception = assert_raises ActiveRecord::Acts::List::NoUpdate::ArrayTypeError do
-      ListMixin.acts_as_list_no_update(nil)
-    end
-
-    assert_equal("The first argument must be an array", exception.message )
-  end
-
-  def test_non_active_record_error
-    exception = assert_raises ActiveRecord::Acts::List::NoUpdate::DisparityClassesError do
-      ListMixin.acts_as_list_no_update([Class])
-    end
-
-    assert_equal("The first argument should contain ActiveRecord or ApplicationRecord classes", exception.message )
-  end
-
-  private
-
-  def udpate_mixin_and_sub_mixin
-    @mixin_1.update_attributes(pos: 2)
-    @sub_mixin_1.update_attributes(pos: 2)
   end
 end
