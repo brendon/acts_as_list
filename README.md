@@ -27,27 +27,27 @@ At first, you need to add a `position` column to desired table:
 
     rails g migration AddPositionToTodoItem position:integer
     rake db:migrate
-    
-After that you can use `acts_as_list` method in the model: 
+
+After that you can use `acts_as_list` method in the model:
 
 ```ruby
 class TodoList < ActiveRecord::Base
   has_many :todo_items, -> { order(position: :asc) }
 end
-    
+
 class TodoItem < ActiveRecord::Base
   belongs_to :todo_list
   acts_as_list scope: :todo_list
 end
 
-todo_list = TodoList.find(...)    
+todo_list = TodoList.find(...)
 todo_list.todo_items.first.move_to_bottom
 todo_list.todo_items.last.move_higher
 ```
 
 ## Instance Methods Added To ActiveRecord Models
 
-You'll have a number of methods added to each instance of the ActiveRecord model that to which `acts_as_list` is added. 
+You'll have a number of methods added to each instance of the ActiveRecord model that to which `acts_as_list` is added.
 
 In `acts_as_list`, "higher" means further up the list (a lower `position`), and "lower" means further down the list (a higher `position`). That can be confusing, so it might make sense to add tests that validate that you're using the right method given your context.
 
@@ -132,7 +132,34 @@ TodoItem.acts_as_list_no_update do
 end
 ```
 In an `acts_as_list_no_update` block, all callbacks are disabled, and positions are not updated. New records will be created with
- the default value from the database. It is your responsibility to correctly manage `positions` values. 
+ the default value from the database. It is your responsibility to correctly manage `positions` values.
+
+You can also pass an array of classes as an argument to disable database updates on just those classes. It can be any ActiveRecord class that has acts_as_list enabled.
+```ruby
+class TodoList < ActiveRecord::Base
+  has_many :todo_items, -> { order(position: :asc) }
+  acts_as_list
+end
+
+class TodoItem < ActiveRecord::Base
+  belongs_to :todo_list
+  has_many :todo_attachments, -> { order(position: :asc) }
+
+  acts_as_list scope: :todo_list
+end
+
+class TodoAttachment < ActiveRecord::Base
+  belongs_to :todo_list
+  acts_as_list scope: :todo_item
+end
+
+TodoItem.acts_as_list_no_update([TodoAttachment]) do
+  TodoItem.find(10).update(position: 2)
+  TodoAttachment.find(10).update(position: 1)
+  TodoAttachment.find(11).update(position: 2)
+  TodoList.find(2).update(position: 3) # For this instance the callbacks will be called because we haven't passed the class as an argument
+end
+```
 
 ## Versions
 Version `0.9.0` adds `acts_as_list_no_update` (https://github.com/swanandp/acts_as_list/pull/244) and compatibility with not-null and uniqueness constraints on the database (https://github.com/swanandp/acts_as_list/pull/246). These additions shouldn't break compatibility with existing implementations.
@@ -152,7 +179,7 @@ All versions `0.1.5` onwards require Rails 3.0.x and higher.
 1. Sort based feature
 
 ## Contributing to `acts_as_list`
- 
+
 - Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet
 - Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it
 - Fork the project

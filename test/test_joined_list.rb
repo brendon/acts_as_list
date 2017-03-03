@@ -1,9 +1,5 @@
 require 'helper'
 
-db_config = YAML.load_file(File.expand_path("../database.yml", __FILE__)).fetch(ENV["DB"] || "sqlite")
-ActiveRecord::Base.establish_connection(db_config)
-ActiveRecord::Schema.verbose = false
-
 class Section < ActiveRecord::Base
   has_many :items
   acts_as_list
@@ -37,14 +33,7 @@ class JoinedTestCase < Minitest::Test
   end
 
   def teardown
-    if ActiveRecord::VERSION::MAJOR >= 5
-      tables = ActiveRecord::Base.connection.data_sources
-    else
-      tables = ActiveRecord::Base.connection.tables
-    end
-    tables.each do |table|
-      ActiveRecord::Base.connection.drop_table(table)
-    end
+    teardown_db
     super
   end
 end

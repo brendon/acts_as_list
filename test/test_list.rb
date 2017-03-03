@@ -1,13 +1,9 @@
 # NOTE: following now done in helper.rb (better Readability)
 require 'helper'
 
-db_config = YAML.load_file(File.expand_path("../database.yml", __FILE__)).fetch(ENV["DB"] || "sqlite")
-ActiveRecord::Base.establish_connection(db_config)
-ActiveRecord::Schema.verbose = false
-
 def setup_db(position_options = {})
   $default_position = position_options[:default]
-  
+
   # sqlite cannot drop/rename/alter columns and add constraints after table creation
   sqlite = ENV.fetch("DB", "sqlite") == "sqlite"
 
@@ -25,7 +21,7 @@ def setup_db(position_options = {})
   if position_options[:unique] && !(sqlite && position_options[:positive])
     ActiveRecord::Base.connection.add_index :mixins, :pos, unique: true
   end
-  
+
   if position_options[:positive]
     if sqlite
       # SQLite cannot add constraint after table creation, also cannot add unique inside ADD COLUMN
@@ -55,27 +51,6 @@ end
 
 def setup_db_with_default
   setup_db default: 0
-end
-
-# Returns true if ActiveRecord is rails3,4 version
-def rails_3
-  defined?(ActiveRecord::VERSION) && ActiveRecord::VERSION::MAJOR >= 3
-end
-
-def rails_4
-  defined?(ActiveRecord::VERSION) && ActiveRecord::VERSION::MAJOR >= 4
-end
-
-def teardown_db
-  if ActiveRecord::VERSION::MAJOR >= 5
-    tables = ActiveRecord::Base.connection.data_sources
-  else
-    tables = ActiveRecord::Base.connection.tables
-  end
-
-  tables.each do |table|
-    ActiveRecord::Base.connection.drop_table(table)
-  end
 end
 
 class Mixin < ActiveRecord::Base

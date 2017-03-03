@@ -20,6 +20,31 @@ if defined?(ActiveRecord::VERSION) &&
   ActiveRecord::Base.raise_in_transactional_callbacks = true
 end
 
+db_config = YAML.load_file(File.expand_path("../database.yml", __FILE__)).fetch(ENV["DB"] || "sqlite")
+ActiveRecord::Base.establish_connection(db_config)
+ActiveRecord::Schema.verbose = false
+
+# Returns true if ActiveRecord is rails 3, 4 version
+def rails_3
+  defined?(ActiveRecord::VERSION) && ActiveRecord::VERSION::MAJOR >= 3
+end
+
+def rails_4
+  defined?(ActiveRecord::VERSION) && ActiveRecord::VERSION::MAJOR >= 4
+end
+
+def teardown_db
+  if ActiveRecord::VERSION::MAJOR >= 5
+    tables = ActiveRecord::Base.connection.data_sources
+  else
+    tables = ActiveRecord::Base.connection.tables
+  end
+
+  tables.each do |table|
+    ActiveRecord::Base.connection.drop_table(table)
+  end
+end
+
 require "shared"
 
 # ActiveRecord::Base.logger = Logger.new(STDOUT)
