@@ -17,6 +17,10 @@ module ActiveRecord::Acts::List::ScopeMethodDefiner #:nodoc:
         define_method :scope_changed? do
           changed.include?(scope_name.to_s)
         end
+
+        define_method :destroyed_via_scope? do
+          destroyed_by_association.second.foreign_key == scope.to_s
+        end
       elsif scope.is_a?(Array)
         define_method :scope_condition do
           scope.inject({}) do |hash, column|
@@ -27,12 +31,20 @@ module ActiveRecord::Acts::List::ScopeMethodDefiner #:nodoc:
         define_method :scope_changed? do
           (scope_condition.keys & changed.map(&:to_sym)).any?
         end
+
+        define_method :destroyed_via_scope? do
+          scope_condition.keys.include? destroyed_by_association.second.foreign_key.to_sym
+        end
       else
         define_method :scope_condition do
           eval "%{#{scope}}"
         end
 
         define_method :scope_changed? do
+          false
+        end
+
+        define_method :destroyed_via_scope? do
           false
         end
       end
