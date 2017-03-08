@@ -33,7 +33,7 @@ class NoUpdateForCollectionClassesTestCase < Minitest::Test
     end
 
     ActiveRecord::Base.connection.schema_cache.clear!
-    [TodoList, Item, TodoItemAttachment].each(&:reset_column_information)
+    [TodoList, TodoItem, TodoItemAttachment].each(&:reset_column_information)
     super
   end
 
