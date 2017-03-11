@@ -12,6 +12,7 @@ group :test do
   gem "minitest", "~> 5.0"
   gem "test_after_commit", "~> 0.4.2"
   gem "timecop"
+  gem "mocha"
 end
 
 group :sqlite do
