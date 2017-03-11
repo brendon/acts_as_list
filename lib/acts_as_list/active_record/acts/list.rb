@@ -410,10 +410,6 @@ module ActiveRecord
           end
         end
 
-        def set_destroyed_by_association_foreign_key
-          @destroyed_by_association_foreign_key = destroyed_by_association && destroyed_by_association.foreign_key
-        end
-
         def internal_scope_changed?
           return @scope_changed if defined?(@scope_changed)
 

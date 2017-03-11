@@ -19,8 +19,8 @@ module ActiveRecord::Acts::List::ScopeMethodDefiner #:nodoc:
         end
 
         define_method :destroyed_via_scope? do
-          return false unless @destroyed_by_association_foreign_key
-          @destroyed_by_association_foreign_key.to_sym == scope
+          return false if ActiveRecord::VERSION::MAJOR < 4
+          scope == (destroyed_by_association && destroyed_by_association.foreign_key.to_sym)
         end
       elsif scope.is_a?(Array)
         define_method :scope_condition do
@@ -34,8 +34,8 @@ module ActiveRecord::Acts::List::ScopeMethodDefiner #:nodoc:
         end
 
         define_method :destroyed_via_scope? do
-          return false unless @destroyed_by_association_foreign_key
-          scope_condition.keys.include? @destroyed_by_association_foreign_key
+          return false if ActiveRecord::VERSION::MAJOR < 4
+          scope_condition.keys.include? (destroyed_by_association && destroyed_by_association.foreign_key.to_sym)
         end
       else
         define_method :scope_condition do

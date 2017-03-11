@@ -3,9 +3,7 @@ module ActiveRecord::Acts::List::CallbackDefiner #:nodoc:
     caller_class.class_eval do
       before_validation :check_top_position, unless: :act_as_list_no_update?
 
-      # lock! reloads the record and we lose the destroyed_by_association information
-      # so set_destroyed_by_association_foreign_key must come first
-      before_destroy :set_destroyed_by_association_foreign_key, :lock!
+      before_destroy :lock!, unless: "destroyed_via_scope? || act_as_list_no_update?"
       after_destroy :decrement_positions_on_lower_items, unless: "destroyed_via_scope? || act_as_list_no_update?"
 
       before_update :check_scope, unless: :act_as_list_no_update?
