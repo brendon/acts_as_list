@@ -2,6 +2,7 @@ require 'helper'
 
 class DestructionTodoList < ActiveRecord::Base
   has_many :destruction_todo_items, dependent: :destroy
+  has_many :destruction_tada_items, dependent: :destroy
 end
 
 class DestructionTodoItem < ActiveRecord::Base
@@ -45,14 +46,8 @@ class NoUpdateForScopeDestructionTestCase < Minitest::Test
       super
       @list = DestructionTodoList.create!
 
-      @todo_item_1, @todo_item_2, @todo_item_3 = (1..3).map { |counter| DestructionTodoItem.create!(position: counter, destruction_todo_list_id: @list.id) }
-      @tada_item_1, @tada_item_2, @tada_item_3 = (1..3).map { |counter| DestructionTadaItem.create!(position: counter, destruction_todo_list_id: @list.id, enabled: true) }
-    end
-
-    def test_no_update_children_when_parent_destroyed
-      @todo_item_1.expects(:decrement_positions_on_lower_items).never
-      @tada_item_1.expects(:decrement_positions_on_lower_items).never
-      assert @list.destroy
+      @todo_item_1 = DestructionTodoItem.create! position: 1, destruction_todo_list_id: @list.id
+      @tada_item_1 = DestructionTadaItem.create! position: 1, destruction_todo_list_id: @list.id, enabled: true
     end
 
     def test_update_children_when_sibling_destroyed
