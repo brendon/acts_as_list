@@ -50,6 +50,14 @@ class NoUpdateForScopeDestructionTestCase < Minitest::Test
       @tada_item_1 = DestructionTadaItem.create! position: 1, destruction_todo_list_id: @list.id, enabled: true
     end
 
+    def test_no_update_children_when_parent_destroyed
+      return if ActiveRecord::VERSION::MAJOR > 4
+
+      DestructionTodoItem.any_instance.expects(:decrement_positions_on_lower_items).never
+      DestructionTadaItem.any_instance.expects(:decrement_positions_on_lower_items).never
+      assert @list.destroy
+    end
+
     def test_update_children_when_sibling_destroyed
       @todo_item_1.expects(:decrement_positions_on_lower_items).once
       @tada_item_1.expects(:decrement_positions_on_lower_items).once
