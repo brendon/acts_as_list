@@ -51,10 +51,13 @@ class NoUpdateForScopeDestructionTestCase < Minitest::Test
     end
 
     def test_no_update_children_when_parent_destroyed
-      return if ActiveRecord::VERSION::MAJOR > 4
-
-      DestructionTodoItem.any_instance.expects(:decrement_positions_on_lower_items).never
-      DestructionTadaItem.any_instance.expects(:decrement_positions_on_lower_items).never
+      if ActiveRecord::VERSION::MAJOR < 4
+        DestructionTodoItem.any_instance.expects(:decrement_positions_on_lower_items).once
+        DestructionTadaItem.any_instance.expects(:decrement_positions_on_lower_items).once
+      else
+        DestructionTodoItem.any_instance.expects(:decrement_positions_on_lower_items).never
+        DestructionTadaItem.any_instance.expects(:decrement_positions_on_lower_items).never
+      end
       assert @list.destroy
     end
 
