@@ -1,5 +1,21 @@
 # Change Log
 
+## [v0.9.3](https://github.com/swanandp/acts_as_list/tree/v0.9.3) (2017-03-14)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.2...v0.9.3)
+
+**Closed issues:**
+
+- Rails 5.1.0.beta1 deprecation [\#257](https://github.com/swanandp/acts_as_list/issues/257)
+- Move item X after item Y [\#256](https://github.com/swanandp/acts_as_list/issues/256)
+- Is there way to specify the position when creating a resource? [\#255](https://github.com/swanandp/acts_as_list/issues/255)
+
+**Merged pull requests:**
+
+- Don't update a child destroyed via relation [\#261](https://github.com/swanandp/acts_as_list/pull/261) ([brendon](https://github.com/brendon))
+- No update list for collection classes [\#260](https://github.com/swanandp/acts_as_list/pull/260) ([IlkhamGaysin](https://github.com/IlkhamGaysin))
+- Fix deprecation introduced in ActiveRecord 5.1.0.beta1. Closes \#257 [\#259](https://github.com/swanandp/acts_as_list/pull/259) ([CvX](https://github.com/CvX))
+- Refactor column definer module [\#258](https://github.com/swanandp/acts_as_list/pull/258) ([ledestin](https://github.com/ledestin))
+
 ## [v0.9.2](https://github.com/swanandp/acts_as_list/tree/v0.9.2) (2017-02-07)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.1...v0.9.2)
 
