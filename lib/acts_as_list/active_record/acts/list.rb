@@ -142,12 +142,12 @@ module ActiveRecord
 
         def first?
           return false unless in_list?
-          !higher_item
+          !higher_items(1).exists?
         end
 
         def last?
           return false unless in_list?
-          !lower_item
+          !lower_items(1).exists?
         end
 
         # Return the next higher item in the list.
