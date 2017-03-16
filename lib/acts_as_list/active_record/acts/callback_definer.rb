@@ -3,8 +3,8 @@ module ActiveRecord::Acts::List::CallbackDefiner #:nodoc:
     caller_class.class_eval do
       before_validation :check_top_position, unless: :act_as_list_no_update?
 
-      before_destroy :lock!, unless: "destroyed_via_scope? || act_as_list_no_update?"
-      after_destroy :decrement_positions_on_lower_items, unless: "destroyed_via_scope? || act_as_list_no_update?"
+      before_destroy :lock!, unless: Proc.new { destroyed_via_scope? || act_as_list_no_update? }
+      after_destroy :decrement_positions_on_lower_items, unless: Proc.new { destroyed_via_scope? || act_as_list_no_update? }
 
       before_update :check_scope, unless: :act_as_list_no_update?
       after_update :update_positions, unless: :act_as_list_no_update?
