@@ -1,5 +1,12 @@
 # Change Log
 
+## [v0.9.4](https://github.com/swanandp/acts_as_list/tree/v0.9.4) (2017-03-16)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.3...v0.9.4)
+
+**Merged pull requests:**
+
+- Optimize first? and last? instance methods. [\#262](https://github.com/swanandp/acts_as_list/pull/262) ([marshall-lee](https://github.com/marshall-lee))
+
 ## [v0.9.3](https://github.com/swanandp/acts_as_list/tree/v0.9.3) (2017-03-14)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.2...v0.9.3)
 
