@@ -403,7 +403,9 @@ module ActiveRecord
         end
 
         def position_before_save
-          if ActiveRecord::VERSION::MAJOR >= 5 && ActiveRecord::VERSION::MINOR >= 1
+          if ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR >= 1 ||
+            ActiveRecord::VERSION::MAJOR > 5
+
             send("#{position_column}_before_last_save")
           else
             send("#{position_column}_was")
