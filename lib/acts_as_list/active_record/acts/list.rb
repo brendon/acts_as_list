@@ -220,7 +220,9 @@ module ActiveRecord
 
         def acts_as_list_list
           if ActiveRecord::VERSION::MAJOR < 4
-            acts_as_list_class.except(:where).where(scope_condition)
+            acts_as_list_class.unscoped do
+              acts_as_list_class.where(scope_condition)
+            end
           else
             acts_as_list_class.unscope(:where).where(scope_condition)
           end

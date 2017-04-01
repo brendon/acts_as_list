@@ -48,6 +48,7 @@ end
 
 require "shared"
 
+# require 'logger'
 # ActiveRecord::Base.logger = Logger.new(STDOUT)
 
 def assert_equal_or_nil(a, b)
