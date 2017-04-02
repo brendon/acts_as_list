@@ -382,7 +382,7 @@ module ActiveRecord
               # temporary move after bottom with gap, avoiding duplicate values
               # gap is required to leave room for position increments
               # positive number will be valid with unique not null check (>= 0) db constraint
-              temporary_position = acts_as_list_class.maximum(position_column).to_i + 2
+              temporary_position = bottom_position_in_list + 2
               set_list_position(temporary_position)
               shuffle_positions_on_intermediate_items(old_position, position, id)
             else
