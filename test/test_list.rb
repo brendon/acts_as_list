@@ -103,7 +103,13 @@ class DefaultScopedWhereMixin < Mixin
   default_scope { order('pos ASC').where(active: true) }
 
   def self.for_active_false_tests
-    unscoped.order('pos ASC').where(active: false)
+    if ActiveRecord::VERSION::MAJOR < 4
+      unscoped do
+        order('pos ASC').where(active: false)
+      end
+    else
+      unscope(:where).where(active: false)
+    end
   end
 end
 

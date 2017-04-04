@@ -164,7 +164,7 @@ module ActiveRecord
           acts_as_list_list.
             where("#{quoted_position_column_with_table_name} <= ?", position_value).
             where("#{quoted_table_name}.#{self.class.primary_key} != ?", self.send(self.class.primary_key)).
-            order("#{quoted_position_column_with_table_name} DESC").
+            reorder("#{quoted_position_column_with_table_name} DESC").
             limit(limit)
         end
 
@@ -182,7 +182,7 @@ module ActiveRecord
           acts_as_list_list.
             where("#{quoted_position_column_with_table_name} >= ?", position_value).
             where("#{quoted_table_name}.#{self.class.primary_key} != ?", self.send(self.class.primary_key)).
-            order("#{quoted_position_column_with_table_name} ASC").
+            reorder("#{quoted_position_column_with_table_name} ASC").
             limit(limit)
         end
 
@@ -219,8 +219,12 @@ module ActiveRecord
         end
 
         def acts_as_list_list
-          acts_as_list_class.unscoped do
-            acts_as_list_class.where(scope_condition)
+          if ActiveRecord::VERSION::MAJOR < 4
+            acts_as_list_class.unscoped do
+              acts_as_list_class.where(scope_condition)
+            end
+          else
+            acts_as_list_class.unscope(:where).where(scope_condition)
           end
         end
 
@@ -274,7 +278,7 @@ module ActiveRecord
             scope = scope.where("#{quoted_table_name}.#{self.class.primary_key} != ?", except.id)
           end
 
-          scope.in_list.order("#{quoted_position_column_with_table_name} DESC").first
+          scope.in_list.reorder("#{quoted_position_column_with_table_name} DESC").first
         end
 
         # Forces item to assume the bottom position in the list.
@@ -346,7 +350,7 @@ module ActiveRecord
             )
 
             if sequential_updates?
-              items.order("#{quoted_position_column_with_table_name} ASC").each do |item|
+              items.reorder("#{quoted_position_column_with_table_name} ASC").each do |item|
                 item.decrement!(position_column)
               end
             else
@@ -364,7 +368,7 @@ module ActiveRecord
             )
 
             if sequential_updates?
-              items.order("#{quoted_position_column_with_table_name} DESC").each do |item|
+              items.reorder("#{quoted_position_column_with_table_name} DESC").each do |item|
                 item.increment!(position_column)
               end
             else
