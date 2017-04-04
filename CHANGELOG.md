@@ -1,5 +1,18 @@
 # Change Log
 
+## [v0.9.5](https://github.com/swanandp/acts_as_list/tree/v0.9.5) (2017-04-04)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.4...v0.9.5)
+
+**Closed issues:**
+
+- acts\_as\_list\_class.maximum\(position\_column\) is causing the entire table to lock [\#264](https://github.com/swanandp/acts_as_list/issues/264)
+- Be more precise with unscope-ing [\#263](https://github.com/swanandp/acts_as_list/issues/263)
+
+**Merged pull requests:**
+
+- Use bottom\_position\_in\_list instead of the highest value in the table [\#266](https://github.com/swanandp/acts_as_list/pull/266) ([brendon](https://github.com/brendon))
+- Be more surgical about unscoping [\#265](https://github.com/swanandp/acts_as_list/pull/265) ([brendon](https://github.com/brendon))
+
 ## [v0.9.4](https://github.com/swanandp/acts_as_list/tree/v0.9.4) (2017-03-16)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.3...v0.9.4)
 
