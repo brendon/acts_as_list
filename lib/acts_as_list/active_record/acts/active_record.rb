@@ -1,5 +1,3 @@
-require "active_support/lazy_load_hooks"
-
 ActiveSupport.on_load :active_record do
-  include ActiveRecord::Acts::List
+  extend ActiveRecord::Acts::List::ClassMethods
 end
