@@ -2,7 +2,10 @@ module ActiveRecord
   module Acts
     module List
       module NoUpdate
-        extend ActiveSupport::Concern
+
+        def self.included(base)
+          base.extend ClassMethods
+        end
 
         class ArrayTypeError < SyntaxError
           def initialize
@@ -96,9 +99,9 @@ module ActiveRecord
 
           private
 
-            def extracted_klasses
-              Thread.current[:act_as_list_no_update] ||= []
-            end
+          def extracted_klasses
+            Thread.current[:act_as_list_no_update] ||= []
+          end
         end
 
         def act_as_list_no_update?
