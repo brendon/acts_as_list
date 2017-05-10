@@ -1,64 +1,66 @@
-class << ActiveRecord::Base
-  # Configuration options are:
-  #
-  # * +column+ - specifies the column name to use for keeping the position integer (default: +position+)
-  # * +scope+ - restricts what is to be considered a list. Given a symbol, it'll attach <tt>_id</tt>
-  #   (if it hasn't already been added) and use that as the foreign key restriction. It's also possible
-  #   to give it an entire string that is interpolated if you need a tighter scope than just a foreign key.
-  #   Example: <tt>acts_as_list scope: 'todo_list_id = #{todo_list_id} AND completed = 0'</tt>
-  # * +top_of_list+ - defines the integer used for the top of the list. Defaults to 1. Use 0 to make the collection
-  #   act more like an array in its indexing.
-  # * +add_new_at+ - specifies whether objects get added to the :top or :bottom of the list. (default: +bottom+)
-  #                   `nil` will result in new items not being added to the list on create.
-  # * +sequential_updates+ - specifies whether insert_at should update objects positions during shuffling
-  #   one by one to respect position column unique not null constraint. 
-  #   Defaults to true if position column has unique index, otherwise false.
-  #   If constraint is <tt>deferrable initially deferred<tt>, overriding it with false will speed up insert_at.
-  def acts_as_list(options = {})
-    configuration = { column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom }
-    configuration.update(options) if options.is_a?(Hash)
-
-    caller_class = self
-
-    ActiveRecord::Acts::List::PositionColumnMethodDefiner.call(caller_class, configuration[:column])
-    ActiveRecord::Acts::List::ScopeMethodDefiner.call(caller_class, configuration[:scope])
-    ActiveRecord::Acts::List::TopOfListMethodDefiner.call(caller_class, configuration[:top_of_list])
-    ActiveRecord::Acts::List::AddNewAtMethodDefiner.call(caller_class, configuration[:add_new_at])
-
-    ActiveRecord::Acts::List::AuxMethodDefiner.call(caller_class)
-    ActiveRecord::Acts::List::CallbackDefiner.call(caller_class, configuration[:add_new_at])
-    ActiveRecord::Acts::List::SequentialUpdatesMethodDefiner.call(caller_class, configuration[:column], configuration[:sequential_updates])
-
-    include ActiveRecord::Acts::List::InstanceMethods
-    include ActiveRecord::Acts::List::NoUpdate
-  end
-end
-
 module ActiveRecord
   module Acts #:nodoc:
     module List #:nodoc:
-      # This +acts_as+ extension provides the capabilities for sorting and reordering a number of objects in a list.
-      # The class that has this specified needs to have a +position+ column defined as an integer on
-      # the mapped database table.
-      #
-      # Todo list example:
-      #
-      #   class TodoList < ActiveRecord::Base
-      #     has_many :todo_items, order: "position"
-      #   end
-      #
-      #   class TodoItem < ActiveRecord::Base
-      #     belongs_to :todo_list
-      #     acts_as_list scope: :todo_list
-      #   end
-      #
-      #   todo_list.first.move_to_bottom
-      #   todo_list.last.move_higher
 
-      # All the methods available to a record that has had <tt>acts_as_list</tt> specified. Each method works
-      # by assuming the object to be the item in the list, so <tt>chapter.move_lower</tt> would move that chapter
-      # lower in the list of all chapters. Likewise, <tt>chapter.first?</tt> would return +true+ if that chapter is
-      # the first in the list of all chapters.
+      module ClassMethods
+        # Configuration options are:
+        #
+        # * +column+ - specifies the column name to use for keeping the position integer (default: +position+)
+        # * +scope+ - restricts what is to be considered a list. Given a symbol, it'll attach <tt>_id</tt>
+        #   (if it hasn't already been added) and use that as the foreign key restriction. It's also possible
+        #   to give it an entire string that is interpolated if you need a tighter scope than just a foreign key.
+        #   Example: <tt>acts_as_list scope: 'todo_list_id = #{todo_list_id} AND completed = 0'</tt>
+        # * +top_of_list+ - defines the integer used for the top of the list. Defaults to 1. Use 0 to make the collection
+        #   act more like an array in its indexing.
+        # * +add_new_at+ - specifies whether objects get added to the :top or :bottom of the list. (default: +bottom+)
+        #                   `nil` will result in new items not being added to the list on create.
+        # * +sequential_updates+ - specifies whether insert_at should update objects positions during shuffling
+        #   one by one to respect position column unique not null constraint.
+        #   Defaults to true if position column has unique index, otherwise false.
+        #   If constraint is <tt>deferrable initially deferred<tt>, overriding it with false will speed up insert_at.
+        def acts_as_list(options = {})
+          configuration = { column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom }
+          configuration.update(options) if options.is_a?(Hash)
+
+          caller_class = self
+
+          ActiveRecord::Acts::List::PositionColumnMethodDefiner.call(caller_class, configuration[:column])
+          ActiveRecord::Acts::List::ScopeMethodDefiner.call(caller_class, configuration[:scope])
+          ActiveRecord::Acts::List::TopOfListMethodDefiner.call(caller_class, configuration[:top_of_list])
+          ActiveRecord::Acts::List::AddNewAtMethodDefiner.call(caller_class, configuration[:add_new_at])
+
+          ActiveRecord::Acts::List::AuxMethodDefiner.call(caller_class)
+          ActiveRecord::Acts::List::CallbackDefiner.call(caller_class, configuration[:add_new_at])
+          ActiveRecord::Acts::List::SequentialUpdatesMethodDefiner.call(caller_class, configuration[:column], configuration[:sequential_updates])
+
+          include ActiveRecord::Acts::List::InstanceMethods
+          include ActiveRecord::Acts::List::NoUpdate
+        end
+
+        # This +acts_as+ extension provides the capabilities for sorting and reordering a number of objects in a list.
+        # The class that has this specified needs to have a +position+ column defined as an integer on
+        # the mapped database table.
+        #
+        # Todo list example:
+        #
+        #   class TodoList < ActiveRecord::Base
+        #     has_many :todo_items, order: "position"
+        #   end
+        #
+        #   class TodoItem < ActiveRecord::Base
+        #     belongs_to :todo_list
+        #     acts_as_list scope: :todo_list
+        #   end
+        #
+        #   todo_list.first.move_to_bottom
+        #   todo_list.last.move_higher
+
+        # All the methods available to a record that has had <tt>acts_as_list</tt> specified. Each method works
+        # by assuming the object to be the item in the list, so <tt>chapter.move_lower</tt> would move that chapter
+        # lower in the list of all chapters. Likewise, <tt>chapter.first?</tt> would return +true+ if that chapter is
+        # the first in the list of all chapters.
+      end
+
       module InstanceMethods
         # Insert the item at the given position (defaults to the top position of 1).
         def insert_at(position = acts_as_list_top)
@@ -376,7 +378,7 @@ module ActiveRecord
             end
           end
         end
-        
+
         def insert_at_position(position)
           return set_list_position(position) if new_record?
           with_lock do
@@ -408,7 +410,7 @@ module ActiveRecord
 
         def position_before_save
           if ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR >= 1 ||
-            ActiveRecord::VERSION::MAJOR > 5
+              ActiveRecord::VERSION::MAJOR > 5
 
             send("#{position_column}_before_last_save")
           else
@@ -460,6 +462,7 @@ module ActiveRecord
           @_quoted_position_column_with_table_name ||= "#{quoted_table_name}.#{quoted_position_column}"
         end
       end
+
     end
   end
 end
