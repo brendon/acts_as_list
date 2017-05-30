@@ -39,12 +39,12 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
         attrs = record.send(:timestamp_attributes_for_update_in_model)
         now = record.send(:current_time_from_proper_timezone)
 
-        updates = ""
+        sql = ""
         attrs.each do |attr|
-          updates << ", #{connection.quote_column_name(attr)} = #{connection.quote(connection.quoted_date(now))}"
+          sql << ", #{connection.quote_column_name(attr)} = #{connection.quote(connection.quoted_date(now))}"
         end
 
-        updates
+        sql
       end
     end
   end
