@@ -29,15 +29,22 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
       end
 
       define_singleton_method :update_all_with_touch do |updates|
+        update_all(updates << touch_record_sql)
+      end
+
+      private
+
+      define_singleton_method :touch_record_sql do
         record = new
         attrs = record.send(:timestamp_attributes_for_update_in_model)
         now = record.send(:current_time_from_proper_timezone)
 
+        updates = ""
         attrs.each do |attr|
           updates << ", #{connection.quote_column_name(attr)} = #{connection.quote(connection.quoted_date(now))}"
         end
 
-        update_all(updates)
+        updates
       end
     end
   end
