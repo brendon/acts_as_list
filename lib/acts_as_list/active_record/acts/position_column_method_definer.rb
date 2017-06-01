@@ -55,9 +55,11 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
 
       define_method :touch_record_sql do
         connection = self.class.connection
+        quoted_now = connection.quote(connection.quoted_date(
+          current_time_from_proper_timezone))
 
         timestamp_attributes_for_update_in_model.inject("") do |sql, attr|
-          sql << ", #{connection.quote_column_name(attr)} = #{connection.quote(connection.quoted_date(current_time_from_proper_timezone))}"
+          sql << ", #{connection.quote_column_name(attr)} = #{quoted_now}"
         end
       end
     end
