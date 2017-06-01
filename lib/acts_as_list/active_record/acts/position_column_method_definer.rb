@@ -55,10 +55,10 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
 
       define_method :touch_record_sql do
         connection = self.class.connection
-        quoted_now = quoted_current_time_from_proper_timezone
+        cached_quoted_now = quoted_current_time_from_proper_timezone
 
         timestamp_attributes_for_update_in_model.inject("") do |sql, attr|
-          sql << ", #{connection.quote_column_name(attr)} = #{quoted_now}"
+          sql << ", #{connection.quote_column_name(attr)} = #{cached_quoted_now}"
         end
       end
 
