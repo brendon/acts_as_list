@@ -57,7 +57,7 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
         cached_quoted_now = quoted_current_time_from_proper_timezone
 
         timestamp_attributes_for_update_in_model.map do |attr|
-          quoted_attr = self.class.connection.quote_column_name(attr)
+          quoted_attr = connection.quote_column_name(attr)
 
           ", #{quoted_attr} = #{cached_quoted_now}"
         end.join
@@ -65,8 +65,10 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
 
       private
 
+      delegate :connection, to: self
+
       def quoted_current_time_from_proper_timezone
-        self.class.connection.quote(self.class.connection.quoted_date(
+        connection.quote(connection.quoted_date(
           current_time_from_proper_timezone))
       end
     end
