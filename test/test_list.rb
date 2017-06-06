@@ -572,6 +572,27 @@ class MultiDestroyTest < ActsAsListTestCase
   end
 end
 
+class NilPositionTest < ActsAsListTestCase
+
+  def setup
+    setup_db
+  end
+
+  def test_nil_position_ordering
+    new1 = ListMixin.create
+    new2 = ListMixin.create
+
+    new1.pos = 1
+    new1.save
+
+    new2.pos = 1
+    new2.save
+
+    assert_equal [1, 2], [new1.pos, new2.pos]
+  end
+
+end
+
 #class TopAdditionMixin < Mixin
 
 class TopAdditionTest < ActsAsListTestCase
