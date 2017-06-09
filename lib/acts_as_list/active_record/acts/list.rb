@@ -144,7 +144,7 @@ module ActiveRecord
 
         def first?
           return false unless in_list?
-          !higher_items(1).exists?
+          !higher_items(1).present?
         end
 
         def last?
@@ -161,13 +161,15 @@ module ActiveRecord
         # Return the next n higher items in the list
         # selects all higher items by default
         def higher_items(limit=nil)
-          limit ||= acts_as_list_list.count
+          limit ||= acts_as_list_list.length
           position_value = send(position_column)
-          acts_as_list_list.
-            where("#{quoted_position_column_with_table_name} <= ?", position_value).
-            where("#{quoted_table_name}.#{self.class.primary_key} != ?", self.send(self.class.primary_key)).
-            reorder("#{quoted_position_column_with_table_name} DESC").
-            limit(limit)
+          acts_as_list_list.select do |item|
+            item.send(position_column) <= position_value
+          end.select do |item|
+            item.send(self.class.primary_key) != self.send(self.class.primary_key)
+          end.sort do |a, b|
+            b.send(position_column) <=> a.send(position_column)
+          end.first(limit)
         end
 
         # Return the next lower item in the list.
