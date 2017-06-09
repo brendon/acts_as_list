@@ -149,7 +149,7 @@ module ActiveRecord
 
         def last?
           return false unless in_list?
-          !lower_items(1).exists?
+          !lower_items(1).present?
         end
 
         # Return the next higher item in the list.
@@ -181,13 +181,15 @@ module ActiveRecord
         # Return the next n lower items in the list
         # selects all lower items by default
         def lower_items(limit=nil)
-          limit ||= acts_as_list_list.count
+          limit ||= acts_as_list_list.length
           position_value = send(position_column)
-          acts_as_list_list.
-            where("#{quoted_position_column_with_table_name} >= ?", position_value).
-            where("#{quoted_table_name}.#{self.class.primary_key} != ?", self.send(self.class.primary_key)).
-            reorder("#{quoted_position_column_with_table_name} ASC").
-            limit(limit)
+          acts_as_list_list.select do |item|
+            item.send(position_column) >= position_value
+          end.select do |item|
+            item.send(self.class.primary_key) != self.send(self.class.primary_key)
+          end.sort do |a, b|
+            a.send(position_column) <=> b.send(position_column)
+          end.first(limit)
         end
 
         # Test if this record is in a list
