@@ -158,6 +158,16 @@ module ActiveRecord
           higher_items(1).first
         end
 
+        def higher_items_relation
+          ids = higher_items.pluck(:id)
+          acts_as_list_list.where(id: ids).order(position_column => :desc)
+        end
+
+        def lower_items_relation
+          ids = lower_items.pluck(:id)
+          acts_as_list_list.where(id: ids).order(position_column => :asc)
+        end
+
         # Return the next n higher items in the list
         # selects all higher items by default
         def higher_items(limit=nil)
