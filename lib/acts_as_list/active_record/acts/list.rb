@@ -164,9 +164,9 @@ module ActiveRecord
           limit ||= acts_as_list_list.length
           position_value = send(position_column)
           acts_as_list_list.select do |item|
-            item.send(position_column) <= position_value
+            item.send(position_column).try(:<=, position_value)
           end.select do |item|
-            item.send(self.class.primary_key) != self.send(self.class.primary_key)
+            item.send(self.class.primary_key).try(:!=, self.send(self.class.primary_key))
           end.sort do |a, b|
             b.send(position_column) <=> a.send(position_column)
           end.first(limit)
@@ -184,9 +184,9 @@ module ActiveRecord
           limit ||= acts_as_list_list.length
           position_value = send(position_column)
           acts_as_list_list.select do |item|
-            item.send(position_column) >= position_value
+            item.send(position_column).try(:>=, position_value)
           end.select do |item|
-            item.send(self.class.primary_key) != self.send(self.class.primary_key)
+            item.send(self.class.primary_key).try(:!=, self.send(self.class.primary_key))
           end.sort do |a, b|
             a.send(position_column) <=> b.send(position_column)
           end.first(limit)
