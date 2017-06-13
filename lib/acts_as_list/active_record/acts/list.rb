@@ -159,12 +159,12 @@ module ActiveRecord
         end
 
         def higher_items_relation
-          ids = higher_items.pluck(:id)
+          ids = higher_items.map(&:id)
           acts_as_list_list.where(id: ids).order(position_column => :desc)
         end
 
         def lower_items_relation
-          ids = lower_items.pluck(:id)
+          ids = lower_items.map(&:id)
           acts_as_list_list.where(id: ids).order(position_column => :asc)
         end
 
