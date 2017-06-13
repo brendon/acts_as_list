@@ -160,12 +160,12 @@ module ActiveRecord
 
         def higher_items_relation
           ids = higher_items.map(&:id)
-          acts_as_list_list.where(id: ids).order(position_column => :desc)
+          acts_as_list_list.where(id: ids).reorder("#{quoted_position_column_with_table_name} DESC")
         end
 
         def lower_items_relation
           ids = lower_items.map(&:id)
-          acts_as_list_list.where(id: ids).order(position_column => :asc)
+          acts_as_list_list.where(id: ids).reorder("#{quoted_position_column_with_table_name} ASC")
         end
 
         # Return the next n higher items in the list
