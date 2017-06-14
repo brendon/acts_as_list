@@ -641,6 +641,12 @@ if rails_4
       assert_equal [1], EnumArrayScopeListMixin.where(:parent_id => 2, :state => EnumArrayScopeListMixin.states['active']).map(&:pos)
       assert_equal [1], EnumArrayScopeListMixin.where(:parent_id => 2, :state => EnumArrayScopeListMixin.states['archived']).map(&:pos)
     end
+
+    def test_update_state
+      active_item = EnumArrayScopeListMixin.find_by(:parent_id => 2, :state => EnumArrayScopeListMixin.states['active'])
+      active_item.update(state: EnumArrayScopeListMixin.states['archived'])
+      assert_equal [1, 2], EnumArrayScopeListMixin.where(:parent_id => 2, :state => EnumArrayScopeListMixin.states['archived']).map(&:pos).sort
+    end
   end
 end
 
