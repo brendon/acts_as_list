@@ -432,9 +432,9 @@ module ActiveRecord
           if internal_scope_changed?
             cached_changes = changes
 
-            cached_changes.each { |attribute, values| self[attribute] = values[0] }
+            cached_changes.each { |attribute, values| send("#{attribute}=", values[0]) }
             send('decrement_positions_on_lower_items') if lower_item
-            cached_changes.each { |attribute, values| self[attribute] = values[1] }
+            cached_changes.each { |attribute, values| send("#{attribute}=", values[1]) }
 
             send("add_to_list_#{add_new_at}") if add_new_at.present?
           end
