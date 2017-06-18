@@ -327,7 +327,7 @@ class DefaultScopedTest < ActsAsListTestCase
 
     new = DefaultScopedMixin.acts_as_list_no_update { DefaultScopedMixin.create }
     assert_equal_or_nil $default_position, new.pos
-    assert_equal $default_position.is_a?(Fixnum), new.first?
+    assert_equal $default_position.is_a?(Integer), new.first?
     assert !new.last?
 
     new = DefaultScopedMixin.create
@@ -431,7 +431,7 @@ class DefaultScopedWhereTest < ActsAsListTestCase
 
     new = DefaultScopedWhereMixin.acts_as_list_no_update { DefaultScopedWhereMixin.create }
     assert_equal_or_nil $default_position, new.pos
-    assert_equal $default_position.is_a?(Fixnum), new.first?
+    assert_equal $default_position.is_a?(Integer), new.first?
     assert !new.last?
 
     new = DefaultScopedWhereMixin.create
