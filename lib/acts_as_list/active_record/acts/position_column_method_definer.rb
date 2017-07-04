@@ -29,15 +29,13 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
       end
 
       define_singleton_method :update_all_with_touch do |updates|
-        record = new
-        attrs = record.send(:timestamp_attributes_for_update_in_model)
-        now = record.send(:current_time_from_proper_timezone)
+        update_all(updates << touch_record_sql)
+      end
 
-        attrs.each do |attr|
-          updates << ", #{connection.quote_column_name(attr)} = #{connection.quote(connection.quoted_date(now))}"
-        end
+      private
 
-        update_all(updates)
+      define_singleton_method :touch_record_sql do
+        new.touch_record_sql
       end
     end
   end
@@ -53,6 +51,23 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
       define_method :"#{position_column}=" do |position|
         write_attribute(position_column, position)
         @position_changed = true
+      end
+
+      define_method :touch_record_sql do
+        cached_quoted_now = quoted_current_time_from_proper_timezone
+
+        timestamp_attributes_for_update_in_model.map do |attr|
+          ", #{connection.quote_column_name(attr)} = #{cached_quoted_now}"
+        end.join
+      end
+
+      private
+
+      delegate :connection, to: self
+
+      def quoted_current_time_from_proper_timezone
+        connection.quote(connection.quoted_date(
+          current_time_from_proper_timezone))
       end
     end
   end
