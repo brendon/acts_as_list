@@ -1,5 +1,25 @@
 # Change Log
 
+## [v0.9.6](https://github.com/swanandp/acts_as_list/tree/v0.9.6) (2017-07-05)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.5...v0.9.6)
+
+**Closed issues:**
+
+- undefined method `+' for nil:NilClass [\#278](https://github.com/swanandp/acts_as_list/issues/278)
+- Enum does not scope correctly [\#277](https://github.com/swanandp/acts_as_list/issues/277)
+- Can we don't use remove\_from\_list when destroy a lot objects? [\#276](https://github.com/swanandp/acts_as_list/issues/276)
+- The NoUpdate code rely's on AS::Concern [\#273](https://github.com/swanandp/acts_as_list/issues/273)
+- ActiveRecord associations are no longer required \(even though belongs\_to\_required\_by\_default == true\) [\#268](https://github.com/swanandp/acts_as_list/issues/268)
+- Unique constraint violation on move\_higher, move\_lower, destroy [\#267](https://github.com/swanandp/acts_as_list/issues/267)
+
+**Merged pull requests:**
+
+- Fix Fixnum deprecation warnings. [\#282](https://github.com/swanandp/acts_as_list/pull/282) ([patrickdavey](https://github.com/patrickdavey))
+- Fix update to scope that was defined with an enum [\#281](https://github.com/swanandp/acts_as_list/pull/281) ([scottmalone](https://github.com/scottmalone))
+- Refactor update\_all\_with\_touch [\#279](https://github.com/swanandp/acts_as_list/pull/279) ([ledestin](https://github.com/ledestin))
+- Remove AS::Concern from NoUpdate [\#274](https://github.com/swanandp/acts_as_list/pull/274) ([brendon](https://github.com/brendon))
+- Use `ActiveSupport.on\_load` to hook into ActiveRecord [\#272](https://github.com/swanandp/acts_as_list/pull/272) ([brendon](https://github.com/brendon))
+
 ## [v0.9.5](https://github.com/swanandp/acts_as_list/tree/v0.9.5) (2017-04-04)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.4...v0.9.5)
 
