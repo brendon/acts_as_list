@@ -1,5 +1,8 @@
 # Change Log
 
+## [v0.9.7](https://github.com/swanandp/acts_as_list/tree/v0.9.7) (2017-07-06)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.6...v0.9.7)
+
 ## [v0.9.6](https://github.com/swanandp/acts_as_list/tree/v0.9.6) (2017-07-05)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.5...v0.9.6)
 
