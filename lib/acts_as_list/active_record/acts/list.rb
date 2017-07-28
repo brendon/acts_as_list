@@ -232,7 +232,7 @@ module ActiveRecord
               acts_as_list_class.where(scope_condition)
             end
           else
-            acts_as_list_class.unscope(:where).where(scope_condition)
+            acts_as_list_class.unscope(:select, :where).where(scope_condition)
           end
         end
 
