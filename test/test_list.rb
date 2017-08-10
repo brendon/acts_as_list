@@ -868,4 +868,25 @@ class SequentialUpdatesMixinNotNullUniquePositiveConstraintsTest < ActsAsListTes
     new.insert_at(3)
     assert_equal 3, new.pos
   end
+
+  class DuplicatePositionRebalancingTest < ActsAsListTestCase
+    def setup
+      setup_db
+    end
+
+    def test_positions_are_unique_with_corrupted_duplicated
+      new1 = DefaultScopedMixin.create
+      new2 = DefaultScopedMixin.create
+      new3 = DefaultScopedMixin.create
+
+      new1.update_column :pos, 1
+      new2.update_column :pos, 1
+      new3.update_column :pos, 2
+
+      assert_equal [[new1.id, 1], [new2.id, 1], [new3.id, 2]], DefaultScopedMixin.all.map { |i| [i.id, i.pos] }
+
+      new4 = DefaultScopedMixin.create pos: 1
+      assert_equal [[new4.id, 1], [new1.id, 2], [new2.id, 3], [new3.id, 4]], DefaultScopedMixin.all.map { |i| [i.id, i.pos] }
+    end
+  end
 end
