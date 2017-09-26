@@ -399,6 +399,8 @@ module ActiveRecord
         end
 
         def update_positions
+          return unless position_before_save_changed?
+
           old_position = position_before_save || bottom_position_in_list + 1
           new_position = send(position_column).to_i
 
@@ -408,13 +410,23 @@ module ActiveRecord
           shuffle_positions_on_intermediate_items old_position, new_position, id
         end
 
+        def position_before_save_changed?
+          if ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR >= 1 ||
+              ActiveRecord::VERSION::MAJOR > 5
+
+            saved_change_to_attribute? position_column
+          else
+            send "#{position_column}_changed?"
+          end
+        end
+
         def position_before_save
           if ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR >= 1 ||
               ActiveRecord::VERSION::MAJOR > 5
 
-            send("#{position_column}_before_last_save")
+            attribute_before_last_save position_column
           else
-            send("#{position_column}_was")
+            send "#{position_column}_was"
           end
         end
 
