@@ -718,7 +718,7 @@ class TouchTest < ActsAsListTestCase
   end
 
   def now
-    @now ||= Time.current
+    @now ||= Time.current.change(usec: 0)
   end
 
   def yesterday
