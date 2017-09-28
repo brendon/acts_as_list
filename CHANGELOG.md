@@ -1,5 +1,13 @@
 # Change Log
 
+## [v0.9.8](https://github.com/swanandp/acts_as_list/tree/v0.9.8) (2017-09-28)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.7...v0.9.8)
+
+**Closed issues:**
+
+- Deadlocking in update\_positions count query [\#285](https://github.com/swanandp/acts_as_list/issues/285)
+- Updating the position fails uniqueness constraint. [\#275](https://github.com/swanandp/acts_as_list/issues/275)
+
 ## [v0.9.7](https://github.com/swanandp/acts_as_list/tree/v0.9.7) (2017-07-06)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.6...v0.9.7)
 
