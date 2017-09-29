@@ -115,6 +115,22 @@ class TodoItem < ActiveRecord::Base
 end
 ```
 
+You can also add multiple scopes in this fashion:
+```ruby
+class TodoItem < ActiveRecord::Base
+  acts_as_list scope: [:kind, :owner_id]
+end
+```
+
+Furthermore, you can optionally include a hash of fixed parameters that will be included in all queries:
+```ruby
+class TodoItem < ActiveRecord::Base
+  acts_as_list scope: [:kind, :owner_id, deleted_at: nil]
+end
+```
+
+This is useful when using this gem in conjunction with the popular [acts_as_paranoid](https://github.com/ActsAsParanoid/acts_as_paranoid) gem.
+
 ## More Options
 - `column`
 default: `position`. Use this option if the column name in your database is different from position.

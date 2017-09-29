@@ -80,6 +80,10 @@ class ArrayScopeListMixin < Mixin
   acts_as_list column: "pos", scope: [:parent_id, :parent_type]
 end
 
+class ArrayScopeListWithHashMixin < Mixin
+  acts_as_list column: "pos", scope: [:parent_id, state: nil]
+end
+
 if rails_4
   class EnumArrayScopeListMixin < Mixin
     STATE_VALUES = %w(active archived)
@@ -704,6 +708,20 @@ class MultipleListsArrayScopeTest < ActsAsListTestCase
     ArrayScopeListMixin.find(2).update_attributes(:parent_id => 4, :pos => 1)
     assert_equal [1, 2, 3], ArrayScopeListMixin.where(:parent_id => 1, :parent_type => 'anything').order('pos').map(&:pos)
     assert_equal [1], ArrayScopeListMixin.where(:parent_id => 4, :parent_type => 'anything').order('pos').map(&:pos)
+  end
+end
+
+class ArrayScopeListWithHashTest
+  def setup
+    setup_db
+    @obj1 = ArrayScopeListWithHashMixin.create! :pos => counter, :parent_id => 1, :state => nil
+    @obj2 = ArrayScopeListWithHashMixin.create! :pos => counter, :parent_id => 1, :state => 'anything'
+  end
+
+  def test_scope_condition_correct
+    [@obj1, @obj2].each do |obj|
+      assert_equal({ :parent_id => 1, :state => nil }, obj.scope_condition)
+    end
   end
 end
 
