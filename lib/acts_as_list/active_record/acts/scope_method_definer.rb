@@ -24,8 +24,17 @@ module ActiveRecord::Acts::List::ScopeMethodDefiner #:nodoc:
         end
       elsif scope.is_a?(Array)
         define_method :scope_condition do
-          scope.inject({}) do |hash, column|
-            hash.merge!({ column.to_sym => read_attribute(column.to_sym) })
+          # The elements of the Array can be symbols, strings, or hashes.
+          # If symbols or strings, they are treated as column names and the current value is looked up.
+          # If hashes, they are treated as fixed values.
+          scope.inject({}) do |hash, column_or_fixed_vals|
+            if column_or_fixed_vals.is_a?(Hash)
+              fixed_vals = column_or_fixed_vals
+              hash.merge!(fixed_vals)
+            else
+              column = column_or_fixed_vals
+              hash.merge!({ column.to_sym => read_attribute(column.to_sym) })
+            end
           end
         end
 
