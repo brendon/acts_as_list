@@ -1,5 +1,20 @@
 # Change Log
 
+## [Unreleased](https://github.com/swanandp/acts_as_list/tree/HEAD)
+
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.9...HEAD)
+
+**Closed issues:**
+
+- Why does acts\_as\_list override rails validation on it's own field? [\#269](https://github.com/swanandp/acts_as_list/issues/269)
+
+## [v0.9.9](https://github.com/swanandp/acts_as_list/tree/v0.9.9) (2017-10-03)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.8...v0.9.9)
+
+**Merged pull requests:**
+
+- Added fixed values option for scope array [\#286](https://github.com/swanandp/acts_as_list/pull/286) ([hooverlunch](https://github.com/hooverlunch))
+
 ## [v0.9.8](https://github.com/swanandp/acts_as_list/tree/v0.9.8) (2017-09-28)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.7...v0.9.8)
 
