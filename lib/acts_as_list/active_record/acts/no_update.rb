@@ -7,13 +7,13 @@ module ActiveRecord
           base.extend ClassMethods
         end
 
-        class ArrayTypeError < SyntaxError
+        class ArrayTypeError < ArgumentError
           def initialize
             super("The first argument must be an array")
           end
         end
 
-        class DisparityClassesError < NotImplementedError
+        class DisparityClassesError < ArgumentError
           def initialize
             super("The first argument should contain ActiveRecord or ApplicationRecord classes")
           end
