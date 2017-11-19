@@ -1,12 +1,16 @@
 # Change Log
 
-## [Unreleased](https://github.com/swanandp/acts_as_list/tree/HEAD)
-
-[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.9...HEAD)
+## [v0.9.10](https://github.com/swanandp/acts_as_list/tree/v0.9.10) (2017-11-19)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.9...v0.9.10)
 
 **Closed issues:**
 
+- Make insert\_at respect position when creating a new record [\#287](https://github.com/swanandp/acts_as_list/issues/287)
 - Why does acts\_as\_list override rails validation on it's own field? [\#269](https://github.com/swanandp/acts_as_list/issues/269)
+
+**Merged pull requests:**
+
+- Change error classes parents [\#288](https://github.com/swanandp/acts_as_list/pull/288) ([alexander-lazarov](https://github.com/alexander-lazarov))
 
 ## [v0.9.9](https://github.com/swanandp/acts_as_list/tree/v0.9.9) (2017-10-03)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.8...v0.9.9)
