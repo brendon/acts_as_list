@@ -124,6 +124,18 @@ module Shared
       assert_equal [$default_position, 1, 2, 3, 4, 5], pos_list
     end
 
+    def test_insert_at_after_dup
+      new1 = ListMixin.create(parent_id: 20)
+      new2 = ListMixin.create(parent_id: 20)
+      new3 = ListMixin.create(parent_id: 20)
+
+      duped = new1.dup
+      duped.save
+      [new1, new2, new3, duped].map(&:reload)
+
+      assert_equal [1, 2, 3, 4], [duped.pos, new1.pos, new2.pos, new3.pos]
+    end
+
     def test_delete_middle
       assert_equal [1, 2, 3, 4], ListMixin.where(parent_id: 5).order('pos').map(&:id)
 

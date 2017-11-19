@@ -234,7 +234,7 @@ module ActiveRecord
         # has been set manually using position=, not necessarily the top or bottom of the list:
 
         def add_to_list_top
-          if not_in_list? || internal_scope_changed? && !position_changed || default_position?
+          if assume_default_position?
             increment_positions_on_all_items
             self[position_column] = acts_as_list_top
           else
@@ -249,7 +249,7 @@ module ActiveRecord
         end
 
         def add_to_list_bottom
-          if not_in_list? || internal_scope_changed? && !position_changed || default_position?
+          if assume_default_position?
             self[position_column] = bottom_position_in_list.to_i + 1
           else
             increment_positions_on_lower_items(self[position_column], id)
@@ -260,6 +260,12 @@ module ActiveRecord
 
           # Don't halt the callback chain
           true
+        end
+
+        def assume_default_position?
+          not_in_list? ||
+          persisted? && internal_scope_changed? && !position_changed ||
+          default_position?
         end
 
         # Overwrite this method to define the scope of the list changes
