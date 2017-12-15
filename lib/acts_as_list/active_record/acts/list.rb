@@ -166,7 +166,7 @@ module ActiveRecord
           acts_as_list_list.
             where("#{quoted_position_column_with_table_name} <= ?", position_value).
             where("#{quoted_table_name}.#{self.class.primary_key} != ?", self.send(self.class.primary_key)).
-            reorder("#{quoted_position_column_with_table_name} DESC").
+            reorder(position_column => :desc).
             limit(limit)
         end
 
@@ -184,7 +184,7 @@ module ActiveRecord
           acts_as_list_list.
             where("#{quoted_position_column_with_table_name} >= ?", position_value).
             where("#{quoted_table_name}.#{self.class.primary_key} != ?", self.send(self.class.primary_key)).
-            reorder("#{quoted_position_column_with_table_name} ASC").
+            reorder(position_column => :asc).
             limit(limit)
         end
 
@@ -286,7 +286,7 @@ module ActiveRecord
             scope = scope.where("#{quoted_table_name}.#{self.class.primary_key} != ?", except.id)
           end
 
-          scope.in_list.reorder("#{quoted_position_column_with_table_name} DESC").first
+          scope.in_list.reorder(position_column => :desc).first
         end
 
         # Forces item to assume the bottom position in the list.
@@ -358,7 +358,7 @@ module ActiveRecord
             )
 
             if sequential_updates?
-              items.reorder("#{quoted_position_column_with_table_name} ASC").each do |item|
+              items.reorder(position_column => :asc).each do |item|
                 item.decrement!(position_column)
               end
             else
@@ -376,7 +376,7 @@ module ActiveRecord
             )
 
             if sequential_updates?
-              items.reorder("#{quoted_position_column_with_table_name} DESC").each do |item|
+              items.reorder(position_column => :desc).each do |item|
                 item.increment!(position_column)
               end
             else
