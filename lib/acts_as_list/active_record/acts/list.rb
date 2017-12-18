@@ -166,7 +166,7 @@ module ActiveRecord
           acts_as_list_list.
             where("#{quoted_position_column_with_table_name} <= ?", position_value).
             where("#{quoted_table_name}.#{self.class.primary_key} != ?", self.send(self.class.primary_key)).
-            reorder(position_column => :desc).
+            reorder(acts_as_list_order_argument(:desc)).
             limit(limit)
         end
 
@@ -184,7 +184,7 @@ module ActiveRecord
           acts_as_list_list.
             where("#{quoted_position_column_with_table_name} >= ?", position_value).
             where("#{quoted_table_name}.#{self.class.primary_key} != ?", self.send(self.class.primary_key)).
-            reorder(position_column => :asc).
+            reorder(acts_as_list_order_argument(:asc)).
             limit(limit)
         end
 
@@ -286,7 +286,7 @@ module ActiveRecord
             scope = scope.where("#{quoted_table_name}.#{self.class.primary_key} != ?", except.id)
           end
 
-          scope.in_list.reorder(position_column => :desc).first
+          scope.in_list.reorder(acts_as_list_order_argument(:desc)).first
         end
 
         # Forces item to assume the bottom position in the list.
@@ -358,7 +358,7 @@ module ActiveRecord
             )
 
             if sequential_updates?
-              items.reorder(position_column => :asc).each do |item|
+              items.reorder(acts_as_list_order_argument(:asc)).each do |item|
                 item.decrement!(position_column)
               end
             else
@@ -376,7 +376,7 @@ module ActiveRecord
             )
 
             if sequential_updates?
-              items.reorder(position_column => :desc).each do |item|
+              items.reorder(acts_as_list_order_argument(:desc)).each do |item|
                 item.increment!(position_column)
               end
             else
@@ -478,6 +478,14 @@ module ActiveRecord
 
         def quoted_position_column_with_table_name
           @_quoted_position_column_with_table_name ||= "#{quoted_table_name}.#{quoted_position_column}"
+        end
+
+        def acts_as_list_order_argument(direction = :asc)
+          if ActiveRecord::VERSION::MAJOR >= 4
+            { position_column => direction }
+          else
+            "#{quoted_position_column_with_table_name} #{direction.to_s.upcase}"
+          end
         end
       end
 
