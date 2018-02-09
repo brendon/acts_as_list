@@ -26,6 +26,5 @@ group :postgresql do
 end
 
 group :mysql do
-  gem "mysql2", "~> 0.4.10", platforms: [:ruby]
   gem "activerecord-jdbcmysql-adapter", platforms: [:jruby]
 end
