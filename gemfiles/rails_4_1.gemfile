@@ -27,8 +27,8 @@ group :postgresql do
 end
 
 group :mysql do
-  gem "mysql2", "~> 0.4.10", platforms: [:ruby]
   gem "activerecord-jdbcmysql-adapter", platforms: [:jruby]
+  gem "mysql2", "~> 0.3.21", platforms: [:ruby]
 end
 
 gemspec path: "../"
