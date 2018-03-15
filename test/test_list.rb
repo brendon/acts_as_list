@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # NOTE: following now done in helper.rb (better Readability)
 require 'helper'
 

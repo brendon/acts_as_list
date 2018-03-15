@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ActiveRecord::Acts::List::SequentialUpdatesMethodDefiner #:nodoc:
   def self.call(caller_class, column, sequential_updates_option)
     caller_class.class_eval do

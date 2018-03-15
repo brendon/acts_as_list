@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
   def self.call(caller_class, position_column)
     define_class_methods(caller_class, position_column)
