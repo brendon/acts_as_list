@@ -1,6 +1,6 @@
 source "http://rubygems.org"
 
-gem "rack", "~> 1", platforms: [:ruby_19, :ruby_20, :ruby_21, :jruby]
+gem "rack", "~> 1", platforms: [:ruby_19, :ruby_20, :ruby_21]
 
 gemspec
 
@@ -17,14 +17,8 @@ end
 
 group :sqlite do
   gem "sqlite3", platforms: [:ruby]
-  gem "activerecord-jdbcsqlite3-adapter", platforms: [:jruby]
 end
 
 group :postgresql do
   gem "pg", "~> 0.18.0", platforms: [:ruby]
-  gem "activerecord-jdbcpostgresql-adapter", platforms: [:jruby]
-end
-
-group :mysql do
-  gem "activerecord-jdbcmysql-adapter", platforms: [:jruby]
 end
