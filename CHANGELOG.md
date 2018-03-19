@@ -1,5 +1,25 @@
 # Change Log
 
+## [v0.9.11](https://github.com/swanandp/acts_as_list/tree/v0.9.11) (2018-03-19)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.10...v0.9.11)
+
+**Closed issues:**
+
+- Setting `position: nil` on update returns `Column 'position' cannot be null` instead of putting the item at the start or the end of the list, like it does on create. [\#302](https://github.com/swanandp/acts_as_list/issues/302)
+- Switching to Semaphore [\#301](https://github.com/swanandp/acts_as_list/issues/301)
+- Dropping jruby support [\#300](https://github.com/swanandp/acts_as_list/issues/300)
+- Rails 5.2.0 [\#299](https://github.com/swanandp/acts_as_list/issues/299)
+- Cannot update record position when scoped to enum [\#298](https://github.com/swanandp/acts_as_list/issues/298)
+- `add\_new\_at: :top` does not work [\#296](https://github.com/swanandp/acts_as_list/issues/296)
+- remove\_from\_list causing "wrong number of arguments \(given 2, expected 0..1\)" [\#293](https://github.com/swanandp/acts_as_list/issues/293)
+- Passing raw strings to reorder deprecated in Rails 5.2 [\#290](https://github.com/swanandp/acts_as_list/issues/290)
+
+**Merged pull requests:**
+
+- Fix Test Suite [\#306](https://github.com/swanandp/acts_as_list/pull/306) ([brendon](https://github.com/brendon))
+- Add frozen\_string\_literal pragma to ruby files [\#305](https://github.com/swanandp/acts_as_list/pull/305) ([krzysiek1507](https://github.com/krzysiek1507))
+- Use symbols instead of SQL strings for reorder \(for Rails 5.2\) [\#294](https://github.com/swanandp/acts_as_list/pull/294) ([jhawthorn](https://github.com/jhawthorn))
+
 ## [v0.9.10](https://github.com/swanandp/acts_as_list/tree/v0.9.10) (2017-11-19)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.9...v0.9.10)
 
