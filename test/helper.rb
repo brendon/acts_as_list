@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # $DEBUG = true
 
 require "rubygems"

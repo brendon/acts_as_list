@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
   def self.call(caller_class, position_column)
     define_class_methods(caller_class, position_column)
@@ -29,7 +31,7 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
       end
 
       define_singleton_method :update_all_with_touch do |updates|
-        update_all(updates << touch_record_sql)
+        update_all(updates + touch_record_sql)
       end
 
       private

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Common shared behaviour.
 module Shared
   autoload :List,           'shared_list'

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ActiveRecord::Acts::List::CallbackDefiner #:nodoc:
   def self.call(caller_class, add_new_at)
     caller_class.class_eval do

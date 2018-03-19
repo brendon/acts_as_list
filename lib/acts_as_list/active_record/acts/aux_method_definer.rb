@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ActiveRecord::Acts::List::AuxMethodDefiner #:nodoc:
   def self.call(caller_class)
     caller_class.class_eval do
