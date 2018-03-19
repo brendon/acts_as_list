@@ -114,7 +114,7 @@ class DefaultScopedWhereMixin < Mixin
         order('pos ASC').where(active: false)
       end
     else
-      unscope(:where).where(active: false)
+      unscope(:where, :select).where(active: false)
     end
   end
 end
@@ -249,7 +249,6 @@ class ListTest < ActsAsListTestCase
 end
 
 class ListWithCallbackTest < ActsAsListTestCase
-
   include Shared::List
 
   def setup
