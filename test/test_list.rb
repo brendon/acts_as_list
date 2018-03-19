@@ -889,3 +889,36 @@ class SequentialUpdatesMixinNotNullUniquePositiveConstraintsTest < ActsAsListTes
     assert_equal 3, new.pos
   end
 end
+
+class MixedPositionCreateTest < ActsAsListTestCase
+  def setup
+    setup_db
+  end
+
+  def test_reverse_position_ordering
+    item3 = DefaultScopedMixin.create pos: 3
+    item2 = DefaultScopedMixin.create pos: 2
+    item1 = DefaultScopedMixin.create pos: 1
+
+    assert_equal item3.id, 1
+    assert_equal item2.id, 2
+    assert_equal item1.id, 3
+
+    assert_equal [1, 2, 3], DefaultScopedMixin.all.map(&:pos)
+    assert_equal [3, 2, 1], DefaultScopedMixin.all.map(&:id)
+  end
+
+
+  def test_mixed_position_ordering
+    item2 = DefaultScopedMixin.create pos: 2
+    item3 = DefaultScopedMixin.create pos: 3
+    item1 = DefaultScopedMixin.create pos: 1
+
+    assert_equal item2.id, 1
+    assert_equal item3.id, 2
+    assert_equal item1.id, 3
+
+    assert_equal [1, 2, 3], DefaultScopedMixin.all.map(&:pos)
+    assert_equal [3, 1, 2], DefaultScopedMixin.all.map(&:id)
+  end
+end

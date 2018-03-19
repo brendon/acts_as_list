@@ -215,6 +215,16 @@ module ActiveRecord
 
         private
 
+        def position_in_list?(position, avoid_id = nil)
+          scope = acts_as_list_list
+
+          if avoid_id
+            scope = scope.where("#{quoted_table_name}.#{self.class.primary_key} != ?", avoid_id)
+          end
+
+          scope.where("#{quoted_position_column_with_table_name} = ?", position).exists?
+        end
+
         def swap_positions(item1, item2)
           item1_position = item1.send(position_column)
 
@@ -239,7 +249,7 @@ module ActiveRecord
           if assume_default_position?
             increment_positions_on_all_items
             self[position_column] = acts_as_list_top
-          else
+          elsif position_in_list?(self[position_column], id)
             increment_positions_on_lower_items(self[position_column], id)
           end
 
@@ -253,7 +263,7 @@ module ActiveRecord
         def add_to_list_bottom
           if assume_default_position?
             self[position_column] = bottom_position_in_list.to_i + 1
-          else
+          elsif position_in_list?(self[position_column], id)
             increment_positions_on_lower_items(self[position_column], id)
           end
 
