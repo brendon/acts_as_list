@@ -1,5 +1,8 @@
 # ActsAsList
 
+## Build Status
+[![Build Status](https://secure.travis-ci.org/swanandp/acts_as_list.png)](https://secure.travis-ci.org/swanandp/acts_as_list)
+
 ## Description
 
 This `acts_as` extension provides the capabilities for sorting and reordering a number of objects in a list. The class that has this specified needs to have a `position` column defined as an integer on the mapped database table.
@@ -183,9 +186,6 @@ Version `0.9.0` adds `acts_as_list_no_update` (https://github.com/swanandp/acts_
 As of version `0.7.5` Rails 5 is supported.
 
 All versions `0.1.5` onwards require Rails 3.0.x and higher.
-
-## Build Status
-[![Build Status](https://secure.travis-ci.org/swanandp/acts_as_list.png)](https://secure.travis-ci.org/swanandp/acts_as_list)
 
 ## Workflow Status
 [![WIP Issues](https://badge.waffle.io/swanandp/acts_as_list.png)](http://waffle.io/swanandp/acts_as_list)
