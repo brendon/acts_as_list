@@ -17,7 +17,12 @@ module ActiveRecord::Acts::List::ScopeMethodDefiner #:nodoc:
         end
 
         define_method :scope_changed? do
-          changed.include?(scope_name.to_s)
+          if ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR >= 1 ||
+              ActiveRecord::VERSION::MAJOR > 5
+            changed_attribute_names_to_save.include?(scope_name.to_s)
+          else
+            changed.include?(scope_name.to_s)
+          end
         end
 
         define_method :destroyed_via_scope? do
