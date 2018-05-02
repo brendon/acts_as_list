@@ -1,5 +1,19 @@
 # Change Log
 
+## [v0.9.12](https://github.com/swanandp/acts_as_list/tree/v0.9.12) (2018-05-02)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.11...v0.9.12)
+
+**Closed issues:**
+
+- acts\_as\_list methods on has\_many through [\#308](https://github.com/swanandp/acts_as_list/issues/308)
+- Travis badge [\#307](https://github.com/swanandp/acts_as_list/issues/307)
+- Unscoping breaks STI subclasses, but is soon to be fixed in Rails [\#291](https://github.com/swanandp/acts_as_list/issues/291)
+- Refactor string eval for scope\_condition [\#227](https://github.com/swanandp/acts_as_list/issues/227)
+
+**Merged pull requests:**
+
+- mocha/minitest, not mocha/mini\_test now. [\#310](https://github.com/swanandp/acts_as_list/pull/310) ([jmarkbrooks](https://github.com/jmarkbrooks))
+
 ## [v0.9.11](https://github.com/swanandp/acts_as_list/tree/v0.9.11) (2018-03-19)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.10...v0.9.11)
 
@@ -37,7 +51,7 @@
 
 **Merged pull requests:**
 
-- Added fixed values option for scope array [\#286](https://github.com/swanandp/acts_as_list/pull/286) ([hooverlunch](https://github.com/hooverlunch))
+- Added fixed values option for scope array [\#286](https://github.com/swanandp/acts_as_list/pull/286) ([smoyth](https://github.com/smoyth))
 
 ## [v0.9.8](https://github.com/swanandp/acts_as_list/tree/v0.9.8) (2017-09-28)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.7...v0.9.8)
