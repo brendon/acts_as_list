@@ -74,6 +74,14 @@ class ListMixinSub2 < ListMixin
   end
 end
 
+class ListMixinError < ListMixin
+  if rails_3
+    validates :state, presence: true
+  else
+    validates_presence_of :state
+  end
+end
+
 class ListWithStringScopeMixin < Mixin
   acts_as_list column: "pos", scope: 'parent_id = #{parent_id}'
 end
