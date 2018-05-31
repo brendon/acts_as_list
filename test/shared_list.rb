@@ -302,5 +302,13 @@ module Shared
       new.insert_at(1)
       assert !new.persisted?
     end
+
+    def test_invalid_records_raise_error_with_insert_at!
+      new = ListMixinError.new(parent_id: 5, state: nil)
+      assert !new.valid?
+      assert_raises ActiveRecord::RecordInvalid do
+        new.insert_at!(1)
+      end
+    end
   end
 end

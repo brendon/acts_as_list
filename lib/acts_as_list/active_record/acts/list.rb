@@ -69,6 +69,10 @@ module ActiveRecord
           insert_at_position(position)
         end
 
+        def insert_at!(position = acts_as_list_top)
+          insert_at_position(position, true)
+        end
+
         # Swap positions with the next lower item, if one exists.
         def move_lower
           return unless lower_item
@@ -208,9 +212,9 @@ module ActiveRecord
         end
 
         # Sets the new position and saves it
-        def set_list_position(new_position)
+        def set_list_position(new_position, raise_exception_if_save_fails=false)
           write_attribute position_column, new_position
-          save
+          raise_exception_if_save_fails ? save! : save
         end
 
         private
@@ -387,8 +391,8 @@ module ActiveRecord
           end
         end
 
-        def insert_at_position(position)
-          return set_list_position(position) if new_record?
+        def insert_at_position(position, raise_exception_if_save_fails=false)
+          return set_list_position(position, raise_exception_if_save_fails) if new_record?
           with_lock do
             if in_list?
               old_position = send(position_column).to_i
@@ -397,12 +401,12 @@ module ActiveRecord
               # gap is required to leave room for position increments
               # positive number will be valid with unique not null check (>= 0) db constraint
               temporary_position = bottom_position_in_list + 2
-              set_list_position(temporary_position)
+              set_list_position(temporary_position, raise_exception_if_save_fails)
               shuffle_positions_on_intermediate_items(old_position, position, id)
             else
               increment_positions_on_lower_items(position)
             end
-            set_list_position(position)
+            set_list_position(position, raise_exception_if_save_fails)
           end
         end
 
