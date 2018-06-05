@@ -888,4 +888,16 @@ class SequentialUpdatesMixinNotNullUniquePositiveConstraintsTest < ActsAsListTes
     new.insert_at(3)
     assert_equal 3, new.pos
   end
+
+  def test_destroy
+    new_item = SequentialUpdatesDefault.create
+    assert_equal 5, new_item.pos
+
+    new_item.insert_at(2)
+    assert_equal 2, new_item.pos
+
+    new_item.destroy
+    assert_equal [1,2,3,4], SequentialUpdatesDefault.all.map(&:pos).sort
+
+  end
 end
