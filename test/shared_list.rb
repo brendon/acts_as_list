@@ -293,8 +293,22 @@ module Shared
 
     def test_non_persisted_records_dont_get_lock_called
       new = ListMixin.new(parent_id: 5)
-
       new.destroy
+    end
+
+    def test_invalid_records_dont_get_inserted
+      new = ListMixinError.new(parent_id: 5, state: nil)
+      assert !new.valid?
+      new.insert_at(1)
+      assert !new.persisted?
+    end
+
+    def test_invalid_records_raise_error_with_insert_at!
+      new = ListMixinError.new(parent_id: 5, state: nil)
+      assert !new.valid?
+      assert_raises ActiveRecord::RecordInvalid do
+        new.insert_at!(1)
+      end
     end
   end
 end
