@@ -1,5 +1,16 @@
 # Change Log
 
+## [v0.9.14](https://github.com/swanandp/acts_as_list/tree/v0.9.14) (2018-06-05)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.13...v0.9.14)
+
+**Closed issues:**
+
+- `insert\_at` saves invalid ActiveRecord objects [\#311](https://github.com/swanandp/acts_as_list/issues/311)
+
+**Merged pull requests:**
+
+- \#311 Don't insert invalid ActiveRecord objects [\#312](https://github.com/swanandp/acts_as_list/pull/312) ([seanabrahams](https://github.com/seanabrahams))
+
 ## [v0.9.13](https://github.com/swanandp/acts_as_list/tree/v0.9.13) (2018-06-05)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.12...v0.9.13)
 
