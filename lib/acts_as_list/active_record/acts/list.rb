@@ -327,7 +327,14 @@ module ActiveRecord
         def decrement_positions_on_lower_items(position=nil)
           return unless in_list?
           position ||= send(position_column).to_i
-          acts_as_list_list.where("#{quoted_position_column_with_table_name} > ?", position).decrement_all
+
+          if sequential_updates?
+            acts_as_list_list.where("#{quoted_position_column_with_table_name} > ?", position).reorder(acts_as_list_order_argument(:asc)).each do |item|
+              item.decrement!(position_column)
+            end
+          else
+            acts_as_list_list.where("#{quoted_position_column_with_table_name} > ?", position).decrement_all
+          end
         end
 
         # Increments position (<tt>position_column</tt>) of all items in the list.
