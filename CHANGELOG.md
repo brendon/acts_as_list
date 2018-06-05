@@ -1,5 +1,12 @@
 # Change Log
 
+## [v0.9.13](https://github.com/swanandp/acts_as_list/tree/v0.9.13) (2018-06-05)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.12...v0.9.13)
+
+**Merged pull requests:**
+
+- Fix unique index constraint failure on item destroy [\#313](https://github.com/swanandp/acts_as_list/pull/313) ([yjukaku](https://github.com/yjukaku))
+
 ## [v0.9.12](https://github.com/swanandp/acts_as_list/tree/v0.9.12) (2018-05-02)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.11...v0.9.12)
 
