@@ -1,5 +1,12 @@
 # Change Log
 
+## [v0.9.15](https://github.com/swanandp/acts_as_list/tree/v0.9.15) (2018-06-11)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.14...v0.9.15)
+
+**Merged pull requests:**
+
+- Fix \#314: `no\_update` is not applied to subclasses [\#315](https://github.com/swanandp/acts_as_list/pull/315) ([YoranBrondsema](https://github.com/YoranBrondsema))
+
 ## [v0.9.14](https://github.com/swanandp/acts_as_list/tree/v0.9.14) (2018-06-05)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.13...v0.9.14)
 
