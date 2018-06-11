@@ -96,7 +96,7 @@ module ActiveRecord
           end
 
           def applied_to?(klass)
-            extracted_klasses.any? { |k| k == klass }
+            !(klass.ancestors & extracted_klasses).empty?
           end
 
           private
