@@ -3,7 +3,7 @@
 module ActiveRecord
   module Acts
     module List
-      VERSION = '0.9.14'
+      VERSION = '0.9.15'
     end
   end
 end
