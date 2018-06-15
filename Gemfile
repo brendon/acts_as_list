@@ -6,7 +6,10 @@ gemspec
 
 gem "rake"
 gem "appraisal"
-gem "github_changelog_generator", "1.9.0"
+
+group :development do
+  gem "github_changelog_generator", "1.9.0"
+end
 
 group :test do
   gem "minitest", "~> 5.0"

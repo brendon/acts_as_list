@@ -5,8 +5,11 @@ source "http://rubygems.org"
 gem "rack", "~> 1", platforms: [:ruby_19, :ruby_20, :ruby_21]
 gem "rake"
 gem "appraisal"
-gem "github_changelog_generator", "1.9.0"
 gem "activerecord", "~> 5.1.4"
+
+group :development do
+  gem "github_changelog_generator", "1.9.0"
+end
 
 group :test do
   gem "minitest", "~> 5.0"
