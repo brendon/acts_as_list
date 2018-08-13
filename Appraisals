@@ -43,5 +43,5 @@ appraise "rails-5-2" do
   group :mysql do
     gem "mysql2", "~> 0.4.10", platforms: [:ruby]
   end
-  gem "activerecord", "~> 5.2.0.rc1"
+  gem "activerecord", "~> 5.2.1"
 end
