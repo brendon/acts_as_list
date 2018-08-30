@@ -105,20 +105,14 @@ module ActiveRecord
         # position adjusted accordingly.
         def move_to_bottom
           return unless in_list?
-          acts_as_list_class.transaction do
-            decrement_positions_on_lower_items
-            assume_bottom_position
-          end
+          insert_at_position bottom_position_in_list.to_i
         end
 
         # Move to the top of the list. If the item is already in the list, the items above it have their
         # position adjusted accordingly.
         def move_to_top
           return unless in_list?
-          acts_as_list_class.transaction do
-            increment_positions_on_higher_items
-            assume_top_position
-          end
+          insert_at_position acts_as_list_top
         end
 
         # Removes the item from the list.
