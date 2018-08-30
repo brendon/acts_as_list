@@ -1,5 +1,19 @@
 # Change Log
 
+## [v0.9.16](https://github.com/swanandp/acts_as_list/tree/v0.9.16) (2018-08-30)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.15...v0.9.16)
+
+**Closed issues:**
+
+- Re-ordering at specific position [\#318](https://github.com/swanandp/acts_as_list/issues/318)
+- `no\_update` is not applied to subclasses [\#314](https://github.com/swanandp/acts_as_list/issues/314)
+- NoMethodError: undefined method `acts\_as\_list' [\#303](https://github.com/swanandp/acts_as_list/issues/303)
+- Cannot create item at position 0 [\#297](https://github.com/swanandp/acts_as_list/issues/297)
+
+**Merged pull requests:**
+
+- Unscope `select` to avoid PG::UndefinedFunction [\#283](https://github.com/swanandp/acts_as_list/pull/283) ([donv](https://github.com/donv))
+
 ## [v0.9.15](https://github.com/swanandp/acts_as_list/tree/v0.9.15) (2018-06-11)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.14...v0.9.15)
 
