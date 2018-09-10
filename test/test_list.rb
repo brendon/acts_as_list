@@ -922,4 +922,12 @@ class SequentialUpdatesMixinNotNullUniquePositiveConstraintsTest < ActsAsListTes
     assert_equal [1,2,3,4], SequentialUpdatesDefault.all.map(&:pos).sort
 
   end
+
+  def test_exception_on_wrong_position
+    new_item = SequentialUpdatesDefault.create
+
+    assert_raises ArgumentError do
+      new_item.insert_at(0)
+    end
+  end
 end
