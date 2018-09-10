@@ -393,6 +393,7 @@ module ActiveRecord
         end
 
         def insert_at_position(position, raise_exception_if_save_fails=false)
+          raise ArgumentError.new("position cannot be lower than top") if position < acts_as_list_top
           return set_list_position(position, raise_exception_if_save_fails) if new_record?
           with_lock do
             if in_list?
