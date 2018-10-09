@@ -1,7 +1,5 @@
 source "http://rubygems.org"
 
-gem "rack", "~> 1", platforms: [:ruby_19, :ruby_20, :ruby_21]
-
 gemspec
 
 gem "rake"
