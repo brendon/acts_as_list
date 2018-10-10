@@ -310,5 +310,33 @@ module Shared
         new.insert_at!(1)
       end
     end
+
+    def test_update_scope__with_in_transaction
+      ActiveRecord::Base.transaction do
+        new1 = ListMixin.create(parent_id: 100)
+        assert_equal 1, new1.pos
+
+        new2 = ListMixin.create(parent_id: 200)
+        assert_equal 1, new2.pos
+
+        new1.update_attributes(parent_id: 20)
+        assert_equal 1, new1.pos
+
+        new2.update_attributes(parent_id: 20)
+        assert_equal 2, new2.pos
+      end
+
+      new1 = ListMixin.create(parent_id: 300)
+      assert_equal 1, new1.pos
+
+      new2 = ListMixin.create(parent_id: 400)
+      assert_equal 1, new2.pos
+
+      new1.update_attributes(parent_id: 30)
+      assert_equal 1, new1.pos
+
+      new2.update_attributes(parent_id: 30)
+      assert_equal 2, new2.pos
+    end
   end
 end

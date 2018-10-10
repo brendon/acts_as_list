@@ -241,9 +241,6 @@ module ActiveRecord
             increment_positions_on_lower_items(self[position_column], id)
           end
 
-          # Make sure we know that we've processed this scope change already
-          @scope_changed = false
-
           # Don't halt the callback chain
           true
         end
@@ -255,16 +252,13 @@ module ActiveRecord
             increment_positions_on_lower_items(self[position_column], id)
           end
 
-          # Make sure we know that we've processed this scope change already
-          @scope_changed = false
-
           # Don't halt the callback chain
           true
         end
 
         def assume_default_position?
           not_in_list? ||
-          persisted? && internal_scope_changed? && !position_changed ||
+          persisted? && @scope_changed && !position_changed ||
           default_position?
         end
 
@@ -445,7 +439,7 @@ module ActiveRecord
         end
 
         def internal_scope_changed?
-          return @scope_changed if defined?(@scope_changed)
+          return false if defined?(@scope_changed) && @scope_changed
 
           @scope_changed = scope_changed?
         end

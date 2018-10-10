@@ -17,7 +17,7 @@ module ActiveRecord::Acts::List::ScopeMethodDefiner #:nodoc:
         end
 
         define_method :scope_changed? do
-          changed.include?(scope_name.to_s)
+          changed.include?(scope_name.to_s) && !changes[scope_name.to_s][0].nil?
         end
 
         define_method :destroyed_via_scope? do
