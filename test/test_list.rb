@@ -41,7 +41,7 @@ def setup_db(position_options = {})
 
   mixins = [ Mixin, ListMixin, ListMixinSub1, ListMixinSub2, ListWithStringScopeMixin,
     ArrayScopeListMixin, ZeroBasedMixin, DefaultScopedMixin,
-    DefaultScopedWhereMixin, TopAdditionMixin, NoAdditionMixin, QuotedList ]
+    DefaultScopedWhereMixin, TopAdditionMixin, NoAdditionMixin, QuotedList, TouchDisabledMixin ]
 
   mixins << EnumArrayScopeListMixin if rails_4
 
@@ -61,6 +61,10 @@ end
 
 class ListMixin < Mixin
   acts_as_list column: "pos", scope: :parent
+end
+
+class TouchDisabledMixin < Mixin
+  acts_as_list column: "pos", touch_on_update: false
 end
 
 class ListMixinSub1 < ListMixin
@@ -808,6 +812,41 @@ class TouchTest < ActsAsListTestCase
       updated_ats[2..2].each do |updated_at|
         assert_equal updated_at.to_i, now.to_i
       end
+    end
+  end
+end
+
+class TouchDisabledTest < ActsAsListTestCase
+  def setup
+    setup_db
+    Timecop.freeze(yesterday) do
+      4.times { TouchDisabledMixin.create! }
+    end
+  end
+
+  def now
+    @now ||= Time.current.change(usec: 0)
+  end
+
+  def yesterday
+    @yesterday ||= 1.day.ago
+  end
+
+  def updated_ats
+    TouchDisabledMixin.order(:id).pluck(:updated_at)
+  end
+
+  def positions
+    ListMixin.order(:id).pluck(:pos)
+  end
+
+  def test_deleting_item_does_not_touch_higher_items
+    Timecop.freeze(now) do
+      TouchDisabledMixin.first.destroy
+      updated_ats.each do |updated_at|
+        assert_equal updated_at.to_i, yesterday.to_i
+      end
+      assert_equal positions, [1, 2, 3]
     end
   end
 end
