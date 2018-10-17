@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
-  def self.call(caller_class, position_column)
-    define_class_methods(caller_class, position_column)
+  def self.call(caller_class, position_column, touch_on_update)
+    define_class_methods(caller_class, position_column, touch_on_update)
     define_instance_methods(caller_class, position_column)
 
     if mass_assignment_protection_was_used_by_user?(caller_class)
@@ -12,7 +12,7 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
 
   private
 
-  def self.define_class_methods(caller_class, position_column)
+  def self.define_class_methods(caller_class, position_column, touch_on_update)
     caller_class.class_eval do
       define_singleton_method :quoted_position_column do
         @_quoted_position_column ||= connection.quote_column_name(position_column)
@@ -31,7 +31,8 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
       end
 
       define_singleton_method :update_all_with_touch do |updates|
-        update_all(updates + touch_record_sql)
+        updates += touch_record_sql if touch_on_update
+        update_all(updates)
       end
 
       private
