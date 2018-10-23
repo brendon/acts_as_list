@@ -328,9 +328,7 @@ module ActiveRecord
           position ||= send(position_column).to_i
 
           if sequential_updates?
-            acts_as_list_list.where("#{quoted_position_column_with_table_name} > ?", position).reorder(acts_as_list_order_argument(:asc)).each do |item|
-              item.decrement!(position_column)
-            end
+            acts_as_list_list.where("#{quoted_position_column_with_table_name} > ?", position).reorder(acts_as_list_order_argument(:asc)).decrement_sequentially
           else
             acts_as_list_list.where("#{quoted_position_column_with_table_name} > ?", position).decrement_all
           end
@@ -366,9 +364,7 @@ module ActiveRecord
             )
 
             if sequential_updates?
-              items.reorder(acts_as_list_order_argument(:asc)).each do |item|
-                item.decrement!(position_column)
-              end
+              items.reorder(acts_as_list_order_argument(:asc)).decrement_sequentially
             else
               items.decrement_all
             end
@@ -384,9 +380,7 @@ module ActiveRecord
             )
 
             if sequential_updates?
-              items.reorder(acts_as_list_order_argument(:desc)).each do |item|
-                item.increment!(position_column)
-              end
+              items.reorder(acts_as_list_order_argument(:desc)).increment_sequentially
             else
               items.increment_all
             end

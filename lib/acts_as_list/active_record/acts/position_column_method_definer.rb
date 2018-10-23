@@ -22,6 +22,18 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
         @_quoted_position_column_with_table_name ||= "#{caller_class.quoted_table_name}.#{quoted_position_column}"
       end
 
+      define_singleton_method :decrement_sequentially do
+        pluck(primary_key).each do |id|
+          where(primary_key => id).decrement_all
+        end
+      end
+
+      define_singleton_method :increment_sequentially do
+        pluck(primary_key).each do |id|
+          where(primary_key => id).increment_all
+        end
+      end
+
       define_singleton_method :decrement_all do
         update_all_with_touch "#{quoted_position_column} = (#{quoted_position_column_with_table_name} - 1)"
       end

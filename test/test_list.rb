@@ -39,6 +39,15 @@ def setup_db(position_options = {})
     t.column :order, :integer
   end
 
+  # This table is used to test table names with different primary_key columns
+  ActiveRecord::Base.connection.create_table 'altid-table', primary_key: 'altid' do |t|
+    t.column :pos, :integer
+    t.column :created_at, :datetime
+    t.column :updated_at, :datetime
+  end
+
+  ActiveRecord::Base.connection.add_index 'altid-table', :pos, unique: true
+
   mixins = [ Mixin, ListMixin, ListMixinSub1, ListMixinSub2, ListWithStringScopeMixin,
     ArrayScopeListMixin, ZeroBasedMixin, DefaultScopedMixin,
     DefaultScopedWhereMixin, TopAdditionMixin, NoAdditionMixin, QuotedList, TouchDisabledMixin ]
@@ -133,6 +142,17 @@ end
 
 class SequentialUpdatesDefault < Mixin
   acts_as_list column: "pos"
+end
+
+class SequentialUpdatesAltId < ActiveRecord::Base
+  self.table_name = "altid-table"
+  self.primary_key = "altid"
+
+  acts_as_list column: "pos"
+end
+
+class SequentialUpdatesAltIdTouchDisabled < SequentialUpdatesAltId
+  acts_as_list column: "pos", touch_on_update: false
 end
 
 class SequentialUpdatesFalseMixin < Mixin
@@ -967,6 +987,97 @@ class SequentialUpdatesMixinNotNullUniquePositiveConstraintsTest < ActsAsListTes
 
     assert_raises ArgumentError do
       new_item.insert_at(0)
+    end
+  end
+
+
+  class SequentialUpdatesMixinNotNullUniquePositiveConstraintsTest < ActsAsListTestCase
+    def setup
+      setup_db null: false, unique: true, positive: true
+      (1..4).each { |counter| SequentialUpdatesAltId.create!({pos: counter}) }
+    end
+
+    def test_sequential_updates_default_to_true_with_unique_index
+      assert_equal true, SequentialUpdatesAltId.new.send(:sequential_updates?)
+    end
+
+    def test_insert_at
+      new = SequentialUpdatesAltId.create
+      assert_equal 5, new.pos
+
+      new.insert_at(1)
+      assert_equal 1, new.pos
+
+      new.insert_at(5)
+      assert_equal 5, new.pos
+
+      new.insert_at(3)
+      assert_equal 3, new.pos
+    end
+
+    def test_move_to_bottom
+      item = SequentialUpdatesAltId.order(:pos).first
+      item.move_to_bottom
+      assert_equal 4, item.pos
+    end
+
+    def test_move_to_top
+      new_item = SequentialUpdatesAltId.create!
+      assert_equal 5, new_item.pos
+
+      new_item.move_to_top
+      assert_equal 1, new_item.pos
+    end
+
+    def test_destroy
+      new_item = SequentialUpdatesAltId.create
+      assert_equal 5, new_item.pos
+
+      new_item.insert_at(2)
+      assert_equal 2, new_item.pos
+
+      new_item.destroy
+      assert_equal [1,2,3,4], SequentialUpdatesAltId.all.map(&:pos).sort
+
+    end
+  end
+
+  class SequentialUpdatesAltIdTouchDisabledTest < ActsAsListTestCase
+    def setup
+      setup_db
+      Timecop.freeze(yesterday) do
+        4.times { SequentialUpdatesAltIdTouchDisabled.create! }
+      end
+    end
+
+    def now
+      @now ||= Time.current.change(usec: 0)
+    end
+
+    def yesterday
+      @yesterday ||= 1.day.ago
+    end
+
+    def updated_ats
+      SequentialUpdatesAltIdTouchDisabled.order(:altid).pluck(:updated_at)
+    end
+
+    def positions
+      SequentialUpdatesAltIdTouchDisabled.order(:altid).pluck(:pos)
+    end
+
+    def test_sequential_updates_default_to_true_with_unique_index
+      assert_equal true, SequentialUpdatesAltIdTouchDisabled.new.send(:sequential_updates?)
+    end
+
+    def test_deleting_item_does_not_touch_higher_items
+      Timecop.freeze(now) do
+        SequentialUpdatesAltIdTouchDisabled.first.destroy
+        updated_ats.each do |updated_at|
+          assert_equal updated_at.to_i, yesterday.to_i
+        end
+        assert_equal positions, [1, 2, 3]
+      end
     end
   end
 end
