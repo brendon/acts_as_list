@@ -1,5 +1,18 @@
 # Change Log
 
+## [v0.9.17](https://github.com/swanandp/acts_as_list/tree/v0.9.17) (2018-10-29)
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.16...v0.9.17)
+
+**Closed issues:**
+
+- Inconsistent behavior [\#330](https://github.com/swanandp/acts_as_list/issues/330)
+- Using `top\_of\_list` set to 1 and setting a record to index 0 triggers a `PG::UniqueViolation` [\#322](https://github.com/swanandp/acts_as_list/issues/322)
+
+**Merged pull requests:**
+
+- Feature/add exception to wrong position [\#323](https://github.com/swanandp/acts_as_list/pull/323) ([TheNeikos](https://github.com/TheNeikos))
+- Methods move\_to\_bottom and move\_to\_top should not fail when there are unique constraints [\#320](https://github.com/swanandp/acts_as_list/pull/320) ([faucct](https://github.com/faucct))
+
 ## [v0.9.16](https://github.com/swanandp/acts_as_list/tree/v0.9.16) (2018-08-30)
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.15...v0.9.16)
 
