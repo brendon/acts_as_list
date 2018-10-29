@@ -74,6 +74,26 @@ class TouchDisabledMixin < Mixin
   acts_as_list column: "pos", touch_on_update: false
 end
 
+class SlowListMixin < Mixin
+  acts_as_list column: "pos", scope: :parent
+
+  before_create :slow_operation
+
+  def slow_operation
+    sleep 0.1
+  end
+end
+
+class SlowListMixinWithAdvisoryLock < Mixin
+  acts_as_list column: "pos", scope: :parent, advisory_lock: true
+
+  before_create :slow_operation
+
+  def slow_operation
+    sleep 0.1
+  end
+end
+
 class ListMixinSub1 < ListMixin
 end
 
@@ -265,6 +285,47 @@ class ListTest < ActsAsListTestCase
     threads.each(&:join)
 
     assert_equal((1..n).to_a, ListMixin.where(parent_id: 1).order('pos').map(&:pos))
+  end
+end
+
+class ListAdvisoryLockTest < ActsAsListTestCase
+  def setup
+    setup_db
+  end
+
+  def test_errors_without_lock
+    range = 1..10
+    threads = range.map do
+      Thread.new do
+        begin
+          SlowListMixin.create!(parent_id: 5)
+        rescue
+          # Retry ActiveRecord::ConnectionTimeoutError, etc
+          retry
+        end
+      end
+    end
+    threads.each(&:join)
+
+    assert(range.to_a != SlowListMixin.order(:pos).pluck(:pos))
+  end
+
+
+  def test_no_errors_with_lock
+    range = 1..10
+    threads = range.map do
+      Thread.new do
+        begin
+          SlowListMixinWithAdvisoryLock.create!(parent_id: 5)
+        rescue
+          # Retry ActiveRecord::ConnectionTimeoutError, etc
+          retry
+        end
+      end
+    end
+    threads.each(&:join)
+
+    assert_equal(range.to_a, SlowListMixinWithAdvisoryLock.order(:pos).pluck(:pos))
   end
 end
 
