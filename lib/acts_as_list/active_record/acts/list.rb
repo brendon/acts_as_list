@@ -38,6 +38,7 @@ module ActiveRecord
 
           include ActiveRecord::Acts::List::InstanceMethods
           include ActiveRecord::Acts::List::NoUpdate
+          include ActiveRecord::Acts::List::AdvisoryLock if configuration[:advisory_lock]
         end
 
         # This +acts_as+ extension provides the capabilities for sorting and reordering a number of objects in a list.
