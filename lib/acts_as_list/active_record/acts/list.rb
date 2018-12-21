@@ -119,8 +119,9 @@ module ActiveRecord
         # Removes the item from the list.
         def remove_from_list
           if in_list?
-            decrement_positions_on_lower_items
+            old_pos = send position_column
             set_list_position(nil)
+            decrement_positions_on_lower_items(old_pos)
           end
         end
 
@@ -239,6 +240,7 @@ module ActiveRecord
             increment_positions_on_all_items
             self[position_column] = acts_as_list_top
           else
+            # Don't actually add to the top; a position has been specified
             increment_positions_on_lower_items(self[position_column], id)
           end
 
@@ -253,6 +255,7 @@ module ActiveRecord
           if assume_default_position?
             self[position_column] = bottom_position_in_list.to_i + 1
           else
+            # Don't actually add to the bottom; a position has been specified
             increment_positions_on_lower_items(self[position_column], id)
           end
 
@@ -324,8 +327,8 @@ module ActiveRecord
 
         # This has the effect of moving all the lower items up one.
         def decrement_positions_on_lower_items(position=nil)
-          return unless in_list?
-          position ||= send(position_column).to_i
+          position ||= send(position_column)
+          return unless position.present?
 
           if sequential_updates?
             acts_as_list_list.where("#{quoted_position_column_with_table_name} > ?", position).reorder(acts_as_list_order_argument(:asc)).decrement_sequentially
@@ -389,7 +392,7 @@ module ActiveRecord
 
         def insert_at_position(position, raise_exception_if_save_fails=false)
           raise ArgumentError.new("position cannot be lower than top") if position < acts_as_list_top
-          return set_list_position(position, raise_exception_if_save_fails) if new_record?
+          return set_list_position(position, raise_exception_if_save_fails) if new_record? && not_in_list?
           with_lock do
             if in_list?
               old_position = send(position_column).to_i

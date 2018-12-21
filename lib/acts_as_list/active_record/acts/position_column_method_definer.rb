@@ -35,11 +35,13 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
       end
 
       define_singleton_method :decrement_all do
-        update_all_with_touch "#{quoted_position_column} = (#{quoted_position_column_with_table_name} - 1)"
+        min = minimum(position_column)
+        shuffle_to(min - 1) if min
       end
 
       define_singleton_method :increment_all do
-        update_all_with_touch "#{quoted_position_column} = (#{quoted_position_column_with_table_name} + 1)"
+        min = minimum(position_column)
+        shuffle_to(min + 1) if min
       end
 
       define_singleton_method :update_all_with_touch do |updates|
@@ -48,6 +50,25 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
       end
 
       private
+
+      # Update recordset to start at the given position
+      define_singleton_method :shuffle_to do |position|
+        max = unscoped.maximum(position_column)
+        return unless max # If no records have a position we don't have to do anything.
+
+        swap_position = max + 2 # Move recordset after the last record
+        update_all_with_touch(
+          "#{quoted_position_column} = #{quoted_position_column_with_table_name} + #{swap_position}"
+        )
+
+        return_from = unscoped.where("#{quoted_position_column_with_table_name} >= #{swap_position}").minimum(position_column)
+
+        return_position = return_from - position
+        # Can't specify _with_table_name as it's an UPDATE
+        unscoped.where("#{quoted_position_column} >= #{swap_position}").update_all(
+          "#{quoted_position_column} = #{quoted_position_column} - #{return_position}",
+        )
+      end
 
       define_singleton_method :touch_record_sql do
         new.touch_record_sql

@@ -954,6 +954,10 @@ class SequentialUpdatesMixinNotNullUniquePositiveConstraintsTest < ActsAsListTes
 
     new.insert_at(3)
     assert_equal 3, new.pos
+
+    unsaved = SequentialUpdatesDefault.new
+    unsaved.insert_at(1)
+    assert_equal(1, unsaved.pos)
   end
 
   def test_move_to_bottom
