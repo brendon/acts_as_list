@@ -931,3 +931,59 @@ class SequentialUpdatesMixinNotNullUniquePositiveConstraintsTest < ActsAsListTes
     end
   end
 end
+
+class ListConsistencyChecksAndRepairTest < ActsAsListTestCase
+  def setup
+    setup_db
+    (1..10).each { |counter| DefaultScopedMixin.create!({pos: counter}) }
+  end
+
+  def test_does_list_have_duplicates
+    assert_equal false, DefaultScopedMixin.first.does_list_have_duplicates?
+
+    # Create a new item and place it at an existing position
+    # We need to disable callbacks in order to accomplish this
+    DefaultScopedMixin.acts_as_list_no_update {DefaultScopedMixin.create(pos: 2)}
+    
+    assert_equal true, DefaultScopedMixin.first.does_list_have_duplicates?
+  end
+
+  def test_repair_duplicate_positions_in_list
+    # Create a few duplicate positions
+    # We need to disable callbacks in order to accomplish this
+    DefaultScopedMixin.acts_as_list_no_update {
+      [3, 4, 5, 3, 8].each { |counter| DefaultScopedMixin.create!({pos: counter}) }
+    }
+
+    # Make sure that the list has duplicates
+    assert_equal true, DefaultScopedMixin.first.does_list_have_duplicates?
+
+    # Fix the list
+    DefaultScopedMixin.first.repair_duplicate_positions_in_list
+
+    # List should have no duplicates
+    assert_equal false, DefaultScopedMixin.first.does_list_have_duplicates?
+  end
+
+  def test_repair_duplicate_positions_in_list_with_gap
+    # Create a few duplicate positions and a gap in the list
+    # We need to disable callbacks in order to accomplish this
+    DefaultScopedMixin.acts_as_list_no_update {
+      [3, 4, 5, 3, 8].each { |counter| DefaultScopedMixin.create!({pos: counter}) }
+    }
+
+    # Set position_column of ewntry with position 6 to nil in order to create a gap in the list
+    DefaultScopedMixin.acts_as_list_no_update {
+      DefaultScopedMixin.find(6).update(pos: nil)
+    }
+
+    # Make sure that the list has duplicates
+    assert_equal true, DefaultScopedMixin.first.does_list_have_duplicates?
+
+    # Fix the list
+    DefaultScopedMixin.first.repair_duplicate_positions_in_list
+
+    # List should have no duplicates
+    assert_equal false, DefaultScopedMixin.first.does_list_have_duplicates?
+  end
+end
