@@ -13,7 +13,7 @@ rescue Bundler::BundlerError => e
 end
 require "active_record"
 require "minitest/autorun"
-require "mocha/mini_test"
+require "mocha/minitest"
 require "#{File.dirname(__FILE__)}/../init"
 
 if defined?(ActiveRecord::VERSION) &&
