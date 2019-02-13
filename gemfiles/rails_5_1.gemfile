@@ -19,7 +19,7 @@ group :test do
 end
 
 group :sqlite do
-  gem "sqlite3", platforms: [:ruby]
+  gem "sqlite3", "~> 1.3.13", platforms: [:ruby]
 end
 
 group :postgresql do
