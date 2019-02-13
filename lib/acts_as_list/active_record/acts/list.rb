@@ -327,7 +327,7 @@ module ActiveRecord
 
         # This has the effect of moving all the lower items up one.
         def decrement_positions_on_lower_items(position=nil)
-          position ||= send(position_column)
+          position ||= Integer(send(position_column))
           return unless position.present?
 
           if sequential_updates?
@@ -393,6 +393,8 @@ module ActiveRecord
         def insert_at_position(position, raise_exception_if_save_fails=false)
           raise ArgumentError.new("position cannot be lower than top") if position < acts_as_list_top
           if invalid?
+            # `raise RecordInvalid` rather than causing a
+            # constraint violation on duplicate positions
             save! if raise_exception_if_save_fails
             return false
           end

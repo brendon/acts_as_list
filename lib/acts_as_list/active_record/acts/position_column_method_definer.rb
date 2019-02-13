@@ -36,7 +36,8 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
 
       define_singleton_method :decrement_all do
         min = minimum(position_column)
-        shuffle_to(min - 1) if min
+        # Avoid going past top of list
+        shuffle_to(min - 1) if min && min > top_of_list
       end
 
       define_singleton_method :increment_all do
@@ -53,7 +54,14 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
 
       # Update recordset to start at the given position
       define_singleton_method :shuffle_to do |position|
-        max = unscoped.maximum(position_column)
+        max = nil
+        if ActiveRecord::VERSION::MAJOR < 4
+          unscoped do
+            max = maximum(position_column)
+          end
+        else
+          max = unscope(:where).maximum(position_column)
+        end
         return unless max # If no records have a position we don't have to do anything.
 
         swap_position = max + 2 # Move recordset after the last record
@@ -61,7 +69,13 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
           "#{quoted_position_column} = #{quoted_position_column_with_table_name} + #{swap_position}"
         )
 
-        return_from = unscoped.where("#{quoted_position_column_with_table_name} >= #{swap_position}").minimum(position_column)
+        return_from = if ActiveRecord::VERSION::MAJOR < 4
+          unscoped do
+            where("#{quoted_position_column_with_table_name} >= #{swap_position}").minimum(position_column)
+          end
+        else
+          unscope[:where].where("#{quoted_position_column_with_table_name} >= #{swap_position}").minimum(position_column)
+        end
 
         return_position = return_from - position
         # Can't specify _with_table_name as it's an UPDATE
