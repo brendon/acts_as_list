@@ -20,13 +20,14 @@ module ActiveRecord
         #   one by one to respect position column unique not null constraint.
         #   Defaults to true if position column has unique index, otherwise false.
         #   If constraint is <tt>deferrable initially deferred<tt>, overriding it with false will speed up insert_at.
+        # * +touch_on_update+ - configuration to disable the update of the model timestamps when the positions are updated.
         def acts_as_list(options = {})
-          configuration = { column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom }
+          configuration = { column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom, touch_on_update: true }
           configuration.update(options) if options.is_a?(Hash)
 
           caller_class = self
 
-          ActiveRecord::Acts::List::PositionColumnMethodDefiner.call(caller_class, configuration[:column])
+          ActiveRecord::Acts::List::PositionColumnMethodDefiner.call(caller_class, configuration[:column], configuration[:touch_on_update])
           ActiveRecord::Acts::List::ScopeMethodDefiner.call(caller_class, configuration[:scope])
           ActiveRecord::Acts::List::TopOfListMethodDefiner.call(caller_class, configuration[:top_of_list])
           ActiveRecord::Acts::List::AddNewAtMethodDefiner.call(caller_class, configuration[:add_new_at])
@@ -327,9 +328,7 @@ module ActiveRecord
           position ||= send(position_column).to_i
 
           if sequential_updates?
-            acts_as_list_list.where("#{quoted_position_column_with_table_name} > ?", position).reorder(acts_as_list_order_argument(:asc)).each do |item|
-              item.decrement!(position_column)
-            end
+            acts_as_list_list.where("#{quoted_position_column_with_table_name} > ?", position).reorder(acts_as_list_order_argument(:asc)).decrement_sequentially
           else
             acts_as_list_list.where("#{quoted_position_column_with_table_name} > ?", position).decrement_all
           end
@@ -365,9 +364,7 @@ module ActiveRecord
             )
 
             if sequential_updates?
-              items.reorder(acts_as_list_order_argument(:asc)).each do |item|
-                item.decrement!(position_column)
-              end
+              items.reorder(acts_as_list_order_argument(:asc)).decrement_sequentially
             else
               items.decrement_all
             end
@@ -383,9 +380,7 @@ module ActiveRecord
             )
 
             if sequential_updates?
-              items.reorder(acts_as_list_order_argument(:desc)).each do |item|
-                item.increment!(position_column)
-              end
+              items.reorder(acts_as_list_order_argument(:desc)).increment_sequentially
             else
               items.increment_all
             end

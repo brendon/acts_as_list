@@ -16,6 +16,12 @@ Gem::Specification.new do |s|
   s.rubyforge_project     = "acts_as_list"
   s.required_ruby_version = ">= 1.9.2"
 
+  if s.respond_to?(:metadata)
+    s.metadata['changelog_uri'] = 'https://github.com/swanandp/acts_as_list/blob/master/CHANGELOG.md'
+    s.metadata['source_code_uri'] = 'https://github.com/swanandp/acts_as_list'
+    s.metadata['bug_tracker_uri'] = 'https://github.com/swanandp/acts_as_list/issues'
+  end
+
   # Load Paths...
   s.files                 = `git ls-files`.split("\n")
   s.test_files            = `git ls-files -- {test,spec,features}/*`.split("\n")
