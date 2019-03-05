@@ -327,9 +327,9 @@ module ActiveRecord
 
         # This has the effect of moving all the lower items up one.
         def decrement_positions_on_lower_items(position=nil)
-          position ||= Integer(send(position_column))
+          position ||= send(position_column)
           return unless position.present?
-
+          position = Integer(position)
           if sequential_updates?
             acts_as_list_list.where("#{quoted_position_column_with_table_name} > ?", position).reorder(acts_as_list_order_argument(:asc)).decrement_sequentially
           else

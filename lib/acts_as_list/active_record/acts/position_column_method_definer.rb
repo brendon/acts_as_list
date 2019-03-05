@@ -37,7 +37,7 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
       define_singleton_method :decrement_all do
         min = minimum(position_column)
         # Avoid going past top of list
-        shuffle_to(min - 1) if min && min > top_of_list
+        shuffle_to(min - 1) if min && min > acts_as_list_top
       end
 
       define_singleton_method :increment_all do
@@ -74,7 +74,7 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
             where("#{quoted_position_column_with_table_name} >= #{swap_position}").minimum(position_column)
           end
         else
-          unscope[:where].where("#{quoted_position_column_with_table_name} >= #{swap_position}").minimum(position_column)
+          unscope(:where).where("#{quoted_position_column_with_table_name} >= #{swap_position}").minimum(position_column)
         end
 
         return_position = return_from - position

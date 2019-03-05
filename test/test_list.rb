@@ -688,6 +688,70 @@ if rails_4
   end
 end
 
+class ShuffleListPositionsTest < ActsAsListTestCase
+  def setup
+    setup_db
+    (1..4).each { |counter| DefaultScopedMixin.create!({pos: counter}) }
+  end
+
+  def test_reordering
+    # Initial case
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.all.map(&:id)
+
+    # Test increment_all does not cause reordering
+    DefaultScopedMixin.increment_all
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.all.map(&:id)
+    assert_equal [2, 3, 4, 5], DefaultScopedMixin.all.map(&:pos)
+
+    # Test decrement_all does not cause reordering
+    DefaultScopedMixin.decrement_all
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.all.map(&:id)
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.all.map(&:pos)
+
+    # Test increment matching no records doesn't cause issues.
+    DefaultScopedMixin.where('pos > 5').increment_all
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.all.map(&:id)
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.all.map(&:pos)
+
+    # Test decrement matching no records doesn't cause issues.
+    DefaultScopedMixin.where('pos < 0').decrement_all
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.all.map(&:id)
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.all.map(&:pos)
+
+    # Test reordering on top of one another
+    assert_raises ArgumentError do
+      DefaultScopedMixin.find(3).insert_at!(0)
+    end
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.all.map(&:id)
+    DefaultScopedMixin.find(3).insert_at!(1)
+    assert_equal [3, 1, 2, 4], DefaultScopedMixin.all.map(&:id)
+    DefaultScopedMixin.find(3).insert_at!(2)
+    assert_equal [1, 3, 2, 4], DefaultScopedMixin.all.map(&:id)
+    DefaultScopedMixin.find(3).insert_at!(3)
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.all.map(&:id)
+    DefaultScopedMixin.find(3).insert_at!(4)
+    assert_equal [1, 2, 4, 3], DefaultScopedMixin.all.map(&:id)
+    DefaultScopedMixin.find(3).insert_at!(5)
+    assert_equal [1, 2, 4, 3], DefaultScopedMixin.all.map(&:id)
+    DefaultScopedMixin.find(3).insert_at!(4)
+    assert_equal [1, 2, 4, 3], DefaultScopedMixin.all.map(&:id)
+    DefaultScopedMixin.find(3).insert_at!(3)
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.all.map(&:id)
+
+    # Test making a 'hole' in the list
+    DefaultScopedMixin.where('pos > 2').increment_all
+    assert_equal [1, 2, 3, 4], DefaultScopedMixin.all.map(&:id)
+    assert_equal [1, 2, 4, 5], DefaultScopedMixin.all.map(&:pos)
+
+    # Test that nil values are ignored
+    DefaultScopedMixin.update_all(pos: nil)
+    DefaultScopedMixin.increment_all
+    DefaultScopedMixin.decrement_all
+    assert_equal [nil, nil, nil, nil], DefaultScopedMixin.all.map(&:pos)
+  end
+end
+
+
 class MultipleListsArrayScopeTest < ActsAsListTestCase
   def setup
     setup_db
