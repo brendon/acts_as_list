@@ -52,6 +52,7 @@ class NoUpdateForCollectionClassesTest < NoUpdateForCollectionClassesTestCase
 
     @item_1, @item_2 = (1..2).map { |counter| TodoItem.create!(position: counter, todo_list_id: @list_1.id) }
     @attachment_1, @attachment_2 = (1..2).map { |counter| TodoItemAttachment.create!(position: counter, todo_item_id: @item_1.id) }
+    @attachment_3, @attachment_4 = (1..2).map {|counter| TodoItemAttachment.create!(position: counter, todo_item_id: @item_2.id)}
   end
 
   def test_update
@@ -78,6 +79,30 @@ class NoUpdateForCollectionClassesTest < NoUpdateForCollectionClassesTestCase
 
     assert_equal 2, @list_1.reload.position
     assert_equal 1, @list_2.reload.position
+  end
+
+  def test_no_update_for_nested_blocks
+    new_list = @list_1.dup
+    new_list.save!
+
+    TodoItem.acts_as_list_no_update do
+      @list_1.todo_items.reverse.each do |item|
+        new_item = item.dup
+        new_list.todo_items << new_item
+        new_item.save!
+
+        assert_equal new_item.position, item.reload.position
+
+        TodoItemAttachment.acts_as_list_no_update do
+          item.todo_item_attachments.reverse.each do |attach|
+            new_attach = attach.dup
+            new_item.todo_item_attachments << new_attach
+            new_attach.save!
+            assert_equal new_attach.position, attach.reload.position
+          end
+        end
+      end
+    end
   end
 
   def test_raising_array_type_error
