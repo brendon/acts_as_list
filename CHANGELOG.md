@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.19] - 2019-03-12
+### Added
+- Allow `acts_as_list_no_update` blocks to be nested [@conorbdaly](https://github.com/conorbdaly)
+
 ## [0.9.18] - 2019-03-08
 ### Added
 - Added additional gemspec metadata [@boone](https://github.com/boone)
