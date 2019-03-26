@@ -393,12 +393,27 @@ module ActiveRecord
         def insert_at_position(position, raise_exception_if_save_fails=false)
           raise ArgumentError.new("position cannot be lower than top") if position < acts_as_list_top
           if invalid?
-            # `raise RecordInvalid` rather than causing a
-            # constraint violation on duplicate positions
+            # If you violate a uniqueness constraint on
+            # position_column, you get a postgres error,
+            # and the transaction rolls back.
+            # You can avoid this with a uniqueness validation (raising
+            # RecordNotValid) which you can catch and continue from.
             save! if raise_exception_if_save_fails
             return false
           end
           return set_list_position(position, raise_exception_if_save_fails) if new_record? && not_in_list?
+
+          # Cannot lock a record with unsaved changes, so save it first.
+          # If the changes are only to the position column, reset them, since we are overriding them.
+          self[position_column] = position_before_save if position_before_save_changed?
+          if changed?
+            if raise_exception_if_save_fails
+              save!
+            else
+              save
+            end
+          end
+
           with_lock do
             if in_list?
               old_position = send(position_column).to_i

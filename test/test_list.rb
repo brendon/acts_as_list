@@ -691,7 +691,8 @@ end
 class ShuffleListPositionsTest < ActsAsListTestCase
   def setup
     setup_db
-    (1..4).each { |counter| DefaultScopedMixin.create!({pos: counter}) }
+    all = [1,2,3,4].map { |counter| DefaultScopedMixin.create!({pos: counter}) }
+    all.first[:pos] = 0
   end
 
   def test_reordering
@@ -723,7 +724,9 @@ class ShuffleListPositionsTest < ActsAsListTestCase
       DefaultScopedMixin.find(3).insert_at!(0)
     end
     assert_equal [1, 2, 3, 4], DefaultScopedMixin.all.map(&:id)
-    DefaultScopedMixin.find(3).insert_at!(1)
+    three = DefaultScopedMixin.find(3)
+    three[:pos] = 0
+    three.insert_at!(1)
     assert_equal [3, 1, 2, 4], DefaultScopedMixin.all.map(&:id)
     DefaultScopedMixin.find(3).insert_at!(2)
     assert_equal [1, 3, 2, 4], DefaultScopedMixin.all.map(&:id)
