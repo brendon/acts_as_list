@@ -246,6 +246,7 @@ todo_list = TodoList.create(name: "The List")
 todo_list.with_lock do
   item = TodoItem.create(description: "Buy Groceries", todo_list: todo_list, position: 1)
 end
+```
 
 ## Versions
 Version `0.9.0` adds `acts_as_list_no_update` (https://github.com/swanandp/acts_as_list/pull/244) and compatibility with not-null and uniqueness constraints on the database (https://github.com/swanandp/acts_as_list/pull/246). These additions shouldn't break compatibility with existing implementations.
