@@ -119,7 +119,7 @@ module ActiveRecord
         # Removes the item from the list.
         def remove_from_list
           if in_list?
-            old_pos = send position_column
+            old_pos = send(position_column)
             set_list_position(nil)
             decrement_positions_on_lower_items(old_pos)
           end
@@ -238,7 +238,7 @@ module ActiveRecord
         def add_to_list_top
           if assume_default_position?
             increment_positions_on_all_items
-            self[position_column] = acts_as_list_top
+            write_attribute position_column, acts_as_list_top
           else
             # Don't actually add to the top; a position has been specified
             increment_positions_on_lower_items(self[position_column], id)
@@ -253,7 +253,7 @@ module ActiveRecord
 
         def add_to_list_bottom
           if assume_default_position?
-            self[position_column] = bottom_position_in_list.to_i + 1
+            write_attribute position_column, bottom_position_in_list.to_i + 1
           else
             # Don't actually add to the bottom; a position has been specified
             increment_positions_on_lower_items(self[position_column], id)
@@ -405,7 +405,7 @@ module ActiveRecord
 
           # Cannot lock a record with unsaved changes, so save it first.
           # If the changes are only to the position column, reset them, since we are overriding them.
-          self[position_column] = position_before_save if position_before_save_changed?
+          write_attribute position_column, position_before_save if position_before_save_changed?
           if changed?
             if raise_exception_if_save_fails
               save!
@@ -489,7 +489,7 @@ module ActiveRecord
         # as modifying the default position on creation is handled elsewhere
         def check_top_position
           if send(position_column) && !default_position? && send(position_column) < acts_as_list_top
-            self[position_column] = acts_as_list_top
+            write_attribute position_column, acts_as_list_top
           end
         end
 
