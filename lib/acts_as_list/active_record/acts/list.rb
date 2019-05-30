@@ -348,6 +348,7 @@ module ActiveRecord
         # both SQLite and PostgreSQL (and most probably MySQL too) has same issue
         # that's why *sequential_updates?* check alters implementation behavior
         def shuffle_positions_on_intermediate_items(old_position, new_position, avoid_id = nil)
+
           return if old_position == new_position
           scope = acts_as_list_list
 
@@ -392,6 +393,10 @@ module ActiveRecord
 
         def insert_at_position(position, raise_exception_if_save_fails=false)
           raise ArgumentError.new("position cannot be lower than top") if position < acts_as_list_top
+
+          old_position = send("#{position_column}_was")
+          # Set the position column so we can check if it's valid
+          write_attribute position_column, position
           if invalid?
             # If you violate a uniqueness constraint on
             # position_column, you get a postgres error,
@@ -401,11 +406,12 @@ module ActiveRecord
             save! if raise_exception_if_save_fails
             return false
           end
+
           return set_list_position(position, raise_exception_if_save_fails) if new_record? && not_in_list?
 
           # Cannot lock a record with unsaved changes, so save it first.
-          # If the changes are only to the position column, reset them, since we are overriding them.
-          write_attribute position_column, position_before_save if position_before_save_changed?
+          # Before saving, stash any changes to the position column for later.
+          write_attribute position_column, old_position if old_position != position
           if changed?
             if raise_exception_if_save_fails
               save!
@@ -415,9 +421,9 @@ module ActiveRecord
           end
 
           with_lock do
+            reload unless new_record?
             if in_list?
-              old_position = send(position_column).to_i
-              return if position == old_position
+              return if position == send("#{position_column}_was")
               # temporary move after bottom with gap, avoiding duplicate values
               # gap is required to leave room for position increments
               # positive number will be valid with unique not null check (>= 0) db constraint
@@ -456,7 +462,6 @@ module ActiveRecord
         def position_before_save
           if ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR >= 1 ||
               ActiveRecord::VERSION::MAJOR > 5
-
             attribute_before_last_save position_column
           else
             send "#{position_column}_was"
