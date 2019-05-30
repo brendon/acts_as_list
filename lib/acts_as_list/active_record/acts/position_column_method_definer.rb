@@ -79,9 +79,36 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
 
         return_position = return_from - position
         # Can't specify _with_table_name as it's an UPDATE
-        unscoped.where("#{quoted_position_column} >= #{swap_position}").update_all(
+
+        # unscoped is safe in this case because we're moved the
+        # records we're targeting above the previous maximum position
+        target_records = unscoped.where("#{quoted_position_column} >= #{swap_position}")
+
+        case connection.class.to_s
+        when "ActiveRecord::ConnectionAdapters::SQLite3Adapter"
+          # Does not fill in 'holes' (if any exist) as sqlite lacks partitioning and variables.
+          target_records.update_all(
           "#{quoted_position_column} = #{quoted_position_column} - #{return_position}",
         )
+        when "ActiveRecord::ConnectionAdapters::Mysql2Adapter"
+          ActiveRecord::Base.connection.execute("SET @position=#{position - 1};")
+          target_records.order(Arel.sql quoted_position_column).update_all <<-SQL
+            #{quoted_position_column} = @position := @position + 1
+          SQL
+        when "ActiveRecord::ConnectionAdapters::PostgreSQLAdapter"
+          target_records.where("acts_as_list_sorted.#{primary_key} = #{quoted_table_name}.#{primary_key}").update_all <<-SQL
+            #{quoted_position_column} = acts_as_list_sorted.seqnum + #{position-1}
+            from (
+              select acts_as_list_subselect.#{primary_key}, row_number() over (
+                order by #{quoted_position_column} asc
+              ) as seqnum
+              from #{quoted_table_name} acts_as_list_subselect
+              where #{quoted_position_column} >= #{swap_position}
+            ) as acts_as_list_sorted
+          SQL
+        else
+          raise "Unknown driver #{connection.class}"
+        end
       end
 
       define_singleton_method :touch_record_sql do
