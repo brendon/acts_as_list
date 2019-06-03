@@ -17,6 +17,8 @@ rvm:
   - 2.3.6
   - 2.4.3
   - 2.5.0
+addons:
+  postgresql: 9.4
 env:
   - DB=sqlite
   - DB=mysql
@@ -28,6 +30,7 @@ gemfile:
   - gemfiles/rails_5_0.gemfile
   - gemfiles/rails_5_1.gemfile
   - gemfiles/rails_5_2.gemfile
+  - gemfiles/rails_6_0.gemfile
 matrix:
   exclude:
     - rvm: 1.9.3
@@ -36,22 +39,34 @@ matrix:
       gemfile: gemfiles/rails_5_1.gemfile
     - rvm: 1.9.3
       gemfile: gemfiles/rails_5_2.gemfile
+    - rvm: 1.9.3
+      gemfile: gemfiles/rails_6_0.gemfile
     - rvm: 2.0.0
       gemfile: gemfiles/rails_5_0.gemfile
     - rvm: 2.0.0
       gemfile: gemfiles/rails_5_1.gemfile
     - rvm: 2.0.0
       gemfile: gemfiles/rails_5_2.gemfile
+    - rvm: 2.0.0
+      gemfile: gemfiles/rails_6_0.gemfile
     - rvm: 2.1.10
       gemfile: gemfiles/rails_5_0.gemfile
     - rvm: 2.1.10
       gemfile: gemfiles/rails_5_1.gemfile
     - rvm: 2.1.10
       gemfile: gemfiles/rails_5_2.gemfile
+    - rvm: 2.1.10
+      gemfile: gemfiles/rails_6_0.gemfile
+    - rvm: 2.2.6
+      gemfile: gemfiles/rails_6_0.gemfile
+    - rvm: 2.3.6
+      gemfile: gemfiles/rails_6_0.gemfile
     - rvm: 2.4.3
       gemfile: gemfiles/rails_3_2.gemfile
     - rvm: 2.4.3
       gemfile: gemfiles/rails_4_1.gemfile
+    - rvm: 2.4.3
+      gemfile: gemfiles/rails_6_0.gemfile
     - rvm: 2.5.0
       gemfile: gemfiles/rails_3_2.gemfile
     - rvm: 2.5.0
