@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Added *Troubleshooting Database Deadlock Errors* section to `README.md`
+- Added support for Rails 6.0 in testing
 
 ## [0.9.19] - 2019-03-12
 ### Added
