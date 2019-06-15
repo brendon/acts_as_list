@@ -211,10 +211,15 @@ module ActiveRecord
           raise_exception_if_save_fails ? save! : save
         end
 
+        # Returns the items that have a duplicate position
+        def items_with_duplicated_position
+          acts_as_list_class.group(position_column).having("count(?) > 1", position_column)
+        end
+
         # Checks if a list has no repeating indices 
         # Returns true if at least one value position_column has a duplicate value
         def does_list_have_duplicates?
-          acts_as_list_class.group(position_column).having("count(?) > 1", position_column).any?
+          items_with_duplicated_position.exists?
         end
 
         # Repairs a list that has duplicate positions by moving each of the duplicated up in position until there are not more duplicates
@@ -222,18 +227,15 @@ module ActiveRecord
         def repair_duplicate_positions_in_list
           # While there are duplicates we will increment the position of the second repetition for every number
           while does_list_have_duplicates? do
+            # Get one of the entries that have a repeated position
+            first_repeated_entry = items_with_duplicated_position.first
             # Get the position with repetitions
-            repeated_pos = acts_as_list_class.group(position_column).having("count(?) > 1", position_column).first.send(position_column)
-            # Get one of the entries in the given position. This will be the entry that will keep the current position
-            first_repeated_entry_id = acts_as_list_class.where("#{position_column} >= ?", repeated_pos).first.id
+            repeated_pos = first_repeated_entry.send(position_column)
             # Increment the position of all entries with position equal or greater than the current repeted position that is not the first entry
-            acts_as_list_class.where("#{position_column} >= ?", repeated_pos).where.not(id: first_repeated_entry_id).increment_all
+            acts_as_list_class.where("#{quoted_position_column_with_table_name} >= ?", repeated_pos).where.not(id: first_repeated_entry.id).increment_all
           end
         end
 
-        # Check that there are no gaps in the list
-        # Gaps are missing positions in middle of list ex: 1,2,3,5,6 (4 is represents a missing position)
-        # TODO!
         private
 
         def swap_positions(item1, item2)
