@@ -1,7 +1,7 @@
 # ActsAsList
 
 ## Build Status
-[![Build Status](https://secure.travis-ci.org/swanandp/acts_as_list.png)](https://secure.travis-ci.org/swanandp/acts_as_list)
+[![Build Status](https://secure.travis-ci.org/swanandp/acts_as_list.svg)](https://secure.travis-ci.org/swanandp/acts_as_list)
 [![Gem Version](https://badge.fury.io/rb/acts_as_list.svg)](https://badge.fury.io/rb/acts_as_list)
 
 ## Description
