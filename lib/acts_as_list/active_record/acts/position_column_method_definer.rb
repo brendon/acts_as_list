@@ -69,21 +69,14 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
       end
 
       define_method :touch_record_sql do
-        cached_quoted_now = quoted_current_time_from_proper_timezone
+        time = (default_timezone == :utc ? Time.now.utc : Time.now)
+        cached_quoted_now = self.class.connection.quote(self.class.connection.quoted_date(time))
 
         timestamp_attributes_for_update_in_model.map do |attr|
-          ", #{connection.quote_column_name(attr)} = #{cached_quoted_now}"
+          ", #{self.class.connection.quote_column_name(attr)} = #{cached_quoted_now}"
         end.join
       end
-
-      private
-
-      delegate :connection, to: self
-
-      def quoted_current_time_from_proper_timezone
-        connection.quote(connection.quoted_date(
-          current_time_from_proper_timezone))
-      end
+      
     end
   end
 
