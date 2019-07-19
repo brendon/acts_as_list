@@ -880,11 +880,7 @@ class ActsAsListTopTest < ActsAsListTestCase
     assert_equal 1, TheBaseSubclass.new.acts_as_list_top
     assert_equal 0, ZeroBasedMixin.new.acts_as_list_top
   end
-
-  def test_class_acts_as_list_top
-    assert_equal 1, TheBaseSubclass.acts_as_list_top
-    assert_equal 0, ZeroBasedMixin.acts_as_list_top
-  end
+  
 end
 
 class NilPositionTest < ActsAsListTestCase
