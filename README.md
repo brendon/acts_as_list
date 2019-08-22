@@ -142,6 +142,8 @@ default: `position`. Use this option if the column name in your database is diff
 default: `1`. Use this option to define the top of the list. Use 0 to make the collection act more like an array in its indexing.
 - `add_new_at`
 default: `:bottom`. Use this option to specify whether objects get added to the `:top` or `:bottom` of the list. `nil` will result in new items not being added to the list on create, i.e, position will be kept nil after create.
+- `touch_on_update`
+default: `true`. Use `touch_on_update: false` if you don't want to update the timestamps of the associated records.
 
 ## Disabling temporarily
 
