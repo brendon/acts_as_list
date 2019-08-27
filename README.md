@@ -209,11 +209,11 @@ Deadlocks are always a possibility when updating tables rows concurrently.
 The general advice from MySQL documentation is to catch these errors and simply retry the transaction; it will probably succeed on another attempt. (see [How to Minimize and Handle Deadlocks](https://dev.mysql.com/doc/refman/8.0/en/innodb-deadlocks-handling.html))
 Retrying transactions sounds simple, but there are many details that need to be chosen on a per-app basis:
 How many retry attempts should be made?
-Should there be a wait time between attemps?
+Should there be a wait time between attempts?
 What _other_ statements were in the transaction that got rolled back?
 
 Here a simple example of rescuing from deadlock and retrying the operation:
-*  `ActiveRecord::Deadlocked` is avilable in Rails >= 5.1.0.
+*  `ActiveRecord::Deadlocked` is available in Rails >= 5.1.0.
 * If you have Rails < 5.1.0, you will need to rescue `ActiveRecord::StatementInvalid` and check `#cause`.
 ```ruby
   attempts_left = 2
@@ -234,7 +234,7 @@ You can also use the approach suggested in this StackOverflow post:
 https://stackoverflow.com/questions/4027659/activerecord3-deadlock-retry
 
 ### 3) Lock Parent Record
-In additon to reacting to deadlocks, it is possible to reduce their frequency with more pessimistic locking. 
+In addition to reacting to deadlocks, it is possible to reduce their frequency with more pessimistic locking. 
 This approach uses the parent record as a mutex for the entire list.
 This kind of locking is very effective at reducing the frequency of deadlocks while updating list items.
 However, there are some things to keep in mind:
