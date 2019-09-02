@@ -1,7 +1,5 @@
 source "http://rubygems.org"
 
-gem "rack", "~> 1", platforms: [:ruby_19, :ruby_20, :ruby_21]
-
 gemspec
 
 gem "rake"
@@ -13,15 +11,18 @@ end
 
 group :test do
   gem "minitest", "~> 5.0"
-  gem "test_after_commit", "~> 0.4.2"
   gem "timecop"
   gem "mocha"
 end
 
 group :sqlite do
-  gem "sqlite3", "~> 1.3.13", platforms: [:ruby]
+  gem "sqlite3", "~> 1.3.13"
 end
 
 group :postgresql do
-  gem "pg", "~> 0.18.0", platforms: [:ruby]
+  gem "pg", "~> 1.1.4"
+end
+
+group :mysql do
+  gem "mysql2", "~> 0.5.0"
 end

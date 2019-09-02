@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.description           = 'This "acts_as" extension provides the capabilities for sorting and reordering a number of objects in a list. The class that has this specified needs to have a "position" column defined as an integer on the mapped database table.'
   s.license               = "MIT"
   s.rubyforge_project     = "acts_as_list"
-  s.required_ruby_version = ">= 1.9.2"
+  s.required_ruby_version = ">= 2.4.7"
 
   if s.respond_to?(:metadata)
     s.metadata['changelog_uri'] = 'https://github.com/swanandp/acts_as_list/blob/master/CHANGELOG.md'
@@ -30,6 +30,6 @@ Gem::Specification.new do |s|
 
 
   # Dependencies (installed via "bundle install")
-  s.add_dependency "activerecord", ">= 3.0"
+  s.add_dependency "activerecord", ">= 4.2"
   s.add_development_dependency "bundler", ">= 1.0.0"
 end
