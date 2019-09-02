@@ -1,23 +1,3 @@
-appraise "rails-3-2" do
-  group :mysql do
-    gem "mysql2", "~> 0.3.21", platforms: [:ruby]
-  end
-  gem "activerecord", "~> 3.2.22.2"
-  group :test do
-    gem "after_commit_exception_notification"
-  end
-end
-
-appraise "rails-4-1" do
-  group :mysql do
-    gem "mysql2", "~> 0.3.21", platforms: [:ruby]
-  end
-  gem "activerecord", "~> 4.1.16"
-  group :test do
-    gem "after_commit_exception_notification"
-  end
-end
-
 appraise "rails-4-2" do
   group :mysql do
     gem "mysql2", "~> 0.4.10", platforms: [:ruby]
