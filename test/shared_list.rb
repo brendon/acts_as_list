@@ -237,12 +237,9 @@ module Shared
       # We need to trigger all the before_destroy callbacks without actually
       # destroying the record so we can see the affect the callbacks have on
       # the record.
-      # NOTE: Hotfix for rails3 ActiveRecord
       list = ListMixin.where(id: 2).first
       if list.respond_to?(:run_callbacks)
-        # Refactored to work according to Rails3 ActiveRSupport Callbacks <http://api.rubyonrails.org/classes/ActiveSupport/Callbacks.html>
-        list.run_callbacks(:destroy) if rails_3
-        list.run_callbacks(:before_destroy) if !rails_3
+        list.run_callbacks(:destroy)
       else
         list.send(:callback, :before_destroy)
       end

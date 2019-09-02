@@ -49,10 +49,8 @@ def setup_db(position_options = {})
   ActiveRecord::Base.connection.add_index 'altid-table', :pos, unique: true
 
   mixins = [ Mixin, ListMixin, ListMixinSub1, ListMixinSub2, ListWithStringScopeMixin,
-    ArrayScopeListMixin, ZeroBasedMixin, DefaultScopedMixin,
+    ArrayScopeListMixin, ZeroBasedMixin, DefaultScopedMixin, EnumArrayScopeListMixin,
     DefaultScopedWhereMixin, TopAdditionMixin, NoAdditionMixin, QuotedList, TouchDisabledMixin ]
-
-  mixins << EnumArrayScopeListMixin if rails_4
 
   ActiveRecord::Base.connection.schema_cache.clear!
   mixins.each do |klass|
@@ -80,19 +78,11 @@ class ListMixinSub1 < ListMixin
 end
 
 class ListMixinSub2 < ListMixin
-  if rails_3
-    validates :pos, presence: true
-  else
-    validates_presence_of :pos
-  end
+  validates :pos, presence: true
 end
 
 class ListMixinError < ListMixin
-  if rails_3
-    validates :state, presence: true
-  else
-    validates_presence_of :state
-  end
+  validates :state, presence: true
 end
 
 class ListWithStringScopeMixin < Mixin
@@ -107,13 +97,11 @@ class ArrayScopeListWithHashMixin < Mixin
   acts_as_list column: "pos", scope: [:parent_id, state: nil]
 end
 
-if rails_4
-  class EnumArrayScopeListMixin < Mixin
-    STATE_VALUES = %w(active archived)
-    enum state: STATE_VALUES
+class EnumArrayScopeListMixin < Mixin
+  STATE_VALUES = %w(active archived)
+  enum state: STATE_VALUES
 
-    acts_as_list column: "pos", scope: [:parent_id, :state]
-  end
+  acts_as_list column: "pos", scope: [:parent_id, :state]
 end
 
 class ZeroBasedMixin < Mixin
@@ -663,28 +651,26 @@ class MultipleListsTest < ActsAsListTestCase
   end
 end
 
-if rails_4
-  class EnumArrayScopeListMixinTest < ActsAsListTestCase
-    def setup
-      setup_db
-      EnumArrayScopeListMixin.create! :parent_id => 1, :state => EnumArrayScopeListMixin.states['active']
-      EnumArrayScopeListMixin.create! :parent_id => 1, :state => EnumArrayScopeListMixin.states['archived']
-      EnumArrayScopeListMixin.create! :parent_id => 2, :state => EnumArrayScopeListMixin.states["active"]
-      EnumArrayScopeListMixin.create! :parent_id => 2, :state => EnumArrayScopeListMixin.states["archived"]
-    end
+class EnumArrayScopeListMixinTest < ActsAsListTestCase
+  def setup
+    setup_db
+    EnumArrayScopeListMixin.create! :parent_id => 1, :state => EnumArrayScopeListMixin.states['active']
+    EnumArrayScopeListMixin.create! :parent_id => 1, :state => EnumArrayScopeListMixin.states['archived']
+    EnumArrayScopeListMixin.create! :parent_id => 2, :state => EnumArrayScopeListMixin.states["active"]
+    EnumArrayScopeListMixin.create! :parent_id => 2, :state => EnumArrayScopeListMixin.states["archived"]
+  end
 
-    def test_positions
-      assert_equal [1], EnumArrayScopeListMixin.where(:parent_id => 1, :state => EnumArrayScopeListMixin.states['active']).map(&:pos)
-      assert_equal [1], EnumArrayScopeListMixin.where(:parent_id => 1, :state => EnumArrayScopeListMixin.states['archived']).map(&:pos)
-      assert_equal [1], EnumArrayScopeListMixin.where(:parent_id => 2, :state => EnumArrayScopeListMixin.states['active']).map(&:pos)
-      assert_equal [1], EnumArrayScopeListMixin.where(:parent_id => 2, :state => EnumArrayScopeListMixin.states['archived']).map(&:pos)
-    end
+  def test_positions
+    assert_equal [1], EnumArrayScopeListMixin.where(:parent_id => 1, :state => EnumArrayScopeListMixin.states['active']).map(&:pos)
+    assert_equal [1], EnumArrayScopeListMixin.where(:parent_id => 1, :state => EnumArrayScopeListMixin.states['archived']).map(&:pos)
+    assert_equal [1], EnumArrayScopeListMixin.where(:parent_id => 2, :state => EnumArrayScopeListMixin.states['active']).map(&:pos)
+    assert_equal [1], EnumArrayScopeListMixin.where(:parent_id => 2, :state => EnumArrayScopeListMixin.states['archived']).map(&:pos)
+  end
 
-    def test_update_state
-      active_item = EnumArrayScopeListMixin.find_by(:parent_id => 2, :state => EnumArrayScopeListMixin.states['active'])
-      active_item.update(state: EnumArrayScopeListMixin.states['archived'])
-      assert_equal [1, 2], EnumArrayScopeListMixin.where(:parent_id => 2, :state => EnumArrayScopeListMixin.states['archived']).map(&:pos).sort
-    end
+  def test_update_state
+    active_item = EnumArrayScopeListMixin.find_by(:parent_id => 2, :state => EnumArrayScopeListMixin.states['active'])
+    active_item.update(state: EnumArrayScopeListMixin.states['archived'])
+    assert_equal [1, 2], EnumArrayScopeListMixin.where(:parent_id => 2, :state => EnumArrayScopeListMixin.states['archived']).map(&:pos).sort
   end
 end
 
