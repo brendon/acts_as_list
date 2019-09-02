@@ -5,9 +5,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Removed
+- **BREAKING CHANGE**: Support for Rails 3.2 > 4.1 has been removed. 0.9.19 is the last version that supports
+	these Rails versions
+
 ### Added
 - Added *Troubleshooting Database Deadlock Errors* section to `README.md`
 - Added support for Rails 6.0 in testing
+- Various README fixes
+- A new method called `current_position` now exists and returns the integer position of the item it's
+	called on, or `nil` if the position isn't set.
 
 ## [0.9.19] - 2019-03-12
 ### Added
