@@ -10,6 +10,13 @@ module Shared
       end
     end
 
+    def test_current_position
+      first_item = ListMixin.where(parent_id: 5).first
+      assert_equal 1, first_item.current_position
+      first_item.remove_from_list
+      assert_nil first_item.current_position
+    end
+
     def test_reordering
       assert_equal [1, 2, 3, 4], ListMixin.where(parent_id: 5).order('pos').map(&:id)
 
