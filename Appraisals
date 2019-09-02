@@ -48,3 +48,13 @@ appraise "rails-5-2" do
   end
   gem "activerecord", "~> 5.2.1"
 end
+
+appraise "rails-6-0" do
+  group :mysql do
+    gem "mysql2", "~> 0.4.10", platforms: [:ruby]
+  end
+  group :sqlite do
+    gem "sqlite3", "~> 1.4", platforms: [:ruby]
+  end
+  gem "activerecord", "~> 6.0.0.rc1"
+end
