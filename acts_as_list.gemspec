@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.description           = 'This "acts_as" extension provides the capabilities for sorting and reordering a number of objects in a list. The class that has this specified needs to have a "position" column defined as an integer on the mapped database table.'
   s.license               = "MIT"
   s.rubyforge_project     = "acts_as_list"
-  s.required_ruby_version = ">= 1.9.2"
+  s.required_ruby_version = ">= 2.3.0"
 
   # Load Paths...
   s.files                 = `git ls-files`.split("\n")

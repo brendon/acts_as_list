@@ -2,7 +2,6 @@
 
 source "http://rubygems.org"
 
-gem "rack", "~> 1", platforms: [:ruby_19, :ruby_20, :ruby_21]
 gem "rake"
 gem "appraisal"
 gem "activerecord", "~> 5.2.0.rc1"
