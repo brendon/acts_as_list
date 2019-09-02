@@ -212,7 +212,7 @@ module ActiveRecord
 
         # Sets the new position and saves it
         def set_list_position(new_position, raise_exception_if_save_fails=false)
-          write_attribute position_column, new_position
+          self[position_column] = new_position
           raise_exception_if_save_fails ? save! : save
         end
 
