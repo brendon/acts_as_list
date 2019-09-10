@@ -226,13 +226,7 @@ module ActiveRecord
         end
 
         def acts_as_list_list
-          if ActiveRecord::VERSION::MAJOR < 4
-            acts_as_list_class.unscoped do
-              acts_as_list_class.where(scope_condition)
-            end
-          else
-            acts_as_list_class.unscope(:select, :where).where(scope_condition)
-          end
+          acts_as_list_class.unscope(:select, :where).where(scope_condition)
         end
 
         # Poorly named methods. They will insert the item at the desired position if the position
@@ -423,22 +417,18 @@ module ActiveRecord
         end
 
         def position_before_save_changed?
-          if ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR >= 1 ||
-              ActiveRecord::VERSION::MAJOR > 5
-
+          if active_record_version_is?('>= 5.1')
             saved_change_to_attribute? position_column
           else
-            send "#{position_column}_changed?"
+            attribute_changed? position_column
           end
         end
 
         def position_before_save
-          if ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR >= 1 ||
-              ActiveRecord::VERSION::MAJOR > 5
-
+          if active_record_version_is?('>= 5.1')
             attribute_before_last_save position_column
           else
-            send "#{position_column}_was"
+            attribute_was position_column
           end
         end
 
@@ -487,11 +477,13 @@ module ActiveRecord
         end
 
         def acts_as_list_order_argument(direction = :asc)
-          if ActiveRecord::VERSION::MAJOR >= 4
-            { position_column => direction }
-          else
-            "#{quoted_position_column_with_table_name} #{direction.to_s.upcase}"
-          end
+          { position_column => direction }
+        end
+
+        def active_record_version_is?(version_requirement)
+          requirement = Gem::Requirement.new(version_requirement)
+          version = Gem.loaded_specs['activerecord'].version
+          requirement.satisfied_by?(version)
         end
       end
 
