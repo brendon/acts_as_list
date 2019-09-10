@@ -35,20 +35,20 @@ class NoUpdateForSubclassesTest < NoUpdateForSubclassesTestCase
   end
 
   def test_update
-    @item_1.update_attributes(position: 2)
+    @item_1.update position: 2
     assert_equal 2, @item_1.reload.position
     assert_equal 1, @item_2.reload.position
   end
 
   def test_no_update_for_subclass_instances_with_no_update_on_superclass
-    MasterItem.acts_as_list_no_update { @item_1.update_attributes(position: 2) }
+    MasterItem.acts_as_list_no_update { @item_1.update position: 2 }
 
     assert_equal 2, @item_1.reload.position
     assert_equal 2, @item_2.reload.position
   end
 
   def test_no_update_for_subclass_instances_with_no_update_on_subclass
-    SlaveItem.acts_as_list_no_update { @item_1.update_attributes(position: 2) }
+    SlaveItem.acts_as_list_no_update { @item_1.update position: 2 }
 
     assert_equal 2, @item_1.reload.position
     assert_equal 2, @item_2.reload.position

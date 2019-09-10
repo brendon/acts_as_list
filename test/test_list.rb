@@ -158,7 +158,7 @@ end
 ##
 # The way we track changes to
 # scope and position can get tripped up
-# by someone using update_attributes within
+# by someone using update within
 # a callback because it causes multiple passes
 # through the callback chain
 module CallbackMixin
@@ -173,7 +173,7 @@ module CallbackMixin
       # doesn't matter what column changes, just
       # need to change something
 
-      self.update_attributes(active: !self.active)
+      self.update active: !self.active
     end
   end
 end
@@ -637,7 +637,7 @@ class MultipleListsTest < ActsAsListTestCase
   def test_check_scope_order
     assert_equal [1, 2, 3, 4], ListMixin.where(:parent_id => 1).order('pos').map(&:id)
     assert_equal [5, 6, 7, 8], ListMixin.where(:parent_id => 2).order('pos').map(&:id)
-    ListMixin.find(4).update_attributes(:parent_id => 2, :pos => 2)
+    ListMixin.find(4).update :parent_id => 2, :pos => 2
     assert_equal [1, 2, 3], ListMixin.where(:parent_id => 1).order('pos').map(&:id)
     assert_equal [5, 4, 6, 7, 8], ListMixin.where(:parent_id => 2).order('pos').map(&:id)
   end
@@ -645,7 +645,7 @@ class MultipleListsTest < ActsAsListTestCase
   def test_check_scope_position
     assert_equal [1, 2, 3, 4], ListMixin.where(:parent_id => 1).map(&:pos)
     assert_equal [1, 2, 3, 4], ListMixin.where(:parent_id => 2).map(&:pos)
-    ListMixin.find(4).update_attributes(:parent_id => 2, :pos => 2)
+    ListMixin.find(4).update :parent_id => 2, :pos => 2
     assert_equal [1, 2, 3], ListMixin.where(:parent_id => 1).order('pos').map(&:pos)
     assert_equal [1, 2, 3, 4, 5], ListMixin.where(:parent_id => 2).order('pos').map(&:pos)
   end
@@ -685,7 +685,7 @@ class MultipleListsArrayScopeTest < ActsAsListTestCase
   def test_order_after_all_scope_properties_are_changed
     assert_equal [1, 2, 3, 4], ArrayScopeListMixin.where(:parent_id => 1, :parent_type => 'anything').order('pos').map(&:id)
     assert_equal [5, 6, 7, 8], ArrayScopeListMixin.where(:parent_id => 2, :parent_type => 'something').order('pos').map(&:id)
-    ArrayScopeListMixin.find(2).update_attributes(:parent_id => 2, :pos => 2,:parent_type => 'something')
+    ArrayScopeListMixin.find(2).update :parent_id => 2, :pos => 2,:parent_type => 'something'
     assert_equal [1, 3, 4], ArrayScopeListMixin.where(:parent_id => 1,:parent_type => 'anything').order('pos').map(&:id)
     assert_equal [5, 2, 6, 7, 8], ArrayScopeListMixin.where(:parent_id => 2,:parent_type => 'something').order('pos').map(&:id)
   end
@@ -693,7 +693,7 @@ class MultipleListsArrayScopeTest < ActsAsListTestCase
   def test_position_after_all_scope_properties_are_changed
     assert_equal [1, 2, 3, 4], ArrayScopeListMixin.where(:parent_id => 1, :parent_type => 'anything').map(&:pos)
     assert_equal [1, 2, 3, 4], ArrayScopeListMixin.where(:parent_id => 2, :parent_type => 'something').map(&:pos)
-    ArrayScopeListMixin.find(4).update_attributes(:parent_id => 2, :pos => 2, :parent_type => 'something')
+    ArrayScopeListMixin.find(4).update :parent_id => 2, :pos => 2, :parent_type => 'something'
     assert_equal [1, 2, 3], ArrayScopeListMixin.where(:parent_id => 1, :parent_type => 'anything').order('pos').map(&:pos)
     assert_equal [1, 2, 3, 4, 5], ArrayScopeListMixin.where(:parent_id => 2, :parent_type => 'something').order('pos').map(&:pos)
   end
@@ -701,7 +701,7 @@ class MultipleListsArrayScopeTest < ActsAsListTestCase
   def test_order_after_one_scope_property_is_changed
     assert_equal [1, 2, 3, 4], ArrayScopeListMixin.where(:parent_id => 1, :parent_type => 'anything').order('pos').map(&:id)
     assert_equal [9, 10, 11, 12], ArrayScopeListMixin.where(:parent_id => 3, :parent_type => 'anything').order('pos').map(&:id)
-    ArrayScopeListMixin.find(2).update_attributes(:parent_id => 3, :pos => 2)
+    ArrayScopeListMixin.find(2).update :parent_id => 3, :pos => 2
     assert_equal [1, 3, 4], ArrayScopeListMixin.where(:parent_id => 1,:parent_type => 'anything').order('pos').map(&:id)
     assert_equal [9, 2, 10, 11, 12], ArrayScopeListMixin.where(:parent_id => 3,:parent_type => 'anything').order('pos').map(&:id)
   end
@@ -709,7 +709,7 @@ class MultipleListsArrayScopeTest < ActsAsListTestCase
   def test_position_after_one_scope_property_is_changed
     assert_equal [1, 2, 3, 4], ArrayScopeListMixin.where(:parent_id => 1, :parent_type => 'anything').map(&:pos)
     assert_equal [1, 2, 3, 4], ArrayScopeListMixin.where(:parent_id => 3, :parent_type => 'anything').map(&:pos)
-    ArrayScopeListMixin.find(4).update_attributes(:parent_id => 3, :pos => 2)
+    ArrayScopeListMixin.find(4).update :parent_id => 3, :pos => 2
     assert_equal [1, 2, 3], ArrayScopeListMixin.where(:parent_id => 1, :parent_type => 'anything').order('pos').map(&:pos)
     assert_equal [1, 2, 3, 4, 5], ArrayScopeListMixin.where(:parent_id => 3, :parent_type => 'anything').order('pos').map(&:pos)
   end
@@ -717,7 +717,7 @@ class MultipleListsArrayScopeTest < ActsAsListTestCase
   def test_order_after_moving_to_empty_list
     assert_equal [1, 2, 3, 4], ArrayScopeListMixin.where(:parent_id => 1, :parent_type => 'anything').order('pos').map(&:id)
     assert_equal [], ArrayScopeListMixin.where(:parent_id => 4, :parent_type => 'anything').order('pos').map(&:id)
-    ArrayScopeListMixin.find(2).update_attributes(:parent_id => 4, :pos => 1)
+    ArrayScopeListMixin.find(2).update :parent_id => 4, :pos => 1
     assert_equal [1, 3, 4], ArrayScopeListMixin.where(:parent_id => 1,:parent_type => 'anything').order('pos').map(&:id)
     assert_equal [2], ArrayScopeListMixin.where(:parent_id => 4,:parent_type => 'anything').order('pos').map(&:id)
   end
@@ -725,7 +725,7 @@ class MultipleListsArrayScopeTest < ActsAsListTestCase
   def test_position_after_moving_to_empty_list
     assert_equal [1, 2, 3, 4], ArrayScopeListMixin.where(:parent_id => 1, :parent_type => 'anything').map(&:pos)
     assert_equal [], ArrayScopeListMixin.where(:parent_id => 4, :parent_type => 'anything').map(&:pos)
-    ArrayScopeListMixin.find(2).update_attributes(:parent_id => 4, :pos => 1)
+    ArrayScopeListMixin.find(2).update :parent_id => 4, :pos => 1
     assert_equal [1, 2, 3], ArrayScopeListMixin.where(:parent_id => 1, :parent_type => 'anything').order('pos').map(&:pos)
     assert_equal [1], ArrayScopeListMixin.where(:parent_id => 4, :parent_type => 'anything').order('pos').map(&:pos)
   end

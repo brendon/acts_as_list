@@ -56,13 +56,13 @@ class NoUpdateForCollectionClassesTest < NoUpdateForCollectionClassesTestCase
   end
 
   def test_update
-    @item_1.update_attributes(position: 2)
+    @item_1.update position: 2
     assert_equal 2, @item_1.reload.position
     assert_equal 1, @item_2.reload.position
   end
 
   def test_no_update_for_single_class_instances
-    TodoItem.acts_as_list_no_update { @item_1.update_attributes(position: 2) }
+    TodoItem.acts_as_list_no_update { @item_1.update position: 2 }
 
     assert_equal 2, @item_1.reload.position
     assert_equal 2, @item_2.reload.position
@@ -124,8 +124,8 @@ class NoUpdateForCollectionClassesTest < NoUpdateForCollectionClassesTestCase
   private
 
   def update_records!
-    @item_1.update_attributes(position: 2)
-    @attachment_1.update_attributes(position: 2)
-    @list_1.update_attributes(position: 2)
+    @item_1.update position: 2
+    @attachment_1.update position: 2
+    @list_1.update position: 2
   end
 end
