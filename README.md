@@ -1,7 +1,7 @@
 # Acts As List
 
 ## Build Status
-[![Build Status](https://secure.travis-ci.org/swanandp/acts_as_list.svg)](https://secure.travis-ci.org/swanandp/acts_as_list)
+[![Build Status](https://travis-ci.org/brendon/acts_as_list.svg?branch=master)](https://travis-ci.org/brendon/acts_as_list)
 [![Gem Version](https://badge.fury.io/rb/acts_as_list.svg)](https://badge.fury.io/rb/acts_as_list)
 
 ## Description
@@ -185,7 +185,7 @@ end
 
 ## Troubleshooting Database Deadlock Errors
 When using this gem in an app with a high amount of concurrency, you may see "deadlock" errors raised by your database server.
-It's difficult for the gem to provide a solution that fits every app. 
+It's difficult for the gem to provide a solution that fits every app.
 Here are some steps you can take to mitigate and handle these kinds of errors.
 
 ### 1) Use the Most Concise API
@@ -205,7 +205,7 @@ item.insert_at(1)
 ```
 
 ### 2) Rescue then Retry
-Deadlocks are always a possibility when updating tables rows concurrently. 
+Deadlocks are always a possibility when updating tables rows concurrently.
 The general advice from MySQL documentation is to catch these errors and simply retry the transaction; it will probably succeed on another attempt. (see [How to Minimize and Handle Deadlocks](https://dev.mysql.com/doc/refman/8.0/en/innodb-deadlocks-handling.html))
 Retrying transactions sounds simple, but there are many details that need to be chosen on a per-app basis:
 How many retry attempts should be made?
@@ -234,7 +234,7 @@ You can also use the approach suggested in this StackOverflow post:
 https://stackoverflow.com/questions/4027659/activerecord3-deadlock-retry
 
 ### 3) Lock Parent Record
-In addition to reacting to deadlocks, it is possible to reduce their frequency with more pessimistic locking. 
+In addition to reacting to deadlocks, it is possible to reduce their frequency with more pessimistic locking.
 This approach uses the parent record as a mutex for the entire list.
 This kind of locking is very effective at reducing the frequency of deadlocks while updating list items.
 However, there are some things to keep in mind:
