@@ -27,15 +27,6 @@ db_config = YAML.load_file(File.expand_path("../database.yml", __FILE__)).fetch(
 ActiveRecord::Base.establish_connection(db_config)
 ActiveRecord::Schema.verbose = false
 
-# Returns true if ActiveRecord is rails 3, 4 version
-def rails_3
-  defined?(ActiveRecord::VERSION) && ActiveRecord::VERSION::MAJOR >= 3
-end
-
-def rails_4
-  defined?(ActiveRecord::VERSION) && ActiveRecord::VERSION::MAJOR >= 4
-end
-
 def teardown_db
   if ActiveRecord::VERSION::MAJOR >= 5
     tables = ActiveRecord::Base.connection.data_sources

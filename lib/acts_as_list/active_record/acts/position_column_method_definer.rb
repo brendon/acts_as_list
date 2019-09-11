@@ -126,7 +126,7 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
       end
 
       define_method :"#{position_column}=" do |position|
-        write_attribute(position_column, position)
+        self[position_column] = position
         @position_changed = true
       end
 

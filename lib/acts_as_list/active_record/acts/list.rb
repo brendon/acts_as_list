@@ -65,6 +65,17 @@ module ActiveRecord
       end
 
       module InstanceMethods
+        # Get the current position of the item in the list
+        def current_position
+          position = send(position_column)
+          position ? position.to_i : nil
+        end
+
+        def current_position_was
+          position = send("#{position_column}_was")
+          position ? position.to_i : nil
+        end
+
         # Insert the item at the given position (defaults to the top position of 1).
         def insert_at(position = acts_as_list_top)
           insert_at_position(position)
@@ -79,8 +90,8 @@ module ActiveRecord
           return unless lower_item
 
           acts_as_list_class.transaction do
-            if lower_item.send(position_column) != self.send(position_column)
-              swap_positions(lower_item, self)
+            if lower_item.current_position != current_position
+              swap_positions_with(lower_item)
             else
               lower_item.decrement_position
               increment_position
@@ -93,8 +104,8 @@ module ActiveRecord
           return unless higher_item
 
           acts_as_list_class.transaction do
-            if higher_item.send(position_column) != self.send(position_column)
-              swap_positions(higher_item, self)
+            if higher_item.current_position != current_position
+              swap_positions_with(higher_item)
             else
               higher_item.increment_position
               decrement_position
@@ -135,13 +146,13 @@ module ActiveRecord
         # Increase the position of this item without adjusting the rest of the list.
         def increment_position
           return unless in_list?
-          set_list_position(self.send(position_column).to_i + 1)
+          set_list_position(current_position + 1)
         end
 
         # Decrease the position of this item without adjusting the rest of the list.
         def decrement_position
           return unless in_list?
-          set_list_position(self.send(position_column).to_i - 1)
+          set_list_position(current_position - 1)
         end
 
         def first?
@@ -164,9 +175,8 @@ module ActiveRecord
         # selects all higher items by default
         def higher_items(limit=nil)
           limit ||= acts_as_list_list.count
-          position_value = send(position_column)
           acts_as_list_list.
-            where("#{quoted_position_column_with_table_name} <= ?", position_value).
+            where("#{quoted_position_column_with_table_name} <= ?", current_position).
             where("#{quoted_table_name}.#{self.class.primary_key} != ?", self.send(self.class.primary_key)).
             reorder(acts_as_list_order_argument(:desc)).
             limit(limit)
@@ -182,9 +192,8 @@ module ActiveRecord
         # selects all lower items by default
         def lower_items(limit=nil)
           limit ||= acts_as_list_list.count
-          position_value = send(position_column)
           acts_as_list_list.
-            where("#{quoted_position_column_with_table_name} >= ?", position_value).
+            where("#{quoted_position_column_with_table_name} >= ?", current_position).
             where("#{quoted_table_name}.#{self.class.primary_key} != ?", self.send(self.class.primary_key)).
             reorder(acts_as_list_order_argument(:asc)).
             limit(limit)
@@ -196,40 +205,34 @@ module ActiveRecord
         end
 
         def not_in_list?
-          send(position_column).nil?
+          current_position.nil?
         end
 
         def default_position
-          acts_as_list_class.columns_hash[position_column.to_s].default
+          acts_as_list_class.column_defaults[position_column.to_s]
         end
 
         def default_position?
-          default_position && default_position.to_i == send(position_column)
+          default_position && default_position == current_position
         end
 
         # Sets the new position and saves it
         def set_list_position(new_position, raise_exception_if_save_fails=false)
-          write_attribute position_column, new_position
+          self[position_column] = new_position
           raise_exception_if_save_fails ? save! : save
         end
 
         private
 
-        def swap_positions(item1, item2)
-          item1_position = item1.send(position_column)
+        def swap_positions_with(item)
+          item_position = item.current_position
 
-          item1.set_list_position(item2.send(position_column))
-          item2.set_list_position(item1_position)
+          item.set_list_position(current_position)
+          set_list_position(item_position)
         end
 
         def acts_as_list_list
-          if ActiveRecord::VERSION::MAJOR < 4
-            acts_as_list_class.unscoped do
-              acts_as_list_class.where(scope_condition)
-            end
-          else
-            acts_as_list_class.unscope(:select, :where).where(scope_condition)
-          end
+          acts_as_list_class.unscope(:select, :where).where(scope_condition)
         end
 
         # Poorly named methods. They will insert the item at the desired position if the position
@@ -279,7 +282,7 @@ module ActiveRecord
         #   bottom_position_in_list    # => 2
         def bottom_position_in_list(except = nil)
           item = bottom_item(except)
-          item ? item.send(position_column) : acts_as_list_top - 1
+          item ? item.current_position : acts_as_list_top - 1
         end
 
         # Returns the bottom item
@@ -306,7 +309,7 @@ module ActiveRecord
         # This has the effect of moving all the higher items down one.
         def increment_positions_on_higher_items
           return unless in_list?
-          acts_as_list_list.where("#{quoted_position_column_with_table_name} < ?", send(position_column).to_i).increment_all
+          acts_as_list_list.where("#{quoted_position_column_with_table_name} < ?", current_position).increment_all
         end
 
         # This has the effect of moving all the lower items down one.
@@ -326,9 +329,7 @@ module ActiveRecord
         end
 
         # This has the effect of moving all the lower items up one.
-        def decrement_positions_on_lower_items(position=nil)
-          position ||= send(position_column)
-          return unless position.present?
+        def decrement_positions_on_lower_items(position=current_position)
           position = Integer(position)
           if sequential_updates?
             acts_as_list_list.where("#{quoted_position_column_with_table_name} > ?", position).reorder(acts_as_list_order_argument(:asc)).decrement_sequentially
@@ -423,13 +424,13 @@ module ActiveRecord
           with_lock do
             reload unless new_record?
             if in_list?
-              return if position == send("#{position_column}_was")
+              return if position == current_position_was
               # temporary move after bottom with gap, avoiding duplicate values
               # gap is required to leave room for position increments
               # positive number will be valid with unique not null check (>= 0) db constraint
               temporary_position = bottom_position_in_list + 2
               set_list_position(temporary_position, raise_exception_if_save_fails)
-              shuffle_positions_on_intermediate_items(old_position, position, id)
+              shuffle_positions_on_intermediate_items(current_position_was, position, id)
             else
               increment_positions_on_lower_items(position)
             end
@@ -441,30 +442,27 @@ module ActiveRecord
           return unless position_before_save_changed?
 
           old_position = position_before_save || bottom_position_in_list + 1
-          new_position = send(position_column).to_i
 
-          return unless acts_as_list_list.where(
-            "#{quoted_position_column_with_table_name} = #{new_position}"
+          return unless current_position && acts_as_list_list.where(
+            "#{quoted_position_column_with_table_name} = #{current_position}"
           ).count > 1
-          shuffle_positions_on_intermediate_items old_position, new_position, id
+
+          shuffle_positions_on_intermediate_items old_position, current_position, id
         end
 
         def position_before_save_changed?
-          if ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR >= 1 ||
-              ActiveRecord::VERSION::MAJOR > 5
-
+          if active_record_version_is?('>= 5.1')
             saved_change_to_attribute? position_column
           else
-            send "#{position_column}_changed?"
+            attribute_changed? position_column
           end
         end
 
         def position_before_save
-          if ActiveRecord::VERSION::MAJOR == 5 && ActiveRecord::VERSION::MINOR >= 1 ||
-              ActiveRecord::VERSION::MAJOR > 5
+          if active_record_version_is?('>= 5.1')
             attribute_before_last_save position_column
           else
-            send "#{position_column}_was"
+            attribute_was position_column
           end
         end
 
@@ -493,8 +491,8 @@ module ActiveRecord
         # This check is skipped if the position is currently the default position from the table
         # as modifying the default position on creation is handled elsewhere
         def check_top_position
-          if send(position_column) && !default_position? && send(position_column) < acts_as_list_top
-            write_attribute position_column, acts_as_list_top
+          if current_position && !default_position? && current_position < acts_as_list_top
+            self[position_column] = acts_as_list_top
           end
         end
 
@@ -513,11 +511,13 @@ module ActiveRecord
         end
 
         def acts_as_list_order_argument(direction = :asc)
-          if ActiveRecord::VERSION::MAJOR >= 4
-            { position_column => direction }
-          else
-            "#{quoted_position_column_with_table_name} #{direction.to_s.upcase}"
-          end
+          { position_column => direction }
+        end
+
+        def active_record_version_is?(version_requirement)
+          requirement = Gem::Requirement.new(version_requirement)
+          version = Gem.loaded_specs['activerecord'].version
+          requirement.satisfied_by?(version)
         end
       end
 

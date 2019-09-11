@@ -89,20 +89,30 @@ module ActiveRecord
 
         class << self
           def apply_to(klasses)
-            extracted_klasses.push(*klasses)
+            klasses.map {|klass| add_klass(klass)}
             yield
           ensure
-            extracted_klasses.clear
+            klasses.map {|klass| remove_klass(klass)}
           end
 
           def applied_to?(klass)
-            !(klass.ancestors & extracted_klasses).empty?
+            !(klass.ancestors & extracted_klasses.keys).empty?
           end
 
           private
 
           def extracted_klasses
-            Thread.current[:act_as_list_no_update] ||= []
+            Thread.current[:act_as_list_no_update] ||= {}
+          end
+
+          def add_klass(klass)
+            extracted_klasses[klass] = 0 unless extracted_klasses.key?(klass)
+            extracted_klasses[klass] += 1
+          end
+
+          def remove_klass(klass)
+            extracted_klasses[klass] -= 1
+            extracted_klasses.delete(klass) if extracted_klasses[klass] <= 0
           end
         end
 

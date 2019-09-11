@@ -7,7 +7,7 @@ module ActiveRecord::Acts::List::SequentialUpdatesMethodDefiner #:nodoc:
         if !defined?(@sequential_updates)
           if sequential_updates_option.nil?
             table_exists =
-              if ActiveRecord::VERSION::MAJOR >= 5
+              if active_record_version_is?('>= 5')
                 caller_class.connection.data_source_exists?(caller_class.table_name)
               else
                 caller_class.connection.table_exists?(caller_class.table_name)

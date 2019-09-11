@@ -1,50 +1,31 @@
-appraise "rails-3-2" do
-  group :mysql do
-    gem "mysql2", "~> 0.3.21", platforms: [:ruby]
-  end
-  gem "activerecord", "~> 3.2.22.2"
-  gem "rake", "~> 12.2.0", platforms: [:ruby_19]
-  group :test do
-    gem "after_commit_exception_notification"
-  end
-end
-
-appraise "rails-4-1" do
-  group :mysql do
-    gem "mysql2", "~> 0.3.21", platforms: [:ruby]
-  end
-  gem "activerecord", "~> 4.1.16"
-  gem "rake", "~> 12.2.0", platforms: [:ruby_19]
-  group :test do
-    gem "after_commit_exception_notification"
-  end
-end
-
 appraise "rails-4-2" do
   group :mysql do
-    gem "mysql2", "~> 0.4.10", platforms: [:ruby]
+    gem "mysql2", "~> 0.4.0"
   end
-  gem "activerecord", "~> 4.2.10"
-  gem "rake", "~> 12.2.0", platforms: [:ruby_19]
+  group :postgresql do
+    gem "pg", "~> 0.18.4"
+  end
+  group :test do
+    gem "test_after_commit", "~> 0.4.2"
+  end
+  gem "activerecord", "~> 4.2.0"
 end
 
 appraise "rails-5-0" do
-  group :mysql do
-    gem "mysql2", "~> 0.4.10", platforms: [:ruby]
-  end
-  gem "activerecord", "~> 5.0.6"
+  gem "activerecord", "~> 5.0.0"
 end
 
 appraise "rails-5-1" do
-  group :mysql do
-    gem "mysql2", "~> 0.4.10", platforms: [:ruby]
-  end
-  gem "activerecord", "~> 5.1.4"
+  gem "activerecord", "~> 5.1.0"
 end
 
 appraise "rails-5-2" do
-  group :mysql do
-    gem "mysql2", "~> 0.4.10", platforms: [:ruby]
+  gem "activerecord", "~> 5.2.0"
+end
+
+appraise "rails-6-0" do
+  group :sqlite do
+    gem "sqlite3", "~> 1.4"
   end
-  gem "activerecord", "~> 5.2.1"
+  gem "activerecord", "~> 6.0.0"
 end

@@ -47,7 +47,7 @@ module Shared
 
     def test_next_prev_not_regular_sequence
       ListMixin.all.each do |item|
-        item.update_attributes(pos: item.pos * 5)
+        item.update pos: item.pos * 5
       end
 
       assert_equal [1, 2, 3, 4], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
