@@ -226,7 +226,7 @@ module ActiveRecord
         end
 
         def acts_as_list_list
-          acts_as_list_class.unscope(:select, :where).where(scope_condition)
+          acts_as_list_class.unscoped.where(scope_condition)
         end
 
         # Poorly named methods. They will insert the item at the desired position if the position

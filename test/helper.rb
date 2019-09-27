@@ -51,3 +51,19 @@ def assert_equal_or_nil(a, b)
     assert_equal a, b
   end
 end
+
+def assert_no_deprecation_warning_raised_by(&block)
+  original_behavior = ActiveSupport::Deprecation.behavior
+  ActiveSupport::Deprecation.behavior = :raise
+  begin
+    block.call
+  rescue ActiveSupport::DeprecationException
+    flunk "Deprecation warnings raised when using find_or_create_by and we didn't expect it"
+  rescue
+    raise
+  else
+    pass "No dep warning raised, no other exception raised either"
+  end
+ensure
+  ActiveSupport::Deprecation.behavior = original_behavior
+end
