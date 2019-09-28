@@ -4,7 +4,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [v1.0.0](https://github.com/swanandp/acts_as_list/tree/v1.0.0) - 2019-09-26
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.19...v1.0.0)
 ### Removed
 - **BREAKING CHANGE**: Support for Rails 3.2 > 4.1 has been removed. 0.9.19 is the last version that supports
 	these Rails versions
@@ -16,11 +17,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A new method called `current_position` now exists and returns the integer position of the item it's
 	called on, or `nil` if the position isn't set.
 
-## [0.9.19] - 2019-03-12
+## [v0.9.19](https://github.com/swanandp/acts_as_list/tree/v0.9.19) - 2019-03-12
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.18...v0.9.19)
 ### Added
 - Allow `acts_as_list_no_update` blocks to be nested [@conorbdaly](https://github.com/conorbdaly)
 
-## [0.9.18] - 2019-03-08
+## [v0.9.18](https://github.com/swanandp/acts_as_list/tree/v0.9.18) - 2019-03-08
+[Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.17...v0.9.18)
+
 ### Added
 - Added additional gemspec metadata [@boone](https://github.com/boone)
 - Add gem version badge to README [@joshuapinter](https://github.com/joshuapinter)
