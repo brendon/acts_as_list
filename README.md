@@ -105,6 +105,25 @@ TodoList.all.each do |todo_list|
 end
 ```
 
+When using PostgreSQL, it is also possible to leave this migration up to the database layer. Inside of the `change` block you could write:
+
+```ruby
+ execute <<~SQL.squeeze
+   UPDATE todo_items
+   SET position = mapping.new_position
+   FROM (
+     SELECT
+       id,
+       ROW_NUMBER() OVER (
+         PARTITION BY todo_list_id
+         ORDER BY updated_at
+       ) as new_position
+     FROM todo_items
+   ) AS mapping
+   WHERE todo_items.id = mapping.id;
+ SQL
+```
+
 ## Notes
 All `position` queries (select, update, etc.) inside gem methods are executed without the default scope (i.e. `Model.unscoped`), this will prevent nasty issues when the default scope is different from `acts_as_list` scope.
 
