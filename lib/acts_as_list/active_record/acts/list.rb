@@ -312,7 +312,11 @@ module ActiveRecord
             scope = scope.where("#{quoted_table_name}.#{self.class.primary_key} != ?", avoid_id)
           end
 
-          scope.where("#{quoted_position_column_with_table_name} >= ?", position).increment_all
+          if sequential_updates?
+            scope.where("#{quoted_position_column_with_table_name} >= ?", position).reorder(acts_as_list_order_argument(:desc)).increment_sequentially
+          else
+            scope.where("#{quoted_position_column_with_table_name} >= ?", position).increment_all
+          end
         end
 
         # This has the effect of moving all the higher items up one.

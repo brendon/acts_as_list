@@ -995,6 +995,11 @@ class SequentialUpdatesMixinNotNullUniquePositiveConstraintsTest < ActsAsListTes
       assert_equal 3, new.pos
     end
 
+    def test_create_at_top
+      new = SequentialUpdatesAltId.create!(pos: 1)
+      assert_equal 1, new.pos
+    end
+
     def test_move_to_bottom
       item = SequentialUpdatesAltId.order(:pos).first
       item.move_to_bottom
