@@ -163,6 +163,8 @@ default: `1`. Use this option to define the top of the list. Use 0 to make the c
 default: `:bottom`. Use this option to specify whether objects get added to the `:top` or `:bottom` of the list. `nil` will result in new items not being added to the list on create, i.e, position will be kept nil after create.
 - `touch_on_update`
 default: `true`. Use `touch_on_update: false` if you don't want to update the timestamps of the associated records.
+- `sequential_updates`
+Specifies whether insert_at should update objects positions during shuffling one by one to respect position column unique not null constraint. Defaults to true if position column has unique index, otherwise false. If constraint is `deferrable initially deferred` (PostgreSQL), overriding it with false will speed up insert_at.
 
 ## Disabling temporarily
 
