@@ -38,5 +38,5 @@ end
 require 'github_changelog_generator/task'
 GitHubChangelogGenerator::RakeTask.new :changelog do |config|
   config.project = 'acts_as_list'
-  config.user = 'swanandp'
+  config.user = 'brendon'
 end
