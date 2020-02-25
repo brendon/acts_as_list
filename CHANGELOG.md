@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed
+- Invert order when incrementing to circumvent unique index violations (#368)
+
 ## [v1.0.0](https://github.com/swanandp/acts_as_list/tree/v1.0.0) - 2019-09-26
 [Full Changelog](https://github.com/swanandp/acts_as_list/compare/v0.9.19...v1.0.0)
 ### Removed
