@@ -13,7 +13,6 @@ Gem::Specification.new do |s|
   s.summary               = "A gem adding sorting, reordering capabilities to an active_record model, allowing it to act as a list"
   s.description           = 'This "acts_as" extension provides the capabilities for sorting and reordering a number of objects in a list. The class that has this specified needs to have a "position" column defined as an integer on the mapped database table.'
   s.license               = "MIT"
-  s.rubyforge_project     = "acts_as_list"
   s.required_ruby_version = ">= 2.4.7"
 
   if s.respond_to?(:metadata)
