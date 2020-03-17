@@ -1,4 +1,4 @@
-# frozen_string_literal: true
+# TODO: row_number starts from 1; top_of_list may be zero.# frozen_string_literal: true
 
 module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
   def self.call(caller_class, position_column, touch_on_update)
@@ -96,6 +96,7 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
             #{quoted_position_column} = @position := @position + 1
           SQL
         when "ActiveRecord::ConnectionAdapters::PostgreSQLAdapter"
+          # TODO: row_number starts from 1; top_of_list may be zero.
           target_records.where("acts_as_list_sorted.#{primary_key} = #{quoted_table_name}.#{primary_key}").update_all <<-SQL
             #{quoted_position_column} = acts_as_list_sorted.seqnum + #{position-1}
             from (
