@@ -395,11 +395,15 @@ module ActiveRecord
             if in_list?
               old_position = current_position
               return if position == old_position
-              # temporary move after bottom with gap, avoiding duplicate values
-              # gap is required to leave room for position increments
-              # positive number will be valid with unique not null check (>= 0) db constraint
-              temporary_position = bottom_position_in_list + 2
-              set_list_position(temporary_position, raise_exception_if_save_fails)
+
+              if sequential_updates?
+                # temporary move after bottom with gap, avoiding duplicate values
+                # gap is required to leave room for position increments
+                # positive number will be valid with unique not null check (>= 0) db constraint
+                temporary_position = bottom_position_in_list + 2
+                set_list_position(temporary_position, raise_exception_if_save_fails)
+              end
+
               shuffle_positions_on_intermediate_items(old_position, position, id)
             else
               increment_positions_on_lower_items(position)
