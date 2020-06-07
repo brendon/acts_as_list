@@ -1,7 +1,7 @@
-# ActsAsList
+# Acts As List
 
 ## Build Status
-[![Build Status](https://secure.travis-ci.org/swanandp/acts_as_list.svg)](https://secure.travis-ci.org/swanandp/acts_as_list)
+[![Build Status](https://travis-ci.org/brendon/acts_as_list.svg?branch=master)](https://travis-ci.org/brendon/acts_as_list)
 [![Gem Version](https://badge.fury.io/rb/acts_as_list.svg)](https://badge.fury.io/rb/acts_as_list)
 
 ## Description
@@ -12,8 +12,8 @@ This `acts_as` extension provides the capabilities for sorting and reordering a 
 
 There are a couple of changes of behaviour from `0.8.0` onwards:
 
-- If you specify `add_new_at: :top`, new items will be added to the top of the list like always. But now, if you specify a position at insert time: `.create(position: 3)`, the position will be respected. In this example, the item will end up at position `3` and will move other items further down the list. Before `0.8.0` the position would be ignored and the item would still be added to the top of the list. [#220](https://github.com/swanandp/acts_as_list/pull/220)
-- `acts_as_list` now copes with disparate position integers (i.e. gaps between the numbers). There has been a change in behaviour for the `higher_items` method. It now returns items with the first item in the collection being the closest item to the reference item, and the last item in the collection being the furthest from the reference item (a.k.a. the first item in the list). [#223](https://github.com/swanandp/acts_as_list/pull/223)
+- If you specify `add_new_at: :top`, new items will be added to the top of the list like always. But now, if you specify a position at insert time: `.create(position: 3)`, the position will be respected. In this example, the item will end up at position `3` and will move other items further down the list. Before `0.8.0` the position would be ignored and the item would still be added to the top of the list. [#220](https://github.com/brendon/acts_as_list/pull/220)
+- `acts_as_list` now copes with disparate position integers (i.e. gaps between the numbers). There has been a change in behaviour for the `higher_items` method. It now returns items with the first item in the collection being the closest item to the reference item, and the last item in the collection being the furthest from the reference item (a.k.a. the first item in the list). [#223](https://github.com/brendon/acts_as_list/pull/223)
 
 ## Installation
 
@@ -105,6 +105,25 @@ TodoList.all.each do |todo_list|
 end
 ```
 
+When using PostgreSQL, it is also possible to leave this migration up to the database layer. Inside of the `change` block you could write:
+
+```ruby
+ execute <<~SQL.squeeze
+   UPDATE todo_items
+   SET position = mapping.new_position
+   FROM (
+     SELECT
+       id,
+       ROW_NUMBER() OVER (
+         PARTITION BY todo_list_id
+         ORDER BY updated_at
+       ) as new_position
+     FROM todo_items
+   ) AS mapping
+   WHERE todo_items.id = mapping.id;
+ SQL
+```
+
 ## Notes
 All `position` queries (select, update, etc.) inside gem methods are executed without the default scope (i.e. `Model.unscoped`), this will prevent nasty issues when the default scope is different from `acts_as_list` scope.
 
@@ -142,6 +161,10 @@ default: `position`. Use this option if the column name in your database is diff
 default: `1`. Use this option to define the top of the list. Use 0 to make the collection act more like an array in its indexing.
 - `add_new_at`
 default: `:bottom`. Use this option to specify whether objects get added to the `:top` or `:bottom` of the list. `nil` will result in new items not being added to the list on create, i.e, position will be kept nil after create.
+- `touch_on_update`
+default: `true`. Use `touch_on_update: false` if you don't want to update the timestamps of the associated records.
+- `sequential_updates`
+Specifies whether insert_at should update objects positions during shuffling one by one to respect position column unique not null constraint. Defaults to true if position column has unique index, otherwise false. If constraint is `deferrable initially deferred` (PostgreSQL), overriding it with false will speed up insert_at.
 
 ## Disabling temporarily
 
@@ -183,7 +206,7 @@ end
 
 ## Troubleshooting Database Deadlock Errors
 When using this gem in an app with a high amount of concurrency, you may see "deadlock" errors raised by your database server.
-It's difficult for the gem to provide a solution that fits every app. 
+It's difficult for the gem to provide a solution that fits every app.
 Here are some steps you can take to mitigate and handle these kinds of errors.
 
 ### 1) Use the Most Concise API
@@ -203,15 +226,15 @@ item.insert_at(1)
 ```
 
 ### 2) Rescue then Retry
-Deadlocks are always a possibility when updating tables rows concurrently. 
+Deadlocks are always a possibility when updating tables rows concurrently.
 The general advice from MySQL documentation is to catch these errors and simply retry the transaction; it will probably succeed on another attempt. (see [How to Minimize and Handle Deadlocks](https://dev.mysql.com/doc/refman/8.0/en/innodb-deadlocks-handling.html))
 Retrying transactions sounds simple, but there are many details that need to be chosen on a per-app basis:
 How many retry attempts should be made?
-Should there be a wait time between attemps?
+Should there be a wait time between attempts?
 What _other_ statements were in the transaction that got rolled back?
 
 Here a simple example of rescuing from deadlock and retrying the operation:
-*  `ActiveRecord::Deadlocked` is avilable in Rails >= 5.1.0.
+*  `ActiveRecord::Deadlocked` is available in Rails >= 5.1.0.
 * If you have Rails < 5.1.0, you will need to rescue `ActiveRecord::StatementInvalid` and check `#cause`.
 ```ruby
   attempts_left = 2
@@ -232,7 +255,7 @@ You can also use the approach suggested in this StackOverflow post:
 https://stackoverflow.com/questions/4027659/activerecord3-deadlock-retry
 
 ### 3) Lock Parent Record
-In additon to reacting to deadlocks, it is possible to reduce their frequency with more pessimistic locking. 
+In addition to reacting to deadlocks, it is possible to reduce their frequency with more pessimistic locking.
 This approach uses the parent record as a mutex for the entire list.
 This kind of locking is very effective at reducing the frequency of deadlocks while updating list items.
 However, there are some things to keep in mind:
@@ -249,14 +272,21 @@ end
 ```
 
 ## Versions
-Version `0.9.0` adds `acts_as_list_no_update` (https://github.com/swanandp/acts_as_list/pull/244) and compatibility with not-null and uniqueness constraints on the database (https://github.com/swanandp/acts_as_list/pull/246). These additions shouldn't break compatibility with existing implementations.
+Version `0.9.0` adds `acts_as_list_no_update` (https://github.com/brendon/acts_as_list/pull/244) and compatibility with not-null and uniqueness constraints on the database (https://github.com/brendon/acts_as_list/pull/246). These additions shouldn't break compatibility with existing implementations.
 
 As of version `0.7.5` Rails 5 is supported.
 
 All versions `0.1.5` onwards require Rails 3.0.x and higher.
 
-## Workflow Status
-[![WIP Issues](https://badge.waffle.io/swanandp/acts_as_list.png)](http://waffle.io/swanandp/acts_as_list)
+## A note about data integrity
+
+We often hear complaints that `position` values are repeated, incorrect etc. For example, #254. To ensure data integrity, you should rely on your database. There are two things you can do:
+
+1. Use constraints.  If you model `Item` that `belongs_to` an `Order`, and it has a `position` column, then add a unique constraint on `items` with `[:order_id, :position]`.  Think of it as a list invariant. What are the properties of your list that don't change no matter how many items you have in it?  One such propery is that each item has a distinct position. Another _could be_ that position is always greater than 0. It is strongly recommended that you rely on your database to enforce these invariants or constraints. Here are the docs for [PostgreSQL](https://www.postgresql.org/docs/9.5/static/ddl-constraints.html) and [MySQL](https://dev.mysql.com/doc/refman/8.0/en/alter-table.html).
+2. Use mutexes or row level locks. At its heart the duplicate problem is that of handling concurrency. Adding a contention resolution mechanism like locks will solve it to some extent.  But it is not a solution or replacement for constraints.  Locks are also prone to deadlocks.
+
+As a library, `acts_as_list` may not always have all the context needed to apply these tools. They are much better suited at the application level.
+
 
 ## Roadmap
 
