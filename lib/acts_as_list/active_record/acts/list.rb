@@ -21,8 +21,9 @@ module ActiveRecord
         #   Defaults to true if position column has unique index, otherwise false.
         #   If constraint is <tt>deferrable initially deferred<tt>, overriding it with false will speed up insert_at.
         # * +touch_on_update+ - configuration to disable the update of the model timestamps when the positions are updated.
+        # * +step+ - default as 1
         def acts_as_list(options = {})
-          configuration = { column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom, touch_on_update: true }
+          configuration = { column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom, touch_on_update: true, step: 1 }
           configuration.update(options) if options.is_a?(Hash)
 
           caller_class = self
