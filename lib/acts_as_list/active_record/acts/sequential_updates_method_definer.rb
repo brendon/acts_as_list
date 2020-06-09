@@ -6,12 +6,7 @@ module ActiveRecord::Acts::List::SequentialUpdatesMethodDefiner #:nodoc:
       define_method :sequential_updates? do
         if !defined?(@sequential_updates)
           if sequential_updates_option.nil?
-            table_exists =
-              if active_record_version_is?('>= 5')
-                caller_class.connection.data_source_exists?(caller_class.table_name)
-              else
-                caller_class.connection.table_exists?(caller_class.table_name)
-              end
+            table_exists = caller_class.connection.data_source_exists?(caller_class.table_name)
             index_exists = caller_class.connection.index_exists?(caller_class.table_name, column, unique: true)
             @sequential_updates = table_exists && index_exists
           else

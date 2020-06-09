@@ -389,8 +389,8 @@ module ActiveRecord
           end
         end
 
-        def insert_at_position(position, raise_exception_if_save_fails=false)
-          raise ArgumentError.new("position cannot be lower than top") if position < acts_as_list_top
+        def insert_at_position(position, raise_exception_if_save_fails = false)
+          raise ArgumentError.new('position cannot be lower than top') if position < acts_as_list_top
           return set_list_position(position, raise_exception_if_save_fails) if new_record?
           with_lock do
             if in_list?
@@ -399,7 +399,7 @@ module ActiveRecord
               # temporary move after bottom with gap, avoiding duplicate values
               # gap is required to leave room for position increments
               # positive number will be valid with unique not null check (>= 0) db constraint
-              temporary_position = bottom_position_in_list + 2
+              temporary_position = bottom_position_in_list + step * 2
               set_list_position(temporary_position, raise_exception_if_save_fails)
               shuffle_positions_on_intermediate_items(old_position, position, id)
             else
@@ -410,31 +410,15 @@ module ActiveRecord
         end
 
         def update_positions
-          return unless position_before_save_changed?
+          return unless saved_change_to_attribute?(position_column)
 
-          old_position = position_before_save || bottom_position_in_list + list_step
+          old_position = attribute_before_last_save(position_column) || bottom_position_in_list + list_step
 
           return unless current_position && acts_as_list_list.where(
             "#{quoted_position_column_with_table_name} = #{current_position}"
           ).count > 1
 
           shuffle_positions_on_intermediate_items old_position, current_position, id
-        end
-
-        def position_before_save_changed?
-          if active_record_version_is?('>= 5.1')
-            saved_change_to_attribute? position_column
-          else
-            attribute_changed? position_column
-          end
-        end
-
-        def position_before_save
-          if active_record_version_is?('>= 5.1')
-            attribute_before_last_save position_column
-          else
-            attribute_was position_column
-          end
         end
 
         def internal_scope_changed?
@@ -483,12 +467,6 @@ module ActiveRecord
 
         def acts_as_list_order_argument(direction = :asc)
           { position_column => direction }
-        end
-
-        def active_record_version_is?(version_requirement)
-          requirement = Gem::Requirement.new(version_requirement)
-          version = Gem.loaded_specs['activerecord'].version
-          requirement.satisfied_by?(version)
         end
       end
 
