@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module ActiveRecord::Acts::List::TopOfListMethodDefiner #:nodoc:
-  def self.call(caller_class, top_of_list)
+  def self.call(caller_class, top_of_list, step)
     caller_class.class_eval do
 
       define_method :acts_as_list_top do
@@ -11,7 +11,11 @@ module ActiveRecord::Acts::List::TopOfListMethodDefiner #:nodoc:
           top_of_list.to_i
         end
       end
-      
+
+      define_method :list_step do
+        step
+      end
+
     end
   end
 end

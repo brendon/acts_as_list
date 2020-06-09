@@ -30,7 +30,7 @@ module ActiveRecord
 
           ActiveRecord::Acts::List::PositionColumnMethodDefiner.call(caller_class, configuration[:column], configuration[:touch_on_update])
           ActiveRecord::Acts::List::ScopeMethodDefiner.call(caller_class, configuration[:scope])
-          ActiveRecord::Acts::List::TopOfListMethodDefiner.call(caller_class, configuration[:top_of_list])
+          ActiveRecord::Acts::List::TopOfListMethodDefiner.call(caller_class, configuration[:top_of_list], configuration[:step])
           ActiveRecord::Acts::List::AddNewAtMethodDefiner.call(caller_class, configuration[:add_new_at])
 
           ActiveRecord::Acts::List::AuxMethodDefiner.call(caller_class)
@@ -141,13 +141,13 @@ module ActiveRecord
         # Increase the position of this item without adjusting the rest of the list.
         def increment_position
           return unless in_list?
-          set_list_position(current_position + 1)
+          set_list_position(current_position + list_step)
         end
 
         # Decrease the position of this item without adjusting the rest of the list.
         def decrement_position
           return unless in_list?
-          set_list_position(current_position - 1)
+          set_list_position(current_position - list_step)
         end
 
         def first?
@@ -250,7 +250,7 @@ module ActiveRecord
 
         def add_to_list_bottom
           if assume_default_position?
-            self[position_column] = bottom_position_in_list.to_i + 1
+            self[position_column] = bottom_position_in_list.to_i + list_step
           else
             increment_positions_on_lower_items(self[position_column], id)
           end
@@ -275,7 +275,7 @@ module ActiveRecord
         #   bottom_position_in_list    # => 2
         def bottom_position_in_list(except = nil)
           item = bottom_item(except)
-          item ? item.current_position : acts_as_list_top - 1
+          item ? item.current_position : acts_as_list_top - list_step
         end
 
         # Returns the bottom item
@@ -291,7 +291,7 @@ module ActiveRecord
 
         # Forces item to assume the bottom position in the list.
         def assume_bottom_position
-          set_list_position(bottom_position_in_list(self).to_i + 1)
+          set_list_position(bottom_position_in_list(self).to_i + list_step)
         end
 
         # Forces item to assume the top position in the list.
@@ -412,7 +412,7 @@ module ActiveRecord
         def update_positions
           return unless position_before_save_changed?
 
-          old_position = position_before_save || bottom_position_in_list + 1
+          old_position = position_before_save || bottom_position_in_list + list_step
 
           return unless current_position && acts_as_list_list.where(
             "#{quoted_position_column_with_table_name} = #{current_position}"
