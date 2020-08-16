@@ -108,7 +108,7 @@ end
 When using PostgreSQL, it is also possible to leave this migration up to the database layer. Inside of the `change` block you could write:
 
 ```ruby
- execute <<~SQL.squeeze
+ execute <<~SQL.squish
    UPDATE todo_items
    SET position = mapping.new_position
    FROM (
