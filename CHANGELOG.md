@@ -6,11 +6,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-### Removed
+## v1.0.2 - 2020-09-14
 
+### Fixed
+- Get foreign key from reflections when possible [\#383](https://github.com/brendon/acts_as_list/pull/383) ([jefftsang])
+
+### Removed
 - gemspec: Drop defunct `rubyforge_project` directive [\#373](https://github.com/brendon/acts_as_list/pull/373) ([olleolleolle])
 
 [olleolleolle]: https://github.com/olleolleolle
+[jefftsang]: https://github.com/jefftsang
 
 ## v1.0.1 - 2020-02-27
 
