@@ -4,7 +4,7 @@ module ActiveRecord::Acts::List::ScopeMethodDefiner #:nodoc:
   extend ActiveSupport::Inflector
 
   def self.call(caller_class, scope)
-    scope = idify(scope) if scope.is_a?(Symbol)
+    scope = idify(caller_class, scope) if scope.is_a?(Symbol)
 
     caller_class.class_eval do
       define_method :scope_name do
@@ -64,9 +64,13 @@ module ActiveRecord::Acts::List::ScopeMethodDefiner #:nodoc:
     end
   end
 
-  def self.idify(name)
+  def self.idify(caller_class, name)
     return name if name.to_s =~ /_id$/
 
-    foreign_key(name).to_sym
+    if caller_class.reflections.key?(name.to_s)
+      caller_class.reflections[name.to_s].foreign_key.to_sym
+    else
+      foreign_key(name).to_sym
+    end
   end
 end
