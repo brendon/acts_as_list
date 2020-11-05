@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixes
+- Add explicit requirement of ActiveSupport::Inflector. Fixes #386
+
 ## v1.0.2 - 2020-09-14
 
 ### Fixed
