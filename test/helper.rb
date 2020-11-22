@@ -51,3 +51,19 @@ def assert_equal_or_nil(a, b)
     assert_equal a, b
   end
 end
+
+def assert_no_deprecation_warning_raised_by(failure_message = 'ActiveRecord deprecation warning raised when we didn\'t expect it', pass_message = 'No ActiveRecord deprecation raised')
+  original_behavior = ActiveSupport::Deprecation.behavior
+  ActiveSupport::Deprecation.behavior = :raise
+  begin
+    yield
+  rescue ActiveSupport::DeprecationException => e
+    flunk "#{failure_message}: #{e}"
+  rescue
+    raise
+  else
+    pass pass_message
+  end
+ensure
+  ActiveSupport::Deprecation.behavior = original_behavior
+end

@@ -314,5 +314,11 @@ module Shared
         new.insert_at!(1)
       end
     end
+
+    def test_find_or_create_doesnt_raise_deprecation_warning
+      assert_no_deprecation_warning_raised_by('ActiveRecord deprecation warning raised when using `find_or_create_by` when we didn\'t expect it') do
+        ListMixin.where(parent_id: 5).find_or_create_by(pos: 5)
+      end
+    end
   end
 end

@@ -23,7 +23,10 @@ gemfile:
   - gemfiles/rails_5_1.gemfile
   - gemfiles/rails_5_2.gemfile
   - gemfiles/rails_6_0.gemfile
+  - gemfiles/rails_6_1.gemfile
 matrix:
   exclude:
     - rvm: 2.4.7
       gemfile: gemfiles/rails_6_0.gemfile
+    - rvm: 2.4.7
+      gemfile: gemfiles/rails_6_1.gemfile
