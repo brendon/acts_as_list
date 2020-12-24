@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Silence deprecation warnings in Rails 6 [\#384](https://github.com/brendon/acts_as_list/pull/384) ([h-lame])
+- Add explicit requirement of ActiveSupport::Inflector [\#387](https://github.com/brendon/acts_as_list/pull/387) ([rdvdijk])
 
 ## v1.0.2 - 2020-09-14
 

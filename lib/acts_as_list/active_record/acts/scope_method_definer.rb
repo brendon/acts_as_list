@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+require "active_support/inflector"
 
 module ActiveRecord::Acts::List::ScopeMethodDefiner #:nodoc:
   extend ActiveSupport::Inflector

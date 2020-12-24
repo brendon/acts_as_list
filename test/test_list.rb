@@ -419,6 +419,12 @@ class DefaultScopedTest < ActsAsListTestCase
     assert_equal_or_nil $default_position, new_noup.pos
   end
 
+  def test_find_or_create_doesnt_raise_deprecation_warning
+    assert_no_deprecation_warning_raised_by('ActiveRecord deprecation warning raised when using `find_or_create_by` when we didn\'t expect it') do
+      DefaultScopedMixin.find_or_create_by(pos: 5)
+    end
+  end
+
   def test_update_position
     assert_equal [1, 2, 3, 4], DefaultScopedMixin.all.map(&:id)
     DefaultScopedMixin.where(id: 2).first.set_list_position(4)
@@ -521,6 +527,12 @@ class DefaultScopedWhereTest < ActsAsListTestCase
 
     new_noup.reload
     assert_equal_or_nil $default_position, new_noup.pos
+  end
+
+  def test_find_or_create_doesnt_raise_deprecation_warning
+    assert_no_deprecation_warning_raised_by('ActiveRecord deprecation warning raised when using `find_or_create_by` when we didn\'t expect it') do
+      DefaultScopedWhereMixin.find_or_create_by(pos: 5)
+    end
   end
 
   def test_update_position
@@ -642,6 +654,12 @@ class MultipleListsTest < ActsAsListTestCase
     ListMixin.find(4).update :parent_id => 2, :pos => 2
     assert_equal [1, 2, 3], ListMixin.where(:parent_id => 1).order('pos').map(&:pos)
     assert_equal [1, 2, 3, 4, 5], ListMixin.where(:parent_id => 2).order('pos').map(&:pos)
+  end
+
+  def test_find_or_create_doesnt_raise_deprecation_warning
+    assert_no_deprecation_warning_raised_by('ActiveRecord deprecation warning raised when using `find_or_create_by` when we didn\'t expect it') do
+      ListMixin.where(:parent_id => 1).find_or_create_by(pos: 5)
+    end
   end
 end
 
