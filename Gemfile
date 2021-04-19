@@ -20,7 +20,7 @@ group :sqlite do
 end
 
 group :postgresql do
-  gem "pg", "~> 1.1.4"
+  gem "pg", "~> 1.2.0"
 end
 
 group :mysql do
