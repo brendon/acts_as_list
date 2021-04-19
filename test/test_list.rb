@@ -11,7 +11,7 @@ def setup_db(position_options = {})
 
   # AR caches columns options like defaults etc. Clear them!
   ActiveRecord::Base.connection.create_table :mixins do |t|
-    t.column :pos, :integer, position_options unless position_options[:positive] && sqlite
+    t.column :pos, :integer, **position_options unless position_options[:positive] && sqlite
     t.column :active, :boolean, default: true
     t.column :parent_id, :integer
     t.column :parent_type, :string
