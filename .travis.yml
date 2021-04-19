@@ -30,3 +30,16 @@ matrix:
       gemfile: gemfiles/rails_6_0.gemfile
     - rvm: 2.4.7
       gemfile: gemfiles/rails_6_1.gemfile
+  include:
+    - rvm: 2.7.3
+      gemfile: gemfiles/rails_6_1.gemfile
+      env:
+        - DB=sqlite
+        - DB=mysql
+        - DB=postgresql
+    - rvm: 3.0.1
+      gemfile: gemfiles/rails_6_1.gemfile
+      env:
+        - DB=sqlite
+        - DB=mysql
+        - DB=postgresql
