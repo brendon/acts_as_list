@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## v1.0.4 - 2021-04-20
+
+### Fixed
+- Add Tests ruby 2.7 and 3.0 [\#393](https://github.com/brendon/acts_as_list/pull/393) ([QWYNG])
+
 ## v1.0.3 - 2020-12-24
 
 ### Fixed
