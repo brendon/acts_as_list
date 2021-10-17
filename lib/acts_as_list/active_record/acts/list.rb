@@ -25,6 +25,19 @@ module ActiveRecord
           configuration = { column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom, touch_on_update: true }
           configuration.update(options) if options.is_a?(Hash)
 
+          def self.active_record_version_is?(version_requirement)
+            @@active_record_version_is = {} unless defined?(@@active_record_version_is)
+
+            if @@active_record_version_is.has_key? version_requirement
+              return @@active_record_version_is[version_requirement]
+            end
+
+            requirement = Gem::Requirement.new(version_requirement)
+            version = Gem.loaded_specs['activerecord'].version
+
+            @@active_record_version_is[version_requirement] = requirement.satisfied_by?(version)
+          end
+
           caller_class = self
 
           ActiveRecord::Acts::List::PositionColumnMethodDefiner.call(caller_class, configuration[:column], configuration[:touch_on_update])
@@ -421,7 +434,7 @@ module ActiveRecord
         end
 
         def position_before_save_changed?
-          if active_record_version_is?('>= 5.1')
+          if self.class.active_record_version_is?('>= 5.1')
             saved_change_to_attribute? position_column
           else
             attribute_changed? position_column
@@ -429,7 +442,7 @@ module ActiveRecord
         end
 
         def position_before_save
-          if active_record_version_is?('>= 5.1')
+          if self.class.active_record_version_is?('>= 5.1')
             attribute_before_last_save position_column
           else
             attribute_was position_column
@@ -482,12 +495,6 @@ module ActiveRecord
 
         def acts_as_list_order_argument(direction = :asc)
           { position_column => direction }
-        end
-
-        def active_record_version_is?(version_requirement)
-          requirement = Gem::Requirement.new(version_requirement)
-          version = Gem.loaded_specs['activerecord'].version
-          requirement.satisfied_by?(version)
         end
       end
 
