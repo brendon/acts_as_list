@@ -133,26 +133,29 @@ The `position` column is set after validations are called, so you should not put
 If you need a scope by a non-association field you should pass an array, containing field name, to a scope:
 ```ruby
 class TodoItem < ActiveRecord::Base
-  # `kind` is a plain text field (e.g. 'work', 'shopping', 'meeting'), not an association
-  acts_as_list scope: [:kind]
+  # `task_category` is a plain text field (e.g. 'work', 'shopping', 'meeting'), not an association
+  acts_as_list scope: [:task_category]
 end
 ```
 
 You can also add multiple scopes in this fashion:
 ```ruby
 class TodoItem < ActiveRecord::Base
-  acts_as_list scope: [:kind, :owner_id]
+  belongs_to :todo_list
+  acts_as_list scope: [:task_category, :todo_list_id]
 end
 ```
 
 Furthermore, you can optionally include a hash of fixed parameters that will be included in all queries:
 ```ruby
 class TodoItem < ActiveRecord::Base
-  acts_as_list scope: [:kind, :owner_id, deleted_at: nil]
+  belongs_to :todo_list
+  # or `discarded_at` if using discard
+  acts_as_list scope: [:task_category, :todo_list_id, deleted_at: nil]
 end
 ```
 
-This is useful when using this gem in conjunction with the popular [acts_as_paranoid](https://github.com/ActsAsParanoid/acts_as_paranoid) gem.
+This is useful when using this gem in conjunction with the popular [acts_as_paranoid](https://github.com/ActsAsParanoid/acts_as_paranoid) or [discard](https://github.com/jhawthorn/discard) gems.
 
 ## More Options
 - `column`
