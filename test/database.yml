@@ -4,13 +4,15 @@ sqlite:
 
 mysql:
   adapter: mysql2
+  host: 127.0.0.1
   username: root
   password:
   database: acts_as_list
 
 postgresql:
   adapter: postgresql
+  host: localhost
   username: postgres
-  password:
+  password: postgres
   database: acts_as_list
   min_messages: ERROR
