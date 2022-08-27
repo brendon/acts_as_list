@@ -12,6 +12,7 @@ rescue Bundler::BundlerError => e
   exit e.status_code
 end
 require "active_record"
+require "byebug"
 require "minitest/autorun"
 require "mocha/minitest"
 require "#{File.dirname(__FILE__)}/../init"

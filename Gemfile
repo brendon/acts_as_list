@@ -15,6 +15,10 @@ group :test do
   gem "mocha"
 end
 
+group :development, :test do
+  gem "byebug"
+end
+
 group :sqlite do
   gem "sqlite3", "~> 1.4"
 end
