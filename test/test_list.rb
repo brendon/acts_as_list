@@ -604,6 +604,42 @@ class MultiDestroyTest < ActsAsListTestCase
   end
 end
 
+class MultiUpdateTest < ActsAsListTestCase
+
+  def setup
+    setup_db
+  end
+
+  def test_multiple_updates_within_transaction
+    @page = ListMixin.create! id: 100, parent_id: nil, pos: 1
+    @row = ListMixin.create! parent_id: @page.id, pos: 1
+    @column1 = ListMixin.create! parent_id: @row.id, pos: 1
+    @column2 = ListMixin.create! parent_id: @row.id, pos: 2
+    @rich_text1 = ListMixin.create! parent_id: @column1.id, pos: 1
+    @rich_text2 = ListMixin.create! parent_id: @column2.id, pos: 1
+
+    ActiveRecord::Base.transaction do
+      @rich_text1.update!(parent_id: @column2.id, pos: 1)
+
+      assert_equal [@rich_text1.id, @rich_text2.id], ListMixin.where(parent_id: @column2.id).order('pos').map(&:id)
+      assert_equal [1, 2], ListMixin.where(parent_id: @column2.id).order('pos').map(&:pos)
+
+      @column1.destroy!
+      assert_equal [@column2.id], ListMixin.where(parent_id: @row.id).order('pos').map(&:id)
+      assert_equal [1], ListMixin.where(parent_id: @row.id).order('pos').map(&:pos)
+
+      @rich_text1.update!(parent_id: @page.id, pos: 1)
+      @rich_text2.update!(parent_id: @page.id, pos: 2)
+      @row.destroy!
+      @column2.destroy!
+    end
+
+    assert_equal(1, @page.reload.pos)
+    assert_equal [@rich_text1.id, @rich_text2.id], ListMixin.where(parent_id: @page.id).order('pos').map(&:id)
+    assert_equal [1, 2], ListMixin.where(parent_id: @page.id).order('pos').map(&:pos)
+  end
+end
+
 #class TopAdditionMixin < Mixin
 
 class TopAdditionTest < ActsAsListTestCase

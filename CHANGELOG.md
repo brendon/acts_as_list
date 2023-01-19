@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+- Use `after_save` instead of `after_commit` for `clear_scope_changed` callback [\#407](https://github.com/brendon/acts_as_list/pull/407) ([@Flixt](https://github.com/Flixt))
+
 ## v1.0.4 - 2021-04-20
 
 ### Fixed
