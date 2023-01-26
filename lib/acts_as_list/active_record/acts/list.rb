@@ -71,6 +71,11 @@ module ActiveRecord
           position ? position.to_i : nil
         end
 
+        def current_position_was
+          position = send("#{position_column}_was")
+          position ? position.to_i : nil
+        end
+
         # Insert the item at the given position (defaults to the top position of 1).
         def insert_at(position = acts_as_list_top)
           insert_at_position(position)
@@ -125,8 +130,9 @@ module ActiveRecord
         # Removes the item from the list.
         def remove_from_list
           if in_list?
-            decrement_positions_on_lower_items
+            old_pos = send(position_column)
             set_list_position(nil)
+            decrement_positions_on_lower_items(old_pos)
           end
         end
 
@@ -235,8 +241,9 @@ module ActiveRecord
         def add_to_list_top
           if assume_default_position?
             increment_positions_on_all_items
-            self[position_column] = acts_as_list_top
+            write_attribute position_column, acts_as_list_top
           else
+            # Don't actually add to the top; a position has been specified
             increment_positions_on_lower_items(self[position_column], id)
           end
 
@@ -249,8 +256,9 @@ module ActiveRecord
 
         def add_to_list_bottom
           if assume_default_position?
-            self[position_column] = bottom_position_in_list.to_i + 1
+            write_attribute position_column, bottom_position_in_list.to_i + 1
           else
+            # Don't actually add to the bottom; a position has been specified
             increment_positions_on_lower_items(self[position_column], id)
           end
 
@@ -326,8 +334,7 @@ module ActiveRecord
 
         # This has the effect of moving all the lower items up one.
         def decrement_positions_on_lower_items(position=current_position)
-          return unless in_list?
-
+          position = Integer(position)
           if sequential_updates?
             acts_as_list_list.where("#{quoted_position_column_with_table_name} > ?", position).reorder(acts_as_list_order_argument(:asc)).decrement_sequentially
           else
@@ -346,6 +353,7 @@ module ActiveRecord
         # both SQLite and PostgreSQL (and most probably MySQL too) has same issue
         # that's why *sequential_updates?* check alters implementation behavior
         def shuffle_positions_on_intermediate_items(old_position, new_position, avoid_id = nil)
+
           return if old_position == new_position
           scope = acts_as_list_list
 
@@ -390,17 +398,43 @@ module ActiveRecord
 
         def insert_at_position(position, raise_exception_if_save_fails=false)
           raise ArgumentError.new("position cannot be lower than top") if position < acts_as_list_top
-          return set_list_position(position, raise_exception_if_save_fails) if new_record?
+
+          old_position = send("#{position_column}_was")
+          # Set the position column so we can check if it's valid
+          write_attribute position_column, position
+          if invalid?
+            # If you violate a uniqueness constraint on
+            # position_column, you get a postgres error,
+            # and the transaction rolls back.
+            # You can avoid this with a uniqueness validation (raising
+            # RecordNotValid) which you can catch and continue from.
+            save! if raise_exception_if_save_fails
+            return false
+          end
+
+          return set_list_position(position, raise_exception_if_save_fails) if new_record? && not_in_list?
+
+          # Cannot lock a record with unsaved changes, so save it first.
+          # Before saving, stash any changes to the position column for later.
+          write_attribute position_column, old_position if old_position != position
+          if changed?
+            if raise_exception_if_save_fails
+              save!
+            else
+              save
+            end
+          end
+
           with_lock do
+            reload unless new_record?
             if in_list?
-              old_position = current_position
-              return if position == old_position
+              return if position == current_position_was
               # temporary move after bottom with gap, avoiding duplicate values
               # gap is required to leave room for position increments
               # positive number will be valid with unique not null check (>= 0) db constraint
               temporary_position = bottom_position_in_list + 2
               set_list_position(temporary_position, raise_exception_if_save_fails)
-              shuffle_positions_on_intermediate_items(old_position, position, id)
+              shuffle_positions_on_intermediate_items(current_position_was, position, id)
             else
               increment_positions_on_lower_items(position)
             end

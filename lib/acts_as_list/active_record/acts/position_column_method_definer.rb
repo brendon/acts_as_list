@@ -1,4 +1,4 @@
-# frozen_string_literal: true
+# TODO: row_number starts from 1; top_of_list may be zero.# frozen_string_literal: true
 
 module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
   def self.call(caller_class, position_column, touch_on_update)
@@ -35,11 +35,14 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
       end
 
       define_singleton_method :decrement_all do
-        update_all_with_touch "#{quoted_position_column} = (#{quoted_position_column_with_table_name} - 1)"
+        min = minimum(position_column)
+        # Avoid going past top of list
+        shuffle_to(min - 1) if min && min > acts_as_list_top
       end
 
       define_singleton_method :increment_all do
-        update_all_with_touch "#{quoted_position_column} = (#{quoted_position_column_with_table_name} + 1)"
+        min = minimum(position_column)
+        shuffle_to(min + 1) if min
       end
 
       define_singleton_method :update_all_with_touch do |updates|
@@ -48,6 +51,66 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
       end
 
       private
+
+      # Update recordset to start at the given position
+      define_singleton_method :shuffle_to do |position|
+        max = nil
+        if ActiveRecord::VERSION::MAJOR < 4
+          unscoped do
+            max = maximum(position_column)
+          end
+        else
+          max = unscope(:where).maximum(position_column)
+        end
+        return unless max # If no records have a position we don't have to do anything.
+
+        swap_position = max + 2 # Move recordset after the last record
+        update_all_with_touch(
+          "#{quoted_position_column} = #{quoted_position_column_with_table_name} + #{swap_position}"
+        )
+
+        return_from = if ActiveRecord::VERSION::MAJOR < 4
+          unscoped do
+            where("#{quoted_position_column_with_table_name} >= #{swap_position}").minimum(position_column)
+          end
+        else
+          unscope(:where).where("#{quoted_position_column_with_table_name} >= #{swap_position}").minimum(position_column)
+        end
+
+        return_position = return_from - position
+        # Can't specify _with_table_name as it's an UPDATE
+
+        # unscoped is safe in this case because we're moved the
+        # records we're targeting above the previous maximum position
+        target_records = unscoped.where("#{quoted_position_column} >= #{swap_position}")
+
+        case connection.class.to_s
+        when "ActiveRecord::ConnectionAdapters::SQLite3Adapter"
+          # Does not fill in 'holes' (if any exist) as sqlite lacks partitioning and variables.
+          target_records.update_all(
+          "#{quoted_position_column} = #{quoted_position_column} - #{return_position}",
+        )
+        when "ActiveRecord::ConnectionAdapters::Mysql2Adapter"
+          ActiveRecord::Base.connection.execute("SET @position=#{position - 1};")
+          target_records.order(Arel.sql quoted_position_column).update_all <<-SQL
+            #{quoted_position_column} = @position := @position + 1
+          SQL
+        when "ActiveRecord::ConnectionAdapters::PostgreSQLAdapter"
+          # TODO: row_number starts from 1; top_of_list may be zero.
+          target_records.where("acts_as_list_sorted.#{primary_key} = #{quoted_table_name}.#{primary_key}").update_all <<-SQL
+            #{quoted_position_column} = acts_as_list_sorted.seqnum + #{position-1}
+            from (
+              select acts_as_list_subselect.#{primary_key}, row_number() over (
+                order by #{quoted_position_column} asc
+              ) as seqnum
+              from #{quoted_table_name} acts_as_list_subselect
+              where #{quoted_position_column} >= #{swap_position}
+            ) as acts_as_list_sorted
+          SQL
+        else
+          raise "Unknown driver #{connection.class}"
+        end
+      end
 
       define_singleton_method :touch_record_sql do
         new.touch_record_sql
