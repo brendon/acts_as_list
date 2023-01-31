@@ -229,36 +229,27 @@ module ActiveRecord
           acts_as_list_class.default_scoped.unscope(:select, :where).where(scope_condition)
         end
 
-        # Poorly named methods. They will insert the item at the desired position if the position
-        # has been set manually using position=, not necessarily the top or bottom of the list:
-
-        def add_to_list_top
-          if assume_default_position?
-            increment_positions_on_all_items
-            self[position_column] = acts_as_list_top
+        def avoid_collision
+          case add_new_at
+          when :top
+            if assume_default_position?
+              increment_positions_on_all_items
+              self[position_column] = acts_as_list_top
+            else
+              increment_positions_on_lower_items(self[position_column], id)
+            end
+          when :bottom
+            if assume_default_position?
+              self[position_column] = bottom_position_in_list.to_i + 1
+            else
+              increment_positions_on_lower_items(self[position_column], id)
+            end
           else
-            increment_positions_on_lower_items(self[position_column], id)
+            increment_positions_on_lower_items(self[position_column], id) if position_changed
           end
 
-          # Make sure we know that we've processed this scope change already
-          @scope_changed = false
-
-          # Don't halt the callback chain
-          true
-        end
-
-        def add_to_list_bottom
-          if assume_default_position?
-            self[position_column] = bottom_position_in_list.to_i + 1
-          else
-            increment_positions_on_lower_items(self[position_column], id)
-          end
-
-          # Make sure we know that we've processed this scope change already
-          @scope_changed = false
-
-          # Don't halt the callback chain
-          true
+          @scope_changed = false # Make sure we know that we've processed this scope change already
+          return true # Don't halt the callback chain
         end
 
         def assume_default_position?
@@ -454,7 +445,7 @@ module ActiveRecord
             send('decrement_positions_on_lower_items') if lower_item
             cached_changes.each { |attribute, values| send("#{attribute}=", values[1]) }
 
-            send("add_to_list_#{add_new_at}") if add_new_at.present?
+            avoid_collision
           end
         end
 
