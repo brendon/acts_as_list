@@ -6,9 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-### Fixed
+## v1.1.0 - 2023-02-01
+
+### Fixed (Possibly Breaking)
 - Use `after_save` instead of `after_commit` for `clear_scope_changed` callback [\#407](https://github.com/brendon/acts_as_list/pull/407) ([@Flixt](https://github.com/Flixt))
-- Rename `add_to_list_top` and `add_to_list_bottom` private methods to `avoid_collision` that handles both cases as well as the case where `:add_new_at` is `nil`. Setting an explicit position when `:add_new_at` is `nil` will now shuffle other items out of the way if necessary. [\#411](https://github.com/brendon/acts_as_list/pull/411). ([brendon])
+- Rename `add_to_list_top` and `add_to_list_bottom` private methods to `avoid_collision` that handles both cases as well as the case where `:add_new_at` is `nil`. Setting an explicit position when `:add_new_at` is `nil` will now shuffle other items out of the way if necessary. *This may break existing workarounds you have in place to deal with this bug*. [\#411](https://github.com/brendon/acts_as_list/pull/411). ([brendon])
 
 ## v1.0.4 - 2021-04-20
 
