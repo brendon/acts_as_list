@@ -117,7 +117,7 @@ When using PostgreSQL, it is also possible to leave this migration up to the dat
        ROW_NUMBER() OVER (
          PARTITION BY todo_list_id
          ORDER BY updated_at
-       ) as new_position
+       ) AS new_position
      FROM todo_items
    ) AS mapping
    WHERE todo_items.id = mapping.id;
