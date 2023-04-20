@@ -232,12 +232,7 @@ module ActiveRecord
         def avoid_collision
           case add_new_at
           when :top
-            if assume_default_position?
-              increment_positions_on_all_items
-              self[position_column] = acts_as_list_top
-            else
-              increment_positions_on_lower_items(self[position_column], id)
-            end
+            increment_positions_on_lower_items(self[position_column], id)
           when :bottom
             if assume_default_position?
               self[position_column] = bottom_position_in_list.to_i + 1
