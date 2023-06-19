@@ -82,13 +82,13 @@ module ActiveRecord
 
         # Swap positions with the next lower item, if one exists.
         def move_lower
-          return unless lower_item
+          return unless (other = lower_item)
 
           acts_as_list_class.transaction do
-            if lower_item.current_position != current_position
-              swap_positions_with(lower_item)
+            if other.current_position != current_position
+              swap_positions_with(other)
             else
-              lower_item.decrement_position
+              other.decrement_position
               increment_position
             end
           end
@@ -96,13 +96,13 @@ module ActiveRecord
 
         # Swap positions with the next higher item, if one exists.
         def move_higher
-          return unless higher_item
+          return unless (other = higher_item)
 
           acts_as_list_class.transaction do
-            if higher_item.current_position != current_position
-              swap_positions_with(higher_item)
+            if other.current_position != current_position
+              swap_positions_with(other)
             else
-              higher_item.increment_position
+              other.increment_position
               decrement_position
             end
           end
