@@ -105,7 +105,7 @@ jobs:
       BUNDLE_GEMFILE: ${{ matrix.gemfile }}
       DB: ${{ matrix.db }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
