@@ -133,6 +133,37 @@ module Shared
       assert_equal [$default_position, 1, 2, 3, 4, 5], pos_list
     end
 
+    def test_insert_at_top
+      new = ListMixin.create(parent_id: 20)
+      assert_equal 1, new.pos
+
+      new = ListMixin.create(parent_id: 20)
+      assert_equal 2, new.pos
+
+      new_noup = ListMixin.acts_as_list_no_update { ListMixin.create(parent_id: 20) }
+      assert_equal_or_nil $default_position, new_noup.pos
+
+      new3 = ListMixin.create(parent_id: 20)
+      assert_equal 3, new3.pos
+
+      new4 = ListMixin.create(parent_id: 20)
+      assert_equal 4, new4.pos
+
+      new4.reload
+      assert_equal 4, new4.pos
+
+      new5 = ListMixin.create(parent_id: 20)
+      assert_equal 5, new5.pos
+
+      ## DnD sorting moves item to top by adding after the top item, creating a gap.
+      ## https://github.com/brendon/acts_as_list/issues/317
+      new3.insert_at(6)
+      assert_equal 5, new3.pos
+
+      pos_list = ListMixin.where(parent_id: 20).order("pos ASC#{' NULLS FIRST' if ENV['DB'] == 'postgresql'}").map(&:pos)
+      assert_equal [$default_position, 1, 2, 3, 4, 5], pos_list
+    end
+
     def test_insert_at_after_dup
       new1 = ListMixin.create(parent_id: 20)
       new2 = ListMixin.create(parent_id: 20)

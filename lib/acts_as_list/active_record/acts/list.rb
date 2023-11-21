@@ -386,6 +386,12 @@ module ActiveRecord
             if in_list?
               old_position = current_position
               return if position == old_position
+
+              # Move 2 after 5 [1, 3, 4, 5, 2] => [1, 3, 4, 5, 6] should be [1, 2, 3, 4, 5].
+              # Addresses Drag&Drop edge case when moving item to the top of the list.
+              max_position = acts_as_list_list.maximum(position_column).to_i
+              position = max_position if position > max_position
+
               # temporary move after bottom with gap, avoiding duplicate values
               # gap is required to leave room for position increments
               # positive number will be valid with unique not null check (>= 0) db constraint
