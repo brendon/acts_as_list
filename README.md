@@ -195,7 +195,7 @@ class TodoItem < ActiveRecord::Base
 end
 
 class TodoAttachment < ActiveRecord::Base
-  belongs_to :todo_list
+  belongs_to :todo_item
   acts_as_list scope: :todo_item
 end
 
