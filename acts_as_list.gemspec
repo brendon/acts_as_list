@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.platform              = Gem::Platform::RUBY
   s.authors               = ["Swanand Pagnis", "Brendon Muir"]
   s.email                 = %w(swanand.pagnis@gmail.com brendon@spikeatschool.co.nz)
-  s.homepage              = "http://github.com/brendon/acts_as_list"
+  s.homepage              = "https://github.com/brendon/acts_as_list"
   s.summary               = "A gem adding sorting, reordering capabilities to an active_record model, allowing it to act as a list"
   s.description           = 'This "acts_as" extension provides the capabilities for sorting and reordering a number of objects in a list. The class that has this specified needs to have a "position" column defined as an integer on the mapped database table.'
   s.license               = "MIT"

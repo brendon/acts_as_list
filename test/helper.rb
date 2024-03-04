@@ -53,8 +53,8 @@ def assert_equal_or_nil(a, b)
 end
 
 def assert_no_deprecation_warning_raised_by(failure_message = 'ActiveRecord deprecation warning raised when we didn\'t expect it', pass_message = 'No ActiveRecord deprecation raised')
-  original_behavior = ActiveSupport::Deprecation.behavior
-  ActiveSupport::Deprecation.behavior = :raise
+  original_behavior = active_record_deprecator.behavior
+  active_record_deprecator.behavior = :raise
   begin
     yield
   rescue ActiveSupport::DeprecationException => e
@@ -65,5 +65,13 @@ def assert_no_deprecation_warning_raised_by(failure_message = 'ActiveRecord depr
     pass pass_message
   end
 ensure
-  ActiveSupport::Deprecation.behavior = original_behavior
+  active_record_deprecator.behavior = original_behavior
+end
+
+def active_record_deprecator
+  if ActiveRecord::VERSION::MAJOR == 7 && ActiveRecord::VERSION::MINOR >= 1 || ActiveRecord::VERSION::MAJOR > 7
+    ActiveRecord.deprecator
+  else
+    ActiveSupport::Deprecation
+  end
 end
