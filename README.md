@@ -4,6 +4,11 @@
 [![Build Status](https://travis-ci.org/brendon/acts_as_list.svg?branch=master)](https://travis-ci.org/brendon/acts_as_list)
 [![Gem Version](https://badge.fury.io/rb/acts_as_list.svg)](https://badge.fury.io/rb/acts_as_list)
 
+## ANNOUNCING: Positioning, the gem
+As maintainer of both Acts As List and the Ranked Model gems, I've become intimately aquainted with the strengths and weaknesses of each. I ended up writing a small scale Rails Concern for positioning database rows for a recent project and it worked really well so I've decided to release it as a gem: [Positioning](https://github.com/brendon/positioning)
+
+Positioning works similarly to Acts As List in that it maintains a sequential list of integer values as positions. It differs in that it encourages a unique constraints on the position column and supports multiple lists per database table. It borrows Ranked Model's concept of relative positioning. I encourage you to check it out and give it a whirl on your project!
+
 ## Description
 
 This `acts_as` extension provides the capabilities for sorting and reordering a number of objects in a list. The class that has this specified needs to have a `position` column defined as an integer on the mapped database table.
