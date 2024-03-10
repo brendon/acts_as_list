@@ -7,6 +7,7 @@ gem "appraisal"
 
 group :development do
   gem "github_changelog_generator", "1.9.0"
+  gem "ancestry"
 end
 
 group :test do
