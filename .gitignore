@@ -10,3 +10,5 @@ pkg/*
 # Appraisal generated lockfiles
 *.gemfile.lock
 .DS_Store
+.byebug_history
+
