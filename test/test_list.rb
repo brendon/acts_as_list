@@ -48,9 +48,18 @@ def setup_db(position_options = {})
 
   ActiveRecord::Base.connection.add_index 'altid-table', :pos, unique: true
 
+  # This table is used to test table names with a composite primary_key
+  ActiveRecord::Base.connection.create_table 'composite-primary-key-table', primary_key: [:first_id, :second_id] do |t|
+    t.integer :first_id, null: false
+    t.integer :second_id, null: false
+    t.column :pos, :integer
+    t.column :created_at, :datetime
+    t.column :updated_at, :datetime
+  end
+
   mixins = [ Mixin, ListMixin, ListMixinSub1, ListMixinSub2, ListWithStringScopeMixin,
     ArrayScopeListMixin, ZeroBasedMixin, DefaultScopedMixin, EnumArrayScopeListMixin,
-    DefaultScopedWhereMixin, TopAdditionMixin, NoAdditionMixin, QuotedList, TouchDisabledMixin ]
+    DefaultScopedWhereMixin, TopAdditionMixin, NoAdditionMixin, QuotedList, TouchDisabledMixin, CompositePrimaryKeyList]
 
   ActiveRecord::Base.connection.schema_cache.clear!
   mixins.each do |klass|
@@ -192,6 +201,13 @@ end
 class QuotedList < ActiveRecord::Base
   self.table_name = 'table-name'
   acts_as_list column: :order
+end
+
+class CompositePrimaryKeyList < ActiveRecord::Base
+  self.table_name = "composite-primary-key-table"
+  self.primary_key = [:first_id, :second_id] 
+
+  acts_as_list column: "pos"
 end
 
 class ActsAsListTestCase < Minitest::Test
@@ -1120,3 +1136,95 @@ class SequentialUpdatesMixinNotNullUniquePositiveConstraintsTest < ActsAsListTes
     end
   end
 end
+
+if ActiveRecord::VERSION::MAJOR >= 7 && ActiveRecord::VERSION::MINOR >= 1
+  class CompositePrimaryKeyListTest < ActsAsListTestCase
+    def setup
+      setup_db
+      (1..4).each { |counter| CompositePrimaryKeyList.create!({first_id: counter, second_id: counter, pos: counter}) }
+    end
+
+    def test_insert_at
+      new = CompositePrimaryKeyList.create({first_id: 5, second_id: 5})
+      assert_equal 5, new.pos
+
+      new.insert_at(1)
+      assert_equal 1, new.pos
+
+      new.insert_at(5)
+      assert_equal 5, new.pos
+
+      new.insert_at(3)
+      assert_equal 3, new.pos
+    end
+
+    def test_move_lower
+      item = CompositePrimaryKeyList.order(:pos).first
+      item.move_lower
+      assert_equal 2, item.pos
+    end
+
+    def test_move_higher
+      item = CompositePrimaryKeyList.order(:pos).second
+      item.move_higher
+      assert_equal 1, item.pos
+    end
+
+    def test_move_to_bottom
+      item = CompositePrimaryKeyList.order(:pos).first
+      item.move_to_bottom
+      assert_equal 4, item.pos
+    end
+
+    def test_move_to_top
+      new_item = CompositePrimaryKeyList.create!({first_id: 5, second_id: 5})
+      assert_equal 5, new_item.pos
+
+      new_item.move_to_top
+      assert_equal 1, new_item.pos
+    end
+
+    def test_remove_from_list
+      assert_equal true, CompositePrimaryKeyList.find([1, 1]).in_list?
+      CompositePrimaryKeyList.find([1,1]).remove_from_list
+      assert_equal false, CompositePrimaryKeyList.find([1, 1]).in_list?
+    end
+
+    def test_increment_position
+      item = CompositePrimaryKeyList.order(:pos).first
+      item.increment_position
+      assert_equal 2, item.pos
+    end
+
+    def test_decrement_position
+      item = CompositePrimaryKeyList.order(:pos).second
+      item.decrement_position
+      assert_equal 1, item.pos
+    end
+
+    def test_set_list_position
+      item = CompositePrimaryKeyList.order(:pos).first
+      item.set_list_position(4)
+      assert_equal 4, item.pos
+    end
+
+    def test_create_at_top
+      new = CompositePrimaryKeyList.create({first_id: 5, second_id: 5, pos: 1})
+      assert_equal 1, new.pos
+    end
+
+    def test_destroy
+      new_item = CompositePrimaryKeyList.create({first_id: 5, second_id: 5})
+      assert_equal 5, new_item.pos
+      assert_equal true, new_item.last?
+
+      new_item.insert_at(1)
+      assert_equal 1, new_item.pos
+      assert_equal true, new_item.first?
+
+      new_item.destroy
+      assert_equal [1,2,3,4], CompositePrimaryKeyList.all.map(&:pos).sort
+    end
+  end
+end
+
