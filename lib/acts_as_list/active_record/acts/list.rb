@@ -171,7 +171,7 @@ module ActiveRecord
           limit ||= acts_as_list_list.count
           acts_as_list_list.
             where("#{quoted_position_column_with_table_name} <= ?", current_position).
-            where(composite_primary_key? ? composite_primary_key_query : primary_key_query).
+            where.not(primary_key_condition).
             reorder(acts_as_list_order_argument(:desc)).
             limit(limit)
         end
@@ -188,7 +188,7 @@ module ActiveRecord
           limit ||= acts_as_list_list.count
           acts_as_list_list.
             where("#{quoted_position_column_with_table_name} >= ?", current_position).
-            where(composite_primary_key? ? composite_primary_key_query : primary_key_query).
+            where.not(primary_key_condition).
             reorder(acts_as_list_order_argument(:asc)).
             limit(limit)
         end
@@ -273,7 +273,7 @@ module ActiveRecord
           scope = acts_as_list_list
 
           if except
-            scope = scope.where(composite_primary_key? ? composite_primary_key_query(except.id) : primary_key_query(except.id))
+            scope = scope.where.not(primary_key_condition(except.id))
           end
 
           scope.in_list.reorder(acts_as_list_order_argument(:desc)).first
@@ -300,7 +300,7 @@ module ActiveRecord
           scope = acts_as_list_list
 
           if avoid_id
-            scope = scope.where(composite_primary_key? ? composite_primary_key_query(avoid_id) : primary_key_query(avoid_id))
+            scope = scope.where.not(primary_key_condition(avoid_id))
           end
 
           if sequential_updates?
@@ -341,7 +341,7 @@ module ActiveRecord
           scope = acts_as_list_list
 
           if avoid_id
-            scope = scope.where(composite_primary_key? ? composite_primary_key_query(avoid_id) : primary_key_query(avoid_id))
+            scope = scope.where.not(primary_key_condition(avoid_id))
           end
 
           if old_position < new_position
@@ -481,25 +481,11 @@ module ActiveRecord
           requirement.satisfied_by?(version)
         end
 
-        def primary_key_query(id = nil)
-          id ||= send(self.class.primary_key)
-          ["#{quoted_table_name}.#{self.class.primary_key} != ?", id]
-        end
+        def primary_key_condition(id = nil)
+          primary_keys = Array.wrap(self.class.primary_key)
 
-        def composite_primary_key_query(id = nil)
-          keys = self.class.primary_key
-          if id
-            values = id
-          else
-            values = keys.map { |key| send(key) }
-          end
-
-          conditions = keys.map { |key| "#{quoted_table_name}.#{key} != ?" }.join(' AND ')
-          [conditions, *values]
-        end
-
-        def composite_primary_key?
-          self.class.respond_to?(:composite_primary_key?) && self.class.composite_primary_key?
+          id = id ? Array.wrap(id) : Array.wrap(primary_keys.map { |k| send(k) })
+          primary_keys.zip(id).to_h
         end
       end
 
