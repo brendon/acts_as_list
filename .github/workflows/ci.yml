@@ -25,6 +25,7 @@ jobs:
           - gemfiles/rails_6_0.gemfile
           - gemfiles/rails_6_1.gemfile
           - gemfiles/rails_7_0.gemfile
+          - gemfiles/rails_7_1.gemfile
         db:
           - sqlite
           - mysql
@@ -40,6 +41,12 @@ jobs:
             gemfile: gemfiles/rails_7_0.gemfile
           - ruby: 2.6
             gemfile: gemfiles/rails_7_0.gemfile
+          - ruby: 2.4
+            gemfile: gemfiles/rails_7_1.gemfile
+          - ruby: 2.5
+            gemfile: gemfiles/rails_7_1.gemfile
+          - ruby: 2.6
+            gemfile: gemfiles/rails_7_1.gemfile
           - ruby: 2.7
             gemfile: gemfiles/rails_4_2.gemfile
           - ruby: 2.7
