@@ -483,9 +483,7 @@ module ActiveRecord
 
         def primary_key_condition(id = nil)
           primary_keys = Array.wrap(self.class.primary_key)
-
-          id = id ? Array.wrap(id) : Array.wrap(primary_keys.map { |k| send(k) })
-          primary_keys.zip(id).to_h
+          id ? primary_keys.zip(Array.wrap(id)).to_h : slice(*primary_keys)
         end
       end
 
