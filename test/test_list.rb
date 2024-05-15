@@ -52,14 +52,17 @@ def setup_db(position_options = {})
   ActiveRecord::Base.connection.create_table 'composite-primary-key-table', primary_key: [:first_id, :second_id] do |t|
     t.integer :first_id, null: false
     t.integer :second_id, null: false
+    t.column :parent_id, :integer
+    t.column :parent_type, :string
     t.column :pos, :integer
     t.column :created_at, :datetime
     t.column :updated_at, :datetime
+    t.column :state, :integer
   end
 
   mixins = [ Mixin, ListMixin, ListMixinSub1, ListMixinSub2, ListWithStringScopeMixin,
     ArrayScopeListMixin, ZeroBasedMixin, DefaultScopedMixin, EnumArrayScopeListMixin,
-    DefaultScopedWhereMixin, TopAdditionMixin, NoAdditionMixin, QuotedList, TouchDisabledMixin, CompositePrimaryKeyList]
+    DefaultScopedWhereMixin, TopAdditionMixin, NoAdditionMixin, QuotedList, TouchDisabledMixin, CompositePrimaryKeyList, CompositePrimaryKeyListScoped ]
 
   ActiveRecord::Base.connection.schema_cache.clear!
   mixins.each do |klass|
@@ -208,6 +211,14 @@ class CompositePrimaryKeyList < ActiveRecord::Base
   self.primary_key = [:first_id, :second_id] 
 
   acts_as_list column: "pos"
+end
+
+class CompositePrimaryKeyListScoped < CompositePrimaryKeyList
+  acts_as_list column: "pos", scope: :parent_id
+end
+
+class CompositePrimaryKeyListScopedError < CompositePrimaryKeyListScoped
+  validates :state, presence: true
 end
 
 class ActsAsListTestCase < Minitest::Test
@@ -1224,6 +1235,16 @@ if ActiveRecord::VERSION::MAJOR == 7 && ActiveRecord::VERSION::MINOR >= 1 || Act
 
       new_item.destroy
       assert_equal [1,2,3,4], CompositePrimaryKeyList.all.map(&:pos).sort
+    end
+  end
+
+  class CompositePrimaryKeyListScopedTest < ActsAsListTestCase
+    include Shared::List
+
+    def setup
+      setup_db
+
+      super(CompositePrimaryKeyListScoped, CompositePrimaryKeyListScopedError, :first_id)
     end
   end
 end
