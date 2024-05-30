@@ -16,6 +16,8 @@ require "minitest/autorun"
 require "mocha/minitest"
 require "#{File.dirname(__FILE__)}/../init"
 
+ENV["DB"] = "mysql" unless ENV["DB"]
+
 if defined?(ActiveRecord::VERSION) &&
   ActiveRecord::VERSION::MAJOR == 4 && ActiveRecord::VERSION::MINOR >= 2
 
@@ -23,8 +25,10 @@ if defined?(ActiveRecord::VERSION) &&
   ActiveRecord::Base.raise_in_transactional_callbacks = true
 end
 
-db_config = YAML.load_file(File.expand_path("../database.yml", __FILE__)).fetch(ENV["DB"] || "sqlite")
-ActiveRecord::Base.establish_connection(db_config)
+database_configuration = ENV["CI"] ? "test/support/ci_database.yml" : "test/support/database.yml"
+
+ActiveRecord::Base.configurations = YAML.safe_load(IO.read(database_configuration))
+ActiveRecord::Base.establish_connection(ENV["DB"].to_sym)
 ActiveRecord::Schema.verbose = false
 
 def teardown_db

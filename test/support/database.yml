@@ -1,6 +1,6 @@
 sqlite:
   adapter: sqlite3
-  database: "file:memdb1?mode=memory&cache=shared"
+  database: file::memory:?cache=shared
 
 mysql:
   adapter: mysql2

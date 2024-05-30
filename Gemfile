@@ -1,28 +1,13 @@
 source "http://rubygems.org"
 
+# Specify your gem's dependencies in positioning.gemspec
 gemspec
 
-gem "rake"
-gem "appraisal"
+gem "rake", "~> 13.0"
 
-group :development do
-  gem "github_changelog_generator", "1.9.0"
-end
+gem "minitest", "~> 5.0"
 
-group :test do
-  gem "minitest", "~> 5.0"
-  gem "timecop"
-  gem "mocha"
-end
-
-group :sqlite do
-  gem "sqlite3", "~> 1.4"
-end
-
-group :postgresql do
-  gem "pg", "~> 1.2.0"
-end
-
-group :mysql do
-  gem "mysql2", "~> 0.5.0"
+if ENV["RAILS_VERSION"]
+  gem "activerecord", ENV["RAILS_VERSION"]
+  gem "activesupport", ENV["RAILS_VERSION"]
 end

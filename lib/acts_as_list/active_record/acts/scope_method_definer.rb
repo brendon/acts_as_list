@@ -2,7 +2,6 @@
 require "active_support/inflector"
 
 module ActiveRecord::Acts::List::ScopeMethodDefiner #:nodoc:
-  extend ActiveSupport::Inflector
 
   def self.call(caller_class, scope)
     scope = idify(caller_class, scope) if scope.is_a?(Symbol)
@@ -71,7 +70,7 @@ module ActiveRecord::Acts::List::ScopeMethodDefiner #:nodoc:
     if caller_class.reflections.key?(name.to_s)
       caller_class.reflections[name.to_s].foreign_key.to_sym
     else
-      foreign_key(name).to_sym
+      ActiveSupport::Inflector.foreign_key(name).to_sym
     end
   end
 end
