@@ -7,11 +7,13 @@ def setup_db(position_options = {})
   $default_position = position_options[:default]
 
   # sqlite cannot drop/rename/alter columns and add constraints after table creation
-  sqlite = ENV.fetch("DB", "sqlite") == "sqlite"
+  sqlite = ENV.fetch("DB") == "sqlite"
+  unique = position_options.delete(:unique)
+  positive = position_options.delete(:positive)
 
   # AR caches columns options like defaults etc. Clear them!
   ActiveRecord::Base.connection.create_table :mixins do |t|
-    t.column :pos, :integer, **position_options unless position_options[:positive] && sqlite
+    t.column :pos, :integer, **position_options unless positive && sqlite
     t.column :active, :boolean, default: true
     t.column :parent_id, :integer
     t.column :parent_type, :string
@@ -20,11 +22,11 @@ def setup_db(position_options = {})
     t.column :state, :integer
   end
 
-  if position_options[:unique] && !(sqlite && position_options[:positive])
+  if unique && !(sqlite && positive)
     ActiveRecord::Base.connection.add_index :mixins, :pos, unique: true
   end
 
-  if position_options[:positive]
+  if positive
     if sqlite
       # SQLite cannot add constraint after table creation, also cannot add unique inside ADD COLUMN
       ActiveRecord::Base.connection.execute('ALTER TABLE mixins ADD COLUMN pos integer8 NOT NULL CHECK (pos > 0) DEFAULT 1')
