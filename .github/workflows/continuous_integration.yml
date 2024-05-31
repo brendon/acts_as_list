@@ -1,0 +1,62 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    name: Ruby ${{ matrix.ruby }}, DB ${{ matrix.db }}, Rails ${{ matrix.rails }}
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - '3.0'
+          - '3.1'
+          - '3.2'
+          - '3.3'
+        rails:
+          - '6.1'
+          - '7.0'
+          - '7.1'
+        db:
+          - mysql
+          - postgresql
+          - sqlite
+        exclude:
+          - rails: '7.0'
+            ruby: '3.1'
+          - rails: '7.0'
+            ruby: '3.2'
+          - rails: '7.0'
+            ruby: '3.3'
+    env:
+      DB: ${{ matrix.db }}
+      RAILS_VERSION: ${{ matrix.rails }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: Enable MySQL
+        if: ${{ matrix.db == 'mysql' }}
+        run: sudo systemctl start mysql.service
+      - name: Create MySQL Database
+        if: ${{ matrix.db == 'mysql' }}
+        run: mysql -u root -proot -e 'CREATE DATABASE runner;'
+      - name: Enable PostgreSQL
+        if: ${{ matrix.db == 'postgresql' }}
+        run: sudo systemctl start postgresql.service
+      - name: Create PostgreSQL User
+        if: ${{ matrix.db == 'postgresql' }}
+        run: sudo -u postgres -i createuser runner -s
+      - name: Create PostgreSQL Database
+        if: ${{ matrix.db == 'postgresql' }}
+        run: createdb runner
+      - name: Run the default task
+        run: bundle exec rake

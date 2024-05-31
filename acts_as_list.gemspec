@@ -27,8 +27,13 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map {|f| File.basename(f)}
   s.require_paths = ["lib"]
 
-
   # Dependencies (installed via "bundle install")
-  s.add_dependency "activerecord", ">= 4.2"
-  s.add_development_dependency "bundler", ">= 1.0.0"
+  s.add_dependency "activerecord", ">= 6.1"
+  s.add_dependency "activesupport", ">= 6.1"
+  s.add_development_dependency "minitest-hooks", "~> 1.5.1"
+  s.add_development_dependency "mocha", "~> 2.1.0"
+  s.add_development_dependency "timecop", "~> 0.9.8"
+  s.add_development_dependency "mysql2", "~> 0.5.6"
+  s.add_development_dependency "pg", "~> 1.5.5"
+  s.add_development_dependency "sqlite3", "~> 1.7.2"
 end

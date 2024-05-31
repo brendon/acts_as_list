@@ -1,0 +1,20 @@
+sqlite:
+  adapter: sqlite3
+  database: file::memory:?cache=shared
+
+mysql:
+  adapter: mysql2
+  database: runner
+  pool: 5
+  timeout: 5000
+  username: root
+  password: root
+
+postgresql:
+  adapter: postgresql
+  database: runner
+  pool: 5
+  timeout: 5000
+  username: runner
+  password:
+  min_messages: ERROR
