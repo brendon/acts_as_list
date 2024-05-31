@@ -7,7 +7,8 @@ module Shared
       @id = id
       @mixinError = mixinError
       (1..4).each do |counter|
-        node = @mixin.new parent_id: 5, @id => counter
+        node = @mixin.new parent_id: 5
+        node.first_id = counter if @id == :first_id
         node.second_id = counter if @id == :first_id
         node.pos = counter
         node.save!
@@ -337,7 +338,8 @@ module Shared
     private
 
     def create_record(opts)
-      attrs = { @id => opts[:id], parent_id: opts[:parent_id] }
+      attrs = { parent_id: opts[:parent_id] }
+      attrs[:first_id] = opts[:id] if @id == :first_id
       attrs[:second_id] = opts[:id] if @id == :first_id
       @mixin.create(attrs)
     end
