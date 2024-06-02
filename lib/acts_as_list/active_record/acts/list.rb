@@ -171,7 +171,7 @@ module ActiveRecord
           limit ||= acts_as_list_list.count
           acts_as_list_list.
             where("#{quoted_position_column_with_table_name} <= ?", current_position).
-            where("#{quoted_table_name}.#{self.class.primary_key} != ?", self.send(self.class.primary_key)).
+            where.not(primary_key_condition).
             reorder(acts_as_list_order_argument(:desc)).
             limit(limit)
         end
@@ -188,7 +188,7 @@ module ActiveRecord
           limit ||= acts_as_list_list.count
           acts_as_list_list.
             where("#{quoted_position_column_with_table_name} >= ?", current_position).
-            where("#{quoted_table_name}.#{self.class.primary_key} != ?", self.send(self.class.primary_key)).
+            where.not(primary_key_condition).
             reorder(acts_as_list_order_argument(:asc)).
             limit(limit)
         end
@@ -273,7 +273,7 @@ module ActiveRecord
           scope = acts_as_list_list
 
           if except
-            scope = scope.where("#{quoted_table_name}.#{self.class.primary_key} != ?", except.id)
+            scope = scope.where.not(primary_key_condition(except.id))
           end
 
           scope.in_list.reorder(acts_as_list_order_argument(:desc)).first
@@ -300,7 +300,7 @@ module ActiveRecord
           scope = acts_as_list_list
 
           if avoid_id
-            scope = scope.where("#{quoted_table_name}.#{self.class.primary_key} != ?", avoid_id)
+            scope = scope.where.not(primary_key_condition(avoid_id))
           end
 
           if sequential_updates?
@@ -341,7 +341,7 @@ module ActiveRecord
           scope = acts_as_list_list
 
           if avoid_id
-            scope = scope.where("#{quoted_table_name}.#{self.class.primary_key} != ?", avoid_id)
+            scope = scope.where.not(primary_key_condition(avoid_id))
           end
 
           if old_position < new_position
@@ -479,6 +479,11 @@ module ActiveRecord
           requirement = Gem::Requirement.new(version_requirement)
           version = Gem.loaded_specs['activerecord'].version
           requirement.satisfied_by?(version)
+        end
+
+        def primary_key_condition(id = nil)
+          primary_keys = Array.wrap(self.class.primary_key)
+          id ? primary_keys.zip(Array.wrap(id)).to_h : slice(*primary_keys)
         end
       end
 

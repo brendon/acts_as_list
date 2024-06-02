@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored CI testing framework and removed the Appraisals gem. Use RAILS_VERSION to switch the Rails version you are currently running the tests against.
 - We now only explicitly test against Rails 6.1+ and Ruby 3.0+.
 
+### Added
+- Add support for composite primary keys. [\#430](https://github.com/brendon/acts_as_list/pull/430) ([divagueame])
+
 ## v1.1.0 - 2023-02-01
 
 ### Fixed (Possibly Breaking)
