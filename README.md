@@ -1,7 +1,7 @@
 # Acts As List
 
 ## Build Status
-[![Build Status](https://travis-ci.org/brendon/acts_as_list.svg?branch=master)](https://travis-ci.org/brendon/acts_as_list)
+[![Continuous Integration](https://github.com/brendon/acts_as_list/actions/workflows/continuous_integration.yml/badge.svg)](https://github.com/brendon/acts_as_list/actions/workflows/continuous_integration.yml)
 [![Gem Version](https://badge.fury.io/rb/acts_as_list.svg)](https://badge.fury.io/rb/acts_as_list)
 
 ## ANNOUNCING: Positioning, the gem
