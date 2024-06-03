@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
     s.metadata['changelog_uri']   = 'https://github.com/brendon/acts_as_list/blob/master/CHANGELOG.md'
     s.metadata['source_code_uri'] = 'https://github.com/brendon/acts_as_list'
     s.metadata['bug_tracker_uri'] = 'https://github.com/brendon/acts_as_list/issues'
+    s.metadata['rubygems_mfa_required'] = 'true'
   end
 
   # Load Paths...
