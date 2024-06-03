@@ -265,7 +265,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 **Closed issues:**
 
 - DEPRECATION WARNING on rails 5.0 as of acts\_as\_list 0.9 [\#251](https://github.com/brendon/acts_as_list/issues/251)
-- highter\_items returns items with the same position value [\#247](https://github.com/brendon/acts_as_list/issues/247)
+- higher\_items returns items with the same position value [\#247](https://github.com/brendon/acts_as_list/issues/247)
 - Broken with unique constraint on position [\#245](https://github.com/brendon/acts_as_list/issues/245)
 
 **Merged pull requests:**
@@ -493,7 +493,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix sanitize\_sql\_hash\_for\_conditions deprecation warning in Rails 4.2 [\#140](https://github.com/brendon/acts_as_list/pull/140) ([eagletmt](https://github.com/eagletmt))
 - Simpler method to find the subclass name [\#139](https://github.com/brendon/acts_as_list/pull/139) ([brendon](https://github.com/brendon))
 - Rails4 enum column support [\#130](https://github.com/brendon/acts_as_list/pull/130) ([arunagw](https://github.com/arunagw))
-- use eval for determing the self.class.name useful when this is used in an abstract class [\#123](https://github.com/brendon/acts_as_list/pull/123) ([flarik](https://github.com/flarik))
+- use eval for determining the self.class.name useful when this is used in an abstract class [\#123](https://github.com/brendon/acts_as_list/pull/123) ([flarik](https://github.com/flarik))
 
 ## [0.5.0](https://github.com/brendon/acts_as_list/tree/0.5.0) (2014-10-31)
 [Full Changelog](https://github.com/brendon/acts_as_list/compare/0.4.0...0.5.0)
@@ -633,7 +633,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - acts\_as\_list :scope =\> "doesnt\_seem\_to\_work" [\#12](https://github.com/brendon/acts_as_list/issues/12)
 - don't work perfectly with default\_scope [\#11](https://github.com/brendon/acts_as_list/issues/11)
 - MySQL: Position column MUST NOT have default [\#10](https://github.com/brendon/acts_as_list/issues/10)
-- insert\_at fails on postgresql w/ non-null constraint on postion\_column  [\#8](https://github.com/brendon/acts_as_list/issues/8)
+- insert\_at fails on postgresql w/ non-null constraint on position\_column  [\#8](https://github.com/brendon/acts_as_list/issues/8)
 
 **Merged pull requests:**
 
@@ -642,7 +642,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Massive test refactorings. [\#24](https://github.com/brendon/acts_as_list/pull/24) ([splattael](https://github.com/splattael))
 - Silent migrations to reduce test noise. [\#22](https://github.com/brendon/acts_as_list/pull/22) ([splattael](https://github.com/splattael))
 - Should decrement lower items after the item has been destroyed to avoid unique key conflicts. [\#18](https://github.com/brendon/acts_as_list/pull/18) ([aepstein](https://github.com/aepstein))
-- Fix spelling and grammer [\#15](https://github.com/brendon/acts_as_list/pull/15) ([tmiller](https://github.com/tmiller))
+- Fix spelling and grammar [\#15](https://github.com/brendon/acts_as_list/pull/15) ([tmiller](https://github.com/tmiller))
 - store\_at\_0 should yank item from the list then decrement items to avoid r [\#14](https://github.com/brendon/acts_as_list/pull/14) ([aepstein](https://github.com/aepstein))
 - Support default\_scope ordering by calling .unscoped [\#13](https://github.com/brendon/acts_as_list/pull/13) ([tanordheim](https://github.com/tanordheim))
 
