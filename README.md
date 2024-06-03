@@ -5,7 +5,7 @@
 [![Gem Version](https://badge.fury.io/rb/acts_as_list.svg)](https://badge.fury.io/rb/acts_as_list)
 
 ## ANNOUNCING: Positioning, the gem
-As maintainer of both Acts As List and the Ranked Model gems, I've become intimately aquainted with the strengths and weaknesses of each. I ended up writing a small scale Rails Concern for positioning database rows for a recent project and it worked really well so I've decided to release it as a gem: [Positioning](https://github.com/brendon/positioning)
+As maintainer of both Acts As List and the Ranked Model gems, I've become intimately acquainted with the strengths and weaknesses of each. I ended up writing a small scale Rails Concern for positioning database rows for a recent project and it worked really well so I've decided to release it as a gem: [Positioning](https://github.com/brendon/positioning)
 
 Positioning works similarly to Acts As List in that it maintains a sequential list of integer values as positions. It differs in that it encourages a unique constraints on the position column and supports multiple lists per database table. It borrows Ranked Model's concept of relative positioning. I encourage you to check it out and give it a whirl on your project!
 
@@ -290,7 +290,7 @@ All versions `0.1.5` onwards require Rails 3.0.x and higher.
 
 We often hear complaints that `position` values are repeated, incorrect etc. For example, #254. To ensure data integrity, you should rely on your database. There are two things you can do:
 
-1. Use constraints.  If you model `Item` that `belongs_to` an `Order`, and it has a `position` column, then add a unique constraint on `items` with `[:order_id, :position]`.  Think of it as a list invariant. What are the properties of your list that don't change no matter how many items you have in it?  One such propery is that each item has a distinct position. Another _could be_ that position is always greater than 0. It is strongly recommended that you rely on your database to enforce these invariants or constraints. Here are the docs for [PostgreSQL](https://www.postgresql.org/docs/9.5/static/ddl-constraints.html) and [MySQL](https://dev.mysql.com/doc/refman/8.0/en/alter-table.html).
+1. Use constraints.  If you model `Item` that `belongs_to` an `Order`, and it has a `position` column, then add a unique constraint on `items` with `[:order_id, :position]`.  Think of it as a list invariant. What are the properties of your list that don't change no matter how many items you have in it?  One such property is that each item has a distinct position. Another _could be_ that position is always greater than 0. It is strongly recommended that you rely on your database to enforce these invariants or constraints. Here are the docs for [PostgreSQL](https://www.postgresql.org/docs/9.5/static/ddl-constraints.html) and [MySQL](https://dev.mysql.com/doc/refman/8.0/en/alter-table.html).
 2. Use mutexes or row level locks. At its heart the duplicate problem is that of handling concurrency. Adding a contention resolution mechanism like locks will solve it to some extent.  But it is not a solution or replacement for constraints.  Locks are also prone to deadlocks.
 
 As a library, `acts_as_list` may not always have all the context needed to apply these tools. They are much better suited at the application level.
