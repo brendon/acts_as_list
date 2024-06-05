@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## v1.2.1 - 2024-06-06
+
+### Fixed
+- We no longer delegate the class `connection` method to the instance. [\#436](https://github.com/brendon/acts_as_list/pull/436) ([davidcelis])
+
 ## v1.2.0 - 2024-06-03
 
 ### Added
