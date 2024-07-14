@@ -23,8 +23,7 @@ Gem::Specification.new do |s|
   end
 
   # Load Paths...
-  s.files         = `git ls-files`.split("\n")
-  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
+  s.files         = `git ls-files -z`.split("\x0").reject { |f| f.start_with?(*%w[test/ Gemfile CHANGELOG]) }
   s.executables   = `git ls-files -- bin/*`.split("\n").map {|f| File.basename(f)}
   s.require_paths = ["lib"]
 
