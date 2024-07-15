@@ -23,8 +23,13 @@ Gem::Specification.new do |s|
   end
 
   # Load Paths...
-  s.files         = `git ls-files`.split("\n")
-  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
+  gemspec = File.basename(__FILE__)
+  s.files = IO.popen(%w[git ls-files -z], chdir: __dir__, err: IO::NULL) do |ls|
+    ls.readlines("\x0", chomp: true).reject do |f|
+      (f == gemspec) ||
+        f.start_with?(*%w[bin/ test/ spec/ features/ .git .github appveyor Gemfile])
+    end
+  end
   s.executables   = `git ls-files -- bin/*`.split("\n").map {|f| File.basename(f)}
   s.require_paths = ["lib"]
 
