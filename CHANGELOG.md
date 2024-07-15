@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## v1.2.2 - 2024-07-16
+
+### Fixed
+- Updated .gemspec to exclude unnecessary files from the gem package. [\#437](https://github.com/brendon/acts_as_list/pull/437) ([f440])
+
 ## v1.2.1 - 2024-06-06
 
 ### Fixed
