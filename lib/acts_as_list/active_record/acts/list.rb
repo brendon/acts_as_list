@@ -481,9 +481,8 @@ module ActiveRecord
           requirement.satisfied_by?(version)
         end
 
-        def primary_key_condition(id = nil)
-          primary_keys = Array.wrap(self.class.primary_key)
-          id ? primary_keys.zip(Array.wrap(id)).to_h : slice(*primary_keys)
+        def primary_key_condition(id = self.id)
+          { self.class.primary_key => [id] }
         end
       end
 
