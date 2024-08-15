@@ -149,48 +149,48 @@ module ActiveRecord
           set_list_position(current_position - 1)
         end
 
-        def first?
+        def first?(conditions = {})
           return false unless in_list?
-          !higher_items(1).exists?
+          !higher_items(1, conditions).exists?
         end
 
-        def last?
+        def last?(conditions = {})
           return false unless in_list?
-          !lower_items(1).exists?
+          !lower_items(1, conditions).exists?
         end
 
         # Return the next higher item in the list.
-        def higher_item
+        def higher_item(conditions = {})
           return nil unless in_list?
-          higher_items(1).first
+          higher_items(1, conditions).first
         end
 
         # Return the next n higher items in the list
         # selects all higher items by default
-        def higher_items(limit=nil)
+        def higher_items(limit=nil, conditions = {})
           limit ||= acts_as_list_list.count
-          acts_as_list_list.
-            where("#{quoted_position_column_with_table_name} <= ?", current_position).
-            where.not(primary_key_condition).
-            reorder(acts_as_list_order_argument(:desc)).
-            limit(limit)
+          query = acts_as_list_list.
+                    where("#{quoted_position_column_with_table_name} <= ?", current_position).
+                    where.not(primary_key_condition)
+          query = query.where(conditions) if conditions.present?
+          query.reorder(acts_as_list_order_argument(:desc)).limit(limit)
         end
 
         # Return the next lower item in the list.
-        def lower_item
+        def lower_item(conditions = {})
           return nil unless in_list?
-          lower_items(1).first
+          lower_items(1, conditions).first
         end
 
         # Return the next n lower items in the list
         # selects all lower items by default
-        def lower_items(limit=nil)
+        def lower_items(limit=nil, conditions = {})
           limit ||= acts_as_list_list.count
-          acts_as_list_list.
-            where("#{quoted_position_column_with_table_name} >= ?", current_position).
-            where.not(primary_key_condition).
-            reorder(acts_as_list_order_argument(:asc)).
-            limit(limit)
+          query = acts_as_list_list.
+                    where("#{quoted_position_column_with_table_name} >= ?", current_position).
+                    where.not(primary_key_condition)
+          query = query.where(conditions) if conditions.present?
+          query.reorder(acts_as_list_order_argument(:asc)).limit(limit)
         end
 
         # Test if this record is in a list

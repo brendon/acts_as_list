@@ -108,6 +108,16 @@ module Shared
       assert_equal [li2, li1], li3.higher_items
     end
 
+    def test_next_prev_with_state_condition
+      ListMixin.update_all(state: 0)
+      ListMixin.where(id: 2).update_all(state: 1)
+      assert_equal [1, 2, 3, 4], ListMixin.where(parent_id: 5000).order('pos').map(&:id)
+      assert_equal ListMixin.where(id: 2).first, ListMixin.where(id: 1).first.lower_item
+      assert_equal ListMixin.where(id: 3).first, ListMixin.where(id: 1).first.lower_item(state: 0)
+      assert_equal ListMixin.where(id: 2).first, ListMixin.where(id: 3).first.higher_item
+      assert_equal ListMixin.where(id: 1).first, ListMixin.where(id: 3).first.higher_item(state: 0)
+    end
+
     def test_injection
       item = ListMixin.new("parent_id"=>1)
       assert_equal({ parent_id: 1 }, item.scope_condition)

@@ -76,15 +76,40 @@ In `acts_as_list`, "higher" means further up the list (a lower `position`), and 
 - `list_item.set_list_position(3)`
 
 ### Methods That Return Attributes of the Item's List Position
-- `list_item.first?`
-- `list_item.last?`
+- `list_item.first?` or `list_item.first?(conditions)`
+- `list_item.last?` or `list_item.last?(conditions)`
 - `list_item.in_list?`
 - `list_item.not_in_list?`
 - `list_item.default_position?`
-- `list_item.higher_item`
-- `list_item.higher_items` will return all the items above `list_item` in the list (ordered by the position, ascending)
-- `list_item.lower_item`
-- `list_item.lower_items` will return all the items below `list_item` in the list (ordered by the position, ascending)
+- `list_item.higher_item` or `list_item.higher_item(conditions)`
+- `list_item.higher_items` or `list_item.higher_items(conditions)` will return all the items above `list_item` in the list (ordered by the position, ascending)
+- `list_item.lower_item` or `list_item.lower_item(conditions)`
+- `list_item.lower_items` or `list_item.lower_items(conditions)` will return all the items below `list_item` in the list (ordered by the position, ascending)
+
+Example: Setting the position for all blogs, get the next/prev published blog
+
+```ruby
+class Blog < ActiveRecord::Base
+  acts_as_list
+  scope :published, -> { where(published: true) }
+end
+
+class BlogsController < ApplicationController
+  def show
+    @blog = Blog.published.find(params[:id])
+    @next_blog = @blog.lower_item(published: true) # next published blog
+    @prev_blog = @blog.higher_item(published: true) # previous published blog
+  end
+end
+
+class Admin::BlogsController < ApplicationController
+  def show
+    @blog = Blog.find(params[:id])
+    @next_blog = @blog.lower_item # next blog
+    @prev_blog = @blog.higher_item # previous blog
+  end
+end
+```
 
 ## Adding `acts_as_list` To An Existing Model
 As it stands `acts_as_list` requires position values to be set on the model before the instance methods above will work. Adding something like the below to your migration will set the default position. Change the parameters to order if you want a different initial ordering.
