@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative './with_connection'
+
 module ActiveRecord
   module Acts #:nodoc:
     module List #:nodoc:
@@ -459,7 +461,9 @@ module ActiveRecord
 
         # When using raw column name it must be quoted otherwise it can raise syntax errors with SQL keywords (e.g. order)
         def quoted_position_column
-          @_quoted_position_column ||= self.class.connection.quote_column_name(position_column)
+          @_quoted_position_column ||= ActiveRecord::Acts::List::WithConnection.new(self.class).call do |connection|
+            connection.quote_column_name(position_column)
+          end
         end
 
         # Used in order clauses

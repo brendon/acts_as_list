@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative './with_connection'
+
 module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
   def self.call(caller_class, position_column, touch_on_update)
     define_class_methods(caller_class, position_column, touch_on_update)
@@ -15,7 +17,9 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
   def self.define_class_methods(caller_class, position_column, touch_on_update)
     caller_class.class_eval do
       define_singleton_method :quoted_position_column do
-        @_quoted_position_column ||= connection.quote_column_name(position_column)
+        @_quoted_position_column ||= ActiveRecord::Acts::List::WithConnection.new(self).call do |connection|
+          connection.quote_column_name(position_column)
+        end
       end
 
       define_singleton_method :quoted_position_column_with_table_name do
@@ -72,18 +76,22 @@ module ActiveRecord::Acts::List::PositionColumnMethodDefiner #:nodoc:
         cached_quoted_now = quoted_current_time_from_proper_timezone
 
         timestamp_attributes_for_update_in_model.map do |attr|
-          ", #{self.class.connection.quote_column_name(attr)} = #{cached_quoted_now}"
+          ActiveRecord::Acts::List::WithConnection.new(self.class).call do |connection|
+            ", #{connection.quote_column_name(attr)} = #{cached_quoted_now}"
+          end
         end.join
       end
 
       private
 
       def quoted_current_time_from_proper_timezone
-        self.class.connection.quote(
-          self.class.connection.quoted_date(
-            current_time_from_proper_timezone
+        ActiveRecord::Acts::List::WithConnection.new(self.class).call do |connection|
+          connection.quote(
+            connection.quoted_date(
+              current_time_from_proper_timezone
+            )
           )
-        )
+        end
       end
     end
   end
