@@ -93,7 +93,7 @@ As it stands `acts_as_list` requires position values to be set on the model befo
 class AddPositionToTodoItem < ActiveRecord::Migration
   def change
     add_column :todo_items, :position, :integer
-    TodoItem.order(:updated_at).each.with_index(1) do |todo_item, index|
+    TodoItem.order(:updated_at).find_each.with_index(1) do |todo_item, index|
       todo_item.update_column :position, index
     end
   end
@@ -103,8 +103,8 @@ end
 If you are using the scope option things can get a bit more complicated. Let's say you have `acts_as_list scope: :todo_list`, you might instead need something like this:
 
 ```ruby
-TodoList.all.each do |todo_list|
-  todo_list.todo_items.order(:updated_at).each.with_index(1) do |todo_item, index|
+TodoList.all.find_each do |todo_list|
+  todo_list.todo_items.order(:updated_at).find_each.with_index(1) do |todo_item, index|
     todo_item.update_column :position, index
   end
 end
