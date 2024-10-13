@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## v1.2.3 - 2024-10-14
+
+### Changed
+- Use `.with_connection do |connection|` where possible instead of `.connection` [\#441](https://github.com/brendon/acts_as_list/pull/441) ([flood4life])
+
 ## v1.2.2 - 2024-07-16
 
 ### Fixed
