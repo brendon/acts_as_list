@@ -228,7 +228,12 @@ module ActiveRecord
         end
 
         def acts_as_list_list
-          acts_as_list_class.default_scoped.unscope(:select, :where).where(scope_condition)
+          # Include soft-deleted records if paranoia/discard is used
+          if acts_as_list_class.respond_to?(:with_deleted)
+            acts_as_list_class.with_deleted.where(scope_condition)
+          else
+            acts_as_list_class.unscoped.where(scope_condition)
+          end
         end
 
         def avoid_collision
@@ -318,13 +323,30 @@ module ActiveRecord
         end
 
         # This has the effect of moving all the lower items up one.
-        def decrement_positions_on_lower_items(position=current_position)
+        def decrement_positions_on_lower_items(position = current_position)
           return unless in_list?
 
+          records = acts_as_list_list
+                      .where("#{quoted_position_column_with_table_name} > ?", position)
+                      .reorder(acts_as_list_order_argument(:asc))
+                      .to_a
+
+          records.reject! do |record|
+            # If another soft-deleted record already has this target display_order,
+            # skip this one to avoid duplication
+            acts_as_list_list.where("#{quoted_position_column_with_table_name} = ?", position)
+                             .where.not(id: record.id)
+                             .exists?
+          end
+
           if sequential_updates?
-            acts_as_list_list.where("#{quoted_position_column_with_table_name} > ?", position).reorder(acts_as_list_order_argument(:asc)).decrement_sequentially
+            records.each_with_index do |item, index|
+              item.update_column(position_column, position + index)
+            end
           else
-            acts_as_list_list.where("#{quoted_position_column_with_table_name} > ?", position).decrement_all
+            records.each do |item|
+              item.decrement!(position_column)
+            end
           end
         end
 
@@ -372,7 +394,6 @@ module ActiveRecord
             ).where(
               "#{quoted_position_column_with_table_name} < ?", old_position
             )
-
             if sequential_updates?
               items.reorder(acts_as_list_order_argument(:desc)).increment_sequentially
             else
