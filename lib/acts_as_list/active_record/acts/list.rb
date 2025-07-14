@@ -27,6 +27,11 @@ module ActiveRecord
           configuration = { column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom, touch_on_update: true }
           configuration.update(options) if options.is_a?(Hash)
 
+          # * Expose configuration via class-level method
+          define_singleton_method(:acts_as_list_options) do
+            configuration.dup.freeze
+          end
+
           caller_class = self
 
           ActiveRecord::Acts::List::PositionColumnMethodDefiner.call(caller_class, configuration[:column], configuration[:touch_on_update])
