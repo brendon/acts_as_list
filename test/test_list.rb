@@ -113,7 +113,7 @@ end
 
 class EnumArrayScopeListMixin < Mixin
   STATE_VALUES = %w(active archived)
-  enum state: STATE_VALUES
+  enum :state, STATE_VALUES
 
   acts_as_list column: "pos", scope: [:parent_id, :state]
 end
