@@ -11,6 +11,7 @@ rescue Bundler::BundlerError => e
   $stderr.puts "Run `bundle install` to install missing gems"
   exit e.status_code
 end
+require 'logger'
 require "active_record"
 require "minitest/autorun"
 require "mocha/minitest"
@@ -45,7 +46,6 @@ end
 
 require "shared"
 
-# require 'logger'
 # ActiveRecord::Base.logger = Logger.new(STDOUT)
 
 def assert_equal_or_nil(a, b)
