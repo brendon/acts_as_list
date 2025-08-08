@@ -113,7 +113,11 @@ end
 
 class EnumArrayScopeListMixin < Mixin
   STATE_VALUES = %w(active archived)
-  enum state: STATE_VALUES
+  if ActiveRecord::VERSION::MAJOR >= 7
+    enum :state, STATE_VALUES
+  else
+    enum state: STATE_VALUES
+  end
 
   acts_as_list column: "pos", scope: [:parent_id, :state]
 end
