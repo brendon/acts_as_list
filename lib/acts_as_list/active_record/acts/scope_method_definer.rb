@@ -89,7 +89,7 @@ module ActiveRecord::Acts::List::ScopeMethodDefiner #:nodoc:
       foreign_key = caller_class.reflections[name.to_s].foreign_key
       # Handle composite foreign keys (Arrays) by returning as-is
       # Single foreign keys should be converted to symbols
-      foreign_key.is_a?(Array) ? foreign_key : foreign_key.to_sym
+      foreign_key.is_a?(Array) ? foreign_key.map(&:to_sym) : foreign_key.to_sym
     else
       ActiveSupport::Inflector.foreign_key(name).to_sym
     end
