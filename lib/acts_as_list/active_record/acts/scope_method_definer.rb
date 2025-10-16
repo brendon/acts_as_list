@@ -21,7 +21,16 @@ module ActiveRecord::Acts::List::ScopeMethodDefiner #:nodoc:
         end
 
         define_method :destroyed_via_scope? do
-          scope == (destroyed_by_association && destroyed_by_association.foreign_key.to_sym)
+          return false unless destroyed_by_association
+
+          foreign_key = destroyed_by_association.foreign_key
+          if foreign_key.is_a?(Array)
+            # Composite foreign key - check if scope is one of the keys
+            foreign_key.map(&:to_sym).include?(scope)
+          else
+            # Single foreign key
+            scope == foreign_key.to_sym
+          end
         end
       elsif scope.is_a?(Array)
         define_method :scope_condition do
@@ -44,7 +53,16 @@ module ActiveRecord::Acts::List::ScopeMethodDefiner #:nodoc:
         end
 
         define_method :destroyed_via_scope? do
-          scope_condition.keys.include? (destroyed_by_association && destroyed_by_association.foreign_key.to_sym)
+          return false unless destroyed_by_association
+
+          foreign_key = destroyed_by_association.foreign_key
+          if foreign_key.is_a?(Array)
+            # Composite foreign key - check if any keys overlap with scope
+            (scope_condition.keys & foreign_key.map(&:to_sym)).any?
+          else
+            # Single foreign key
+            scope_condition.keys.include?(foreign_key.to_sym)
+          end
         end
       else
         define_method :scope_condition do
@@ -68,7 +86,10 @@ module ActiveRecord::Acts::List::ScopeMethodDefiner #:nodoc:
     return name if name.to_s =~ /_id$/
 
     if caller_class.reflections.key?(name.to_s)
-      caller_class.reflections[name.to_s].foreign_key.to_sym
+      foreign_key = caller_class.reflections[name.to_s].foreign_key
+      # Handle composite foreign keys (Arrays) by returning as-is
+      # Single foreign keys should be converted to symbols
+      foreign_key.is_a?(Array) ? foreign_key : foreign_key.to_sym
     else
       ActiveSupport::Inflector.foreign_key(name).to_sym
     end
