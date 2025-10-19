@@ -12,7 +12,7 @@ gem "minitest", "~> 5.0"
 gem "minitest-hooks", "~> 1.5.1"
 gem "mocha", "~> 2.1.0"
 gem "timecop", "~> 0.9.8"
-gem "mysql2", "~> 0.5.6"
+gem "mysql2", "0.5.6"
 gem "pg", "~> 1.5.5"
 
 rails_version = Gem::Version.new(ENV["RAILS_VERSION"])
