@@ -34,13 +34,13 @@ ActiveRecord::Schema.verbose = false
 
 def teardown_db
   if ActiveRecord::VERSION::MAJOR >= 5
-    tables = ActiveRecord::Base.connection.data_sources
+    tables = ActiveRecord::Base.lease_connection.data_sources
   else
-    tables = ActiveRecord::Base.connection.tables
+    tables = ActiveRecord::Base.lease_connection.tables
   end
 
   tables.each do |table|
-    ActiveRecord::Base.connection.drop_table(table)
+    ActiveRecord::Base.lease_connection.drop_table(table)
   end
 end
 

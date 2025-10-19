@@ -7,12 +7,12 @@ end
 
 class DefaultScopeWithSelectTest < Minitest::Test
   def setup
-    ActiveRecord::Base.connection.create_table :animals do |t|
+    ActiveRecord::Base.lease_connection.create_table :animals do |t|
       t.column :position, :integer
       t.column :name, :string
     end
 
-    ActiveRecord::Base.connection.schema_cache.clear!
+    ActiveRecord::Base.lease_connection.schema_cache.clear!
     Animal.reset_column_information
     super
   end

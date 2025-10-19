@@ -10,12 +10,12 @@ class SlaveItem < MasterItem; end
 
 class NoUpdateForSubclassesTestCase < Minitest::Test
   def setup
-    ActiveRecord::Base.connection.create_table :master_items do |t|
+    ActiveRecord::Base.lease_connection.create_table :master_items do |t|
       t.column :position, :integer
       t.column :type, :string
     end
 
-    ActiveRecord::Base.connection.schema_cache.clear!
+    ActiveRecord::Base.lease_connection.schema_cache.clear!
     [MasterItem, SlaveItem].each(&:reset_column_information)
     super
   end

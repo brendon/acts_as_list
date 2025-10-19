@@ -20,21 +20,21 @@ end
 
 class NoUpdateForCollectionClassesTestCase < Minitest::Test
   def setup
-    ActiveRecord::Base.connection.create_table :todo_lists do |t|
+    ActiveRecord::Base.lease_connection.create_table :todo_lists do |t|
       t.column :position, :integer
     end
 
-    ActiveRecord::Base.connection.create_table :todo_items do |t|
+    ActiveRecord::Base.lease_connection.create_table :todo_items do |t|
       t.column :position, :integer
       t.column :todo_list_id, :integer
     end
 
-    ActiveRecord::Base.connection.create_table :todo_item_attachments do |t|
+    ActiveRecord::Base.lease_connection.create_table :todo_item_attachments do |t|
       t.column :position, :integer
       t.column :todo_item_id, :integer
     end
 
-    ActiveRecord::Base.connection.schema_cache.clear!
+    ActiveRecord::Base.lease_connection.schema_cache.clear!
     [TodoList, TodoItem, TodoItemAttachment].each(&:reset_column_information)
     super
   end
