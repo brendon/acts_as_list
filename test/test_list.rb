@@ -12,7 +12,7 @@ def setup_db(position_options = {})
   positive = position_options.delete(:positive)
 
   # AR caches columns options like defaults etc. Clear them!
-  ActiveRecord::Base.lease_connection.create_table :mixins do |t|
+  ActiveRecord::Base.connection.create_table :mixins do |t|
     t.column :pos, :integer, **position_options unless positive && sqlite
     t.column :active, :boolean, default: true
     t.column :parent_id, :integer
@@ -23,35 +23,35 @@ def setup_db(position_options = {})
   end
 
   if unique && !(sqlite && positive)
-    ActiveRecord::Base.lease_connection.add_index :mixins, :pos, unique: true
+    ActiveRecord::Base.connection.add_index :mixins, :pos, unique: true
   end
 
   if positive
     if sqlite
       # SQLite cannot add constraint after table creation, also cannot add unique inside ADD COLUMN
-      ActiveRecord::Base.lease_connection.execute('ALTER TABLE mixins ADD COLUMN pos integer8 NOT NULL CHECK (pos > 0) DEFAULT 1')
-      ActiveRecord::Base.lease_connection.execute('CREATE UNIQUE INDEX index_mixins_on_pos ON mixins(pos)')
+      ActiveRecord::Base.connection.execute('ALTER TABLE mixins ADD COLUMN pos integer8 NOT NULL CHECK (pos > 0) DEFAULT 1')
+      ActiveRecord::Base.connection.execute('CREATE UNIQUE INDEX index_mixins_on_pos ON mixins(pos)')
     else
-      ActiveRecord::Base.lease_connection.execute('ALTER TABLE mixins ADD CONSTRAINT pos_check CHECK (pos > 0)')
+      ActiveRecord::Base.connection.execute('ALTER TABLE mixins ADD CONSTRAINT pos_check CHECK (pos > 0)')
     end
   end
 
   # This table is used to test table names and column names quoting
-  ActiveRecord::Base.lease_connection.create_table 'table-name' do |t|
+  ActiveRecord::Base.connection.create_table 'table-name' do |t|
     t.column :order, :integer
   end
 
   # This table is used to test table names with different primary_key columns
-  ActiveRecord::Base.lease_connection.create_table 'altid-table', primary_key: 'altid' do |t|
+  ActiveRecord::Base.connection.create_table 'altid-table', primary_key: 'altid' do |t|
     t.column :pos, :integer
     t.column :created_at, :datetime
     t.column :updated_at, :datetime
   end
 
-  ActiveRecord::Base.lease_connection.add_index 'altid-table', :pos, unique: true
+  ActiveRecord::Base.connection.add_index 'altid-table', :pos, unique: true
 
   # This table is used to test table names with a composite primary_key
-  ActiveRecord::Base.lease_connection.create_table 'composite-primary-key-table', primary_key: [:first_id, :second_id] do |t|
+  ActiveRecord::Base.connection.create_table 'composite-primary-key-table', primary_key: [:first_id, :second_id] do |t|
     t.integer :first_id, null: false
     t.integer :second_id, null: false
     t.column :parent_id, :integer
@@ -66,7 +66,7 @@ def setup_db(position_options = {})
     ArrayScopeListMixin, ZeroBasedMixin, DefaultScopedMixin, EnumArrayScopeListMixin,
     DefaultScopedWhereMixin, TopAdditionMixin, NoAdditionMixin, QuotedList, TouchDisabledMixin, CompositePrimaryKeyList, CompositePrimaryKeyListScoped ]
 
-  ActiveRecord::Base.lease_connection.schema_cache.clear!
+  ActiveRecord::Base.connection.schema_cache.clear!
   mixins.each do |klass|
     klass.reset_column_information
   end
@@ -214,7 +214,7 @@ end
 
 class CompositePrimaryKeyList < ActiveRecord::Base
   self.table_name = "composite-primary-key-table"
-  self.primary_key = [:first_id, :second_id]
+  self.primary_key = [:first_id, :second_id] 
 
   acts_as_list column: "pos"
 end

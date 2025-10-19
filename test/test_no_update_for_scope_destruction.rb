@@ -19,21 +19,21 @@ end
 
 class NoUpdateForScopeDestructionTestCase < Minitest::Test
   def setup
-    ActiveRecord::Base.lease_connection.create_table :destruction_todo_lists do |t|
+    ActiveRecord::Base.connection.create_table :destruction_todo_lists do |t|
     end
 
-    ActiveRecord::Base.lease_connection.create_table :destruction_todo_items do |t|
+    ActiveRecord::Base.connection.create_table :destruction_todo_items do |t|
       t.column :position, :integer
       t.column :destruction_todo_list_id, :integer
     end
 
-    ActiveRecord::Base.lease_connection.create_table :destruction_tada_items do |t|
+    ActiveRecord::Base.connection.create_table :destruction_tada_items do |t|
       t.column :position, :integer
       t.column :destruction_todo_list_id, :integer
       t.column :enabled, :boolean
     end
 
-    ActiveRecord::Base.lease_connection.schema_cache.clear!
+    ActiveRecord::Base.connection.schema_cache.clear!
     [DestructionTodoList, DestructionTodoItem, DestructionTadaItem].each(&:reset_column_information)
     super
   end

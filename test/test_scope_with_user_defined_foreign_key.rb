@@ -11,15 +11,15 @@ end
 
 class ScopeWithUserDefinedForeignKeyTest < Minitest::Test
   def setup
-    ActiveRecord::Base.lease_connection.create_table :checklists do |t|
+    ActiveRecord::Base.connection.create_table :checklists do |t|
     end
 
-    ActiveRecord::Base.lease_connection.create_table :checklist_items do |t|
+    ActiveRecord::Base.connection.create_table :checklist_items do |t|
       t.column :list_id, :integer
       t.column :position, :integer
     end
 
-    ActiveRecord::Base.lease_connection.schema_cache.clear!
+    ActiveRecord::Base.connection.schema_cache.clear!
     [Checklist, ChecklistItem].each(&:reset_column_information)
     super
   end

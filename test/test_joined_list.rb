@@ -18,18 +18,18 @@ end
 
 class JoinedTestCase < Minitest::Test
   def setup
-    ActiveRecord::Base.lease_connection.create_table :sections do |t|
+    ActiveRecord::Base.connection.create_table :sections do |t|
       t.column :position, :integer
       t.column :visible, :boolean, default: true
     end
 
-    ActiveRecord::Base.lease_connection.create_table :items do |t|
+    ActiveRecord::Base.connection.create_table :items do |t|
       t.column :position, :integer
       t.column :section_id, :integer
       t.column :visible, :boolean, default: true
     end
 
-    ActiveRecord::Base.lease_connection.schema_cache.clear!
+    ActiveRecord::Base.connection.schema_cache.clear!
     [Section, Item].each(&:reset_column_information)
     super
   end
