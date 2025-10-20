@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## v1.2.5 - 2025-10-21
+
+- Fix crash when deleting an association with composite primary keys [\#450](https://github.com/brendon/acts_as_list/pull/450) ([smathieu])
+
 ## v1.2.4 - 2024-11-20
 
 ### Added
