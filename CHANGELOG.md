@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## v1.2.6 - 2025-10-21
+
 - Expose configuration via class-level method (acts_as_list_options) [\#447](https://github.com/brendon/acts_as_list/pull/447) ([anthony0030])
 
 ## v1.2.5 - 2025-10-21
