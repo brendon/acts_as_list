@@ -298,6 +298,7 @@ A create, update, destroy or move then starts with locking reads (`SELECT id FRO
 - `destroy` locks the item and the items below it. `insert_at`, `move_to_top` and `move_to_bottom` lock the item and the items between its old and its new position. `move_higher` and `move_lower` lock the item and its neighbour.
 - A save locks only when it creates the item, or changes its position or its scope. A new item at the bottom of the list moves no other item, so it locks nothing. A change of scope locks the items below the item in the old list, and the items that make room for it in the new list.
 - The locks are taken in a prepended `before_validation` and `before_save` (a save), in a prepended `before_destroy` (a destroy), and at the start of the move methods. That puts them before the reads of your validations and callbacks too.
+- A callback that you prepend yourself (`prepend: true`) below the `acts_as_list` line runs before these locks. When it reads, declare `acts_as_list` below it.
 - The locking reads select columns and load no record, so a model's `after_find` or `after_initialize` callback cannot read before them.
 - It costs one or two more queries for each of these changes.
 - SQLite has no row locks. ActiveRecord sends no `FOR UPDATE` there, so the option only adds reads.
