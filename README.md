@@ -175,7 +175,7 @@ default: `true`. Use `touch_on_update: false` if you don't want to update the ti
 Specifies whether insert_at should update objects positions during shuffling one by one to respect position column unique not null constraint. Defaults to true if position column has unique index, otherwise false. If constraint is `deferrable initially deferred` (PostgreSQL), overriding it with false will speed up insert_at.
 
 - `lock_first`
-default: `false`. Use `lock_first: true` to lock the rows that `acts_as_list` is going to update before it reads anything. See [Locking before reading](#locking-before-reading).
+default: `false`. Use `lock_first: true` to lock the rows of the item's list before `acts_as_list` reads anything. See [Locking before reading](#locking-before-reading).
 
 ## Disabling temporarily
 
@@ -284,7 +284,7 @@ end
 
 ## Locking before reading
 
-`acts_as_list` reads (the item, the bottom of the list), and then updates the item and the items that change position (`UPDATE ... SET position = position + 1 WHERE ...`). The model's validations also read before that. With `lock_first: true` the gem locks those rows before the first of these reads:
+`acts_as_list` reads (the item, the bottom of the list), and then updates the item and the items that change position (`UPDATE ... SET position = position + 1 WHERE ...`). The model's validations also read before that. With `lock_first: true` the gem locks the rows of the item's list before the first of these reads:
 
 ```ruby
 class TodoItem < ActiveRecord::Base
@@ -293,16 +293,17 @@ class TodoItem < ActiveRecord::Base
 end
 ```
 
-A create, update, destroy or move then starts with locking reads (`SELECT id FROM todo_items WHERE ... FOR UPDATE`) of the item and of the items that it is going to move. These are the rows that its `UPDATE` and `DELETE` statements lock anyway, in the same order. They are only locked earlier, so the option adds no lock on any other row.
+A create, update, destroy or move then starts with a locking read of the list (`SELECT id FROM todo_items WHERE todo_list_id = 1 ORDER BY id FOR UPDATE`). A change of scope locks the old list and the new one, in the same statement. The rows that the change goes on to update are among the rows it has locked. Another change to the same list waits at its own locking read until the first one commits.
 
-- `destroy` locks the item and the items below it. `insert_at`, `move_to_top` and `move_to_bottom` lock the item and the items between its old and its new position. `move_higher` and `move_lower` lock the item and its neighbour.
-- A save locks only when it creates the item, or changes its position or its scope. A new item at the bottom of the list moves no other item, so it locks nothing. A change of scope locks the items below the item in the old list, and the items that make room for it in the new list.
+- `destroy`, `insert_at`, the `move_*` methods and `remove_from_list` lock the list. A save locks it when it creates the item, or changes its position or its scope. Any other save locks nothing.
 - The locks are taken in a prepended `before_validation` and `before_save` (a save), in a prepended `before_destroy` (a destroy), and at the start of the move methods. That puts them before the reads of your validations and callbacks too.
 - A callback that you prepend yourself (`prepend: true`) below the `acts_as_list` line runs before these locks. When it reads, declare `acts_as_list` below it.
-- The locking reads select columns and load no record, so a model's `after_find` or `after_initialize` callback cannot read before them.
-- It costs one or two more queries for each of these changes.
-- SQLite has no row locks. ActiveRecord sends no `FOR UPDATE` there, so the option only adds reads.
-- The option does not make a list a queue. It does not reload the item in a save, and two new items that are added at the bottom at the same time can still get the same position (see [A note about data integrity](#a-note-about-data-integrity)). It does not prevent deadlocks either (see [Troubleshooting Database Deadlock Errors](#troubleshooting-database-deadlock-errors)).
+- The locking read selects ids and loads no record, so a model's `after_find` or `after_initialize` callback cannot read before it. It leaves out the model's default scope, so a join there locks no row of the joined table.
+- Changes to one list run one at a time. The locking read returns the id of every item in the list, so it costs more as the list grows.
+- On MySQL and MariaDB, index the scope columns. A locking read locks every row that it scans, so without an index it locks the whole table.
+- SQLite has no row locks. ActiveRecord sends no `FOR UPDATE` there, so the option only adds a read.
+- A save does not reload the item: it moves the item from the position that it had when it was loaded.
+- An empty list has no rows to lock. Two items that are created in an empty list at the same time can still get the same position on PostgreSQL, and on MySQL and MariaDB one of them can fail with a deadlock error (see [A note about data integrity](#a-note-about-data-integrity) and [Troubleshooting Database Deadlock Errors](#troubleshooting-database-deadlock-errors)).
 
 ### MariaDB 11.6.2 and later
 
@@ -314,7 +315,7 @@ Mysql2::Error: Record has changed since last read in table 'todo_items'; try res
 
 Earlier versions, and MySQL, let that write through. Without `lock_first: true`, two concurrent changes to one list hit this error: for example two `destroy` calls, two `insert_at` calls, or two `update(position: ...)` calls on a model with a uniqueness validation. The second transaction reads, waits for the row locks of the first one, and then updates rows that the first one changed.
 
-With `lock_first: true` the transaction waits for those rows before it has read anything, and the error does not occur. This holds when the save, destroy or move opens the transaction, or when the surrounding transaction has not read yet. It cannot hold when your code opens a transaction, reads in it, and then changes the list:
+With `lock_first: true` the transaction waits for the list before it has read anything, and the error does not occur. This holds when the save, destroy or move opens the transaction, or when the surrounding transaction has not read yet. It cannot hold when your code opens a transaction, reads in it, and then changes the list:
 
 ```ruby
 TodoItem.transaction do

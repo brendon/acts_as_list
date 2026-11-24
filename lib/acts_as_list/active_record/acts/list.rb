@@ -23,8 +23,8 @@ module ActiveRecord
         #   Defaults to true if position column has unique index, otherwise false.
         #   If constraint is <tt>deferrable initially deferred<tt>, overriding it with false will speed up insert_at.
         # * +touch_on_update+ - configuration to disable the update of the model timestamps when the positions are updated.
-        # * +lock_first+ - when true, a create, update, destroy or move first locks the rows that it is going to
-        #   update (<tt>SELECT ... FOR UPDATE</tt>), before it reads anything. Defaults to false.
+        # * +lock_first+ - when true, a create, update, destroy or move first locks the rows of the item's list
+        #   (<tt>SELECT ... FOR UPDATE</tt>), before it reads anything. Defaults to false.
         #   See "Locking before reading" in the README.
         def acts_as_list(options = {})
           configuration = { column: "position", scope: "1 = 1", top_of_list: 1, add_new_at: :bottom, touch_on_update: true, lock_first: false }
@@ -93,10 +93,10 @@ module ActiveRecord
 
         # Swap positions with the next lower item, if one exists.
         def move_lower
-          return unless lower_item
+          with_list_locked_first do
+            return unless lower_item
 
-          acts_as_list_class.transaction do
-            with_item_and_neighbour_locked_first(lower_items(1)) do
+            acts_as_list_class.transaction do
               if lower_item.current_position != current_position
                 swap_positions_with(lower_item)
               else
@@ -109,10 +109,10 @@ module ActiveRecord
 
         # Swap positions with the next higher item, if one exists.
         def move_higher
-          return unless higher_item
+          with_list_locked_first do
+            return unless higher_item
 
-          acts_as_list_class.transaction do
-            with_item_and_neighbour_locked_first(higher_items(1)) do
+            acts_as_list_class.transaction do
               if higher_item.current_position != current_position
                 swap_positions_with(higher_item)
               else
@@ -127,7 +127,7 @@ module ActiveRecord
         # position adjusted accordingly.
         def move_to_bottom
           return unless in_list?
-          insert_at_position bottom_position_in_list.to_i
+          with_list_locked_first { insert_at_position bottom_position_in_list.to_i }
         end
 
         # Move to the top of the list. If the item is already in the list, the items above it have their
@@ -140,8 +140,10 @@ module ActiveRecord
         # Removes the item from the list.
         def remove_from_list
           if in_list?
-            decrement_positions_on_lower_items
-            set_list_position(nil)
+            with_list_locked_first do
+              decrement_positions_on_lower_items
+              set_list_position(nil)
+            end
           end
         end
 
@@ -401,7 +403,7 @@ module ActiveRecord
         def insert_at_position(position, raise_exception_if_save_fails=false)
           raise ArgumentError.new("position cannot be lower than top") if position < acts_as_list_top
           return set_list_position(position, raise_exception_if_save_fails) if new_record?
-          with_item_and_rows_to_move_locked(position) do
+          with_list_and_item_locked do
             if in_list?
               old_position = current_position
               return if position == old_position
@@ -420,40 +422,30 @@ module ActiveRecord
 
         # --- lock_first: true ---
         #
-        # Each method below locks the rows that the gem is going to update, before the gem's first plain read.
-        # They are the rows, and the order, that its UPDATE and DELETE statements lock anyway: the item, then the
-        # items that change position. Nothing else is locked.
+        # A change to a list starts by locking the rows of the list (SELECT ... FOR UPDATE), before acts_as_list
+        # or the model reads anything. Whichever rows acts_as_list then moves are among them, so this code does not
+        # need to know which ones they are. A change of scope locks the rows of both lists, in one statement, so
+        # two changes lock them in the same order.
         #
-        # The locking reads select columns only. They do not load a record: a model's after_find and
-        # after_initialize callbacks can read, and that read would come before the locks that follow.
-        # The lists are the ones of the scope that the item was loaded with.
+        # The locking read selects the primary key and loads no record, so an after_find or after_initialize
+        # callback cannot read before it. It leaves out the default scope: its joins would lock rows of other
+        # tables, and PostgreSQL refuses FOR UPDATE on the nullable side of an outer join.
 
-        # insert_at and the move_to_* methods: lock the item, then the items between its position and the new
-        # one. with_lock reloads the item after that, and bottom_position_in_list reads.
-        def with_item_and_rows_to_move_locked(position, &block)
-          return with_lock(&block) unless lock_first?
+        # The move methods: a transaction that starts with the lock. The saves inside it lock nothing more.
+        def with_list_locked_first
+          return yield unless lock_first? && !list_rows_locked?
 
           acts_as_list_class.transaction do
-            current_position = lock_item_and_read_position
-            if current_position.nil?
-              lock_list_rows(list_rows_from(position))
-            elsif position != current_position
-              lock_list_rows(list_rows_between(acts_as_list_list, current_position, position))
-            end
-            with_list_rows_locked { with_lock(&block) }
+            lock_list_rows
+            with_list_rows_locked { yield }
           end
         end
 
-        # move_higher and move_lower: lock the neighbour and the item, in the order in which they are saved.
-        def with_item_and_neighbour_locked_first(neighbour, &block)
-          return yield unless lock_first?
-
-          lock_list_rows(neighbour)
-          lock_item_and_read_position
-          with_list_rows_locked(&block)
+        # insert_at and the move_to_* methods: the list, then with_lock, which reloads the item.
+        def with_list_and_item_locked(&block)
+          with_list_locked_first { with_lock(&block) }
         end
 
-        # The saves inside a move must not lock again.
         def with_list_rows_locked
           rows_locked, @acts_as_list_rows_locked = @acts_as_list_rows_locked, true
           yield
@@ -465,52 +457,19 @@ module ActiveRecord
           @acts_as_list_rows_locked
         end
 
-        # destroy: lock the item, then the items below it, which move up.
-        def lock_first_before_destroy
-          position = lock_item_and_read_position
-          lock_list_rows(acts_as_list_list.where("#{quoted_position_column_with_table_name} > ?", position)) if position
-        end
-
-        # The position of the item in the database, read with a lock on its row.
-        def lock_item_and_read_position
-          position = acts_as_list_class.unscoped.where(primary_key_condition).lock.pluck(position_column).first
-          position ? position.to_i : nil
-        end
-
         # before_validation runs for +valid?+ too. A lock outside a transaction is released at once, so the
         # callback only locks inside one. A save without validations locks in before_save.
         def lock_first_before_validation
           transaction = acts_as_list_current_transaction
           return unless transaction.open?
 
-          lock_first_for_save
+          lock_list_rows
           @acts_as_list_locked_in_transaction = transaction
         end
 
         def lock_first_before_save
           locked_in, @acts_as_list_locked_in_transaction = @acts_as_list_locked_in_transaction, nil
-          lock_first_for_save unless locked_in.equal?(acts_as_list_current_transaction)
-        end
-
-        def lock_first_for_save
-          return lock_list_rows(list_rows_moved_by_insert) if new_record?
-
-          lock_item_and_read_position
-          old_position = position_in_database
-          new_position = self[position_column]
-
-          if scope_changed?
-            # check_scope closes the gap in the old list, avoid_collision makes room in the new one.
-            if old_position
-              old_list = acts_as_list_list_before_scope_change
-              lock_list_rows(old_list.where("#{quoted_position_column_with_table_name} > ?", old_position))
-            end
-            lock_list_rows(list_rows_moved_by_insert)
-          elsif new_position && old_position
-            lock_list_rows(list_rows_between(acts_as_list_list, old_position, new_position))
-          elsif new_position
-            lock_list_rows(list_rows_from(new_position))
-          end
+          lock_list_rows unless locked_in.equal?(acts_as_list_current_transaction)
         end
 
         # A save that does not change the position or the scope of the item updates no other item.
@@ -518,49 +477,21 @@ module ActiveRecord
           new_record? || scope_changed? || changed.include?(position_column.to_s)
         end
 
-        # The items that avoid_collision moves down for an item that enters the list of its current scope:
-        # all of them, the ones from its position on, or none.
-        def list_rows_moved_by_insert
-          explicit_position = position_changed || (persisted? && changed.include?(position_column.to_s))
-          default_position = not_in_list? || default_position? || (persisted? && !explicit_position)
-
-          case add_new_at
-          when :top
-            default_position ? acts_as_list_list : list_rows_from(self[position_column])
-          when :bottom
-            default_position ? nil : list_rows_from(self[position_column])
-          else
-            explicit_position && in_list? ? list_rows_from(self[position_column]) : nil
-          end
+        def lock_list_rows
+          rows = list_rows_where(scope_condition)
+          rows = rows.or(list_rows_where(scope_condition_before_change)) if persisted? && scope_changed?
+          primary_key = Array(acts_as_list_class.primary_key).map(&:to_sym)
+          rows.reorder(*primary_key).lock.pluck(*primary_key)
         end
 
-        def list_rows_from(position)
-          acts_as_list_list.where("#{quoted_position_column_with_table_name} >= ?", position)
+        def list_rows_where(condition)
+          acts_as_list_class.unscoped.unscope(:where).where(condition)
         end
 
-        def list_rows_between(list, one_position, other_position)
-          low, high = [one_position, other_position].minmax
-          list.where("#{quoted_position_column_with_table_name} >= ?", low).where("#{quoted_position_column_with_table_name} <= ?", high)
-        end
-
-        # In the order of the positions: the order in which the UPDATE that moves them reads them.
-        def lock_list_rows(rows)
-          return unless rows
-
-          rows = rows.reorder(acts_as_list_order_argument(:asc)) if rows.limit_value.nil?
-          rows.lock.pluck(*Array(self.class.primary_key))
-        end
-
-        def position_in_database
-          position = changed_attributes.fetch(position_column.to_s) { self[position_column] }
-          position ? position.to_i : nil
-        end
-
-        def acts_as_list_list_before_scope_change
+        def scope_condition_before_change
           cached_changes = changes
-
           cached_changes.each { |attribute, values| self[attribute] = values[0] }
-          acts_as_list_list
+          scope_condition
         ensure
           cached_changes.each { |attribute, values| self[attribute] = values[1] }
         end
