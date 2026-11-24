@@ -174,6 +174,9 @@ default: `true`. Use `touch_on_update: false` if you don't want to update the ti
 - `sequential_updates`
 Specifies whether insert_at should update objects positions during shuffling one by one to respect position column unique not null constraint. Defaults to true if position column has unique index, otherwise false. If constraint is `deferrable initially deferred` (PostgreSQL), overriding it with false will speed up insert_at.
 
+- `lock_first`
+default: `false`. Use `lock_first: true` to lock the rows that `acts_as_list` is going to update before it reads anything. See [Locking before reading](#locking-before-reading).
+
 ## Disabling temporarily
 
 If you need to temporarily disable `acts_as_list` during specific operations such as mass-update or imports:
@@ -278,6 +281,49 @@ todo_list.with_lock do
   item = TodoItem.create(description: "Buy Groceries", todo_list: todo_list, position: 1)
 end
 ```
+
+## Locking before reading
+
+`acts_as_list` reads (the item, the bottom of the list), and then updates the item and the items that change position (`UPDATE ... SET position = position + 1 WHERE ...`). The model's validations also read before that. With `lock_first: true` the gem locks those rows before the first of these reads:
+
+```ruby
+class TodoItem < ActiveRecord::Base
+  belongs_to :todo_list
+  acts_as_list scope: :todo_list, lock_first: true
+end
+```
+
+A create, update, destroy or move then starts with locking reads (`SELECT id FROM todo_items WHERE ... FOR UPDATE`) of the item and of the items that it is going to move. These are the rows that its `UPDATE` and `DELETE` statements lock anyway, in the same order. They are only locked earlier, so the option adds no lock on any other row.
+
+- `destroy` locks the item and the items below it. `insert_at`, `move_to_top` and `move_to_bottom` lock the item and the items between its old and its new position. `move_higher` and `move_lower` lock the item and its neighbour.
+- A save locks only when it creates the item, or changes its position or its scope. A new item at the bottom of the list moves no other item, so it locks nothing. A change of scope locks the items below the item in the old list, and the items that make room for it in the new list.
+- The locks are taken in a prepended `before_validation` and `before_save` (a save), in a prepended `before_destroy` (a destroy), and at the start of the move methods. That puts them before the reads of your validations and callbacks too.
+- A callback that you prepend yourself (`prepend: true`) below the `acts_as_list` line runs before these locks. When it reads, declare `acts_as_list` below it.
+- The locking reads select columns and load no record, so a model's `after_find` or `after_initialize` callback cannot read before them.
+- It costs one or two more queries for each of these changes.
+- SQLite has no row locks. ActiveRecord sends no `FOR UPDATE` there, so the option only adds reads.
+- The option does not make a list a queue. It does not reload the item in a save, and two new items that are added at the bottom at the same time can still get the same position (see [A note about data integrity](#a-note-about-data-integrity)). It does not prevent deadlocks either (see [Troubleshooting Database Deadlock Errors](#troubleshooting-database-deadlock-errors)).
+
+### MariaDB 11.6.2 and later
+
+MariaDB 11.6.2 and later run with [`innodb_snapshot_isolation=ON`](https://mariadb.com/docs/server/server-usage/storage-engines/innodb/innodb-system-variables#innodb_snapshot_isolation) by default. At the default isolation level (`REPEATABLE READ`), a transaction that has done a plain read, and then locks or writes a row that another transaction changed after that read, is rolled back:
+
+```
+Mysql2::Error: Record has changed since last read in table 'todo_items'; try restarting transaction
+```
+
+Earlier versions, and MySQL, let that write through. Without `lock_first: true`, two concurrent changes to one list hit this error: for example two `destroy` calls, two `insert_at` calls, or two `update(position: ...)` calls on a model with a uniqueness validation. The second transaction reads, waits for the row locks of the first one, and then updates rows that the first one changed.
+
+With `lock_first: true` the transaction waits for those rows before it has read anything, and the error does not occur. This holds when the save, destroy or move opens the transaction, or when the surrounding transaction has not read yet. It cannot hold when your code opens a transaction, reads in it, and then changes the list:
+
+```ruby
+TodoItem.transaction do
+  item = TodoItem.find(id)  # the snapshot of the transaction starts here
+  item.move_to_top          # raises if another transaction changed one of the rows in between
+end
+```
+
+No order of locks inside the gem can help there: the server rolls back the whole transaction, and only the code that opened it can run it again. Either take your own lock as the first statement of the transaction (`TodoItem.lock.find(id)`, or a lock on the parent record), or rescue the error and run the transaction again as for a deadlock.
 
 ## Versions
 Version `0.9.0` adds `acts_as_list_no_update` (https://github.com/brendon/acts_as_list/pull/244) and compatibility with not-null and uniqueness constraints on the database (https://github.com/brendon/acts_as_list/pull/246). These additions shouldn't break compatibility with existing implementations.
