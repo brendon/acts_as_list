@@ -6,6 +6,8 @@ module ActiveRecord::Acts::List::LockFirstMethodDefiner #:nodoc:
       define_method :lock_first? do
         lock_first
       end
+
+      private :lock_first?
     end
   end
 end
