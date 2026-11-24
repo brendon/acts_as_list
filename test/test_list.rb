@@ -64,7 +64,7 @@ def setup_db(position_options = {})
 
   mixins = [ Mixin, ListMixin, ListMixinSub1, ListMixinSub2, ListWithStringScopeMixin,
     ArrayScopeListMixin, ZeroBasedMixin, DefaultScopedMixin, EnumArrayScopeListMixin,
-    DefaultScopedWhereMixin, TopAdditionMixin, NoAdditionMixin, QuotedList, TouchDisabledMixin, CompositePrimaryKeyList, CompositePrimaryKeyListScoped ]
+    DefaultScopedWhereMixin, TopAdditionMixin, NoAdditionMixin, QuotedList, TouchDisabledMixin, CompositePrimaryKeyList, CompositePrimaryKeyListScoped, LockFirstMixin ]
 
   ActiveRecord::Base.connection.schema_cache.clear!
   mixins.each do |klass|
@@ -96,6 +96,14 @@ class ListMixinSub2 < ListMixin
 end
 
 class ListMixinError < ListMixin
+  validates :state, presence: true
+end
+
+class LockFirstMixin < Mixin
+  acts_as_list column: "pos", scope: :parent, lock_first: true
+end
+
+class LockFirstMixinError < LockFirstMixin
   validates :state, presence: true
 end
 
@@ -292,6 +300,15 @@ class ListTest < ActsAsListTestCase
     threads.each(&:join)
 
     assert_equal((1..n).to_a, ListMixin.where(parent_id: 1).order('pos').map(&:pos))
+  end
+end
+
+class LockFirstTest < ActsAsListTestCase
+  include Shared::List
+
+  def setup
+    setup_db
+    super(LockFirstMixin, LockFirstMixinError)
   end
 end
 

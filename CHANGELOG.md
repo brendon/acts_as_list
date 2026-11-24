@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+- `lock_first: true` option: lock the rows that are going to be updated before reading anything. Off by default. It avoids "Record has changed since last read" errors on MariaDB 11.6.2+ (`innodb_snapshot_isolation`) when two transactions change one list.
+
 ## v1.2.6 - 2025-10-21
 
 - Expose configuration via class-level method (acts_as_list_options) [\#447](https://github.com/brendon/acts_as_list/pull/447) ([anthony0030])
