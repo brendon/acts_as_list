@@ -293,16 +293,18 @@ class TodoItem < ActiveRecord::Base
 end
 ```
 
-A create, update, destroy or move then starts with locking reads (`SELECT id FROM todo_items WHERE ... FOR UPDATE`) of the item and of the items that it is going to move. These are the rows that its `UPDATE` and `DELETE` statements lock anyway, in the same order. They are only locked earlier, so the option adds no lock on any other row.
+A create, update, destroy or move then starts with locking reads (`SELECT id FROM todo_items WHERE ... FOR UPDATE`) of the item and of the items that it is going to move. These are the rows that its `UPDATE` and `DELETE` statements lock anyway, in the same order. They are only locked earlier.
+
+Before them, each change locks the first item of the list. Two changes to one list then take their locks one after the other, and cannot deadlock with each other on the rows of the list. This is the only row that the option locks in addition. Without it, a `destroy` deadlocks either with the `destroy` of the item above it or with a move, whichever way it orders its own locks.
 
 - `destroy` locks the item and the items below it. `insert_at`, `move_to_top` and `move_to_bottom` lock the item and the items between its old and its new position. `move_higher` and `move_lower` lock the item and its neighbour.
-- A save locks only when it creates the item, or changes its position or its scope. A new item at the bottom of the list moves no other item, so it locks nothing. A change of scope locks the items below the item in the old list, and the items that make room for it in the new list.
+- A save locks only when it creates the item, or changes its position or its scope. A new item at the bottom of the list moves no other item, so it locks nothing. A change of scope locks the first item of the old list and of the new list, the items below the item in the old list, and the items that make room for it in the new list.
 - The locks are taken in a prepended `before_validation` and `before_save` (a save), in a prepended `before_destroy` (a destroy), and at the start of the move methods. That puts them before the reads of your validations and callbacks too.
 - A callback that you prepend yourself (`prepend: true`) below the `acts_as_list` line runs before these locks. When it reads, declare `acts_as_list` below it.
 - The locking reads select columns and load no record, so a model's `after_find` or `after_initialize` callback cannot read before them.
-- It costs one or two more queries for each of these changes.
+- It costs two or three more queries for each of these changes. Changes to one list run one after the other. Without an index on the scope and position columns, the lock of the first item can lock more rows of the table.
 - SQLite has no row locks. ActiveRecord sends no `FOR UPDATE` there, so the option only adds reads.
-- The option does not make a list a queue. It does not reload the item in a save, and two new items that are added at the bottom at the same time can still get the same position (see [A note about data integrity](#a-note-about-data-integrity)). It does not prevent deadlocks either (see [Troubleshooting Database Deadlock Errors](#troubleshooting-database-deadlock-errors)).
+- The option does not make a list a queue. It does not reload the item in a save, and two new items that are added at the bottom at the same time can still get the same position (see [A note about data integrity](#a-note-about-data-integrity)). It does not prevent every deadlock either: a change inside a transaction that already holds other locks, or two items that swap lists at the same time, can still deadlock (see [Troubleshooting Database Deadlock Errors](#troubleshooting-database-deadlock-errors)).
 
 ### MariaDB 11.6.2 and later
 

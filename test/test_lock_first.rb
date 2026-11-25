@@ -45,6 +45,9 @@ class LockFirstTestCase < Minitest::Test
       t.column :position, :integer
       t.column :name, :string
     end
+    # As most applications have it. With this index, a destroy that locks its own row before the rows below it
+    # deadlocks with a destroy of the item above (see LockFirstConcurrencyTest).
+    ActiveRecord::Base.connection.add_index :locked_todo_items, [:todo_list_id, :position]
 
     ActiveRecord::Base.connection.create_table :locked_composite_todo_items, primary_key: [:first_id, :second_id] do |t|
       t.column :first_id, :integer, null: false
@@ -99,6 +102,8 @@ class LockFirstTestCase < Minitest::Test
     assert_equal locks, statements[start + 1, count], "the locks must be the first statements of the transaction"
   end
 
+  # The first item of the list: every change to a list locks it before anything else.
+  HEAD_LOCK = /ORDER BY .*position\W+ ASC LIMIT 1 FOR UPDATE/
   ITEM_LOCK = /WHERE\W+locked_todo_items\W+id\W+ (=|IN)/
   POSITION_RANGE = /position\W+ >/
 end
@@ -127,13 +132,14 @@ class LockFirstOrderTest < LockFirstTestCase
     assert_equal true, LockedTodoItem.acts_as_list_options[:lock_first]
   end
 
-  def test_destroy_locks_the_item_and_the_items_below_it_first
+  def test_destroy_locks_the_list_head_the_item_and_the_items_below_it_first
     item = LockedTodoItem.find(@items[1].id)
     statements = capture_sql { item.destroy! }
 
-    assert_locks_first statements, 2
-    assert_match ITEM_LOCK, locking_reads(statements)[0]
-    assert_match POSITION_RANGE, locking_reads(statements)[1]
+    assert_locks_first statements, 3
+    assert_match HEAD_LOCK, locking_reads(statements)[0]
+    assert_match ITEM_LOCK, locking_reads(statements)[1]
+    assert_match POSITION_RANGE, locking_reads(statements)[2]
     assert_equal @items.values_at(0, 2, 3).map(&:id), list_ids
     assert_equal [1, 2, 3], list_positions
   end
@@ -142,12 +148,12 @@ class LockFirstOrderTest < LockFirstTestCase
     item = LockedReadingTodoItem.find(@items[3].id)
     statements = capture_sql { item.insert_at(2) }
 
-    # The item, the items in between, and then with_lock, which reloads the item.
-    assert_locks_first statements, 3
+    # The list head, the item, the items in between, and then with_lock, which reloads the item.
+    assert_locks_first statements, 4
     assert_equal @items.values_at(0, 3, 1, 2).map(&:id), list_ids
 
     item = LockedReadingTodoItem.find(@items[0].id)
-    assert_locks_first capture_sql { item.destroy! }, 2
+    assert_locks_first capture_sql { item.destroy! }, 3
     assert_equal [1, 2, 3], list_positions
   end
 
@@ -155,9 +161,10 @@ class LockFirstOrderTest < LockFirstTestCase
     item = LockedTodoItem.find(@items[3].id)
     statements = capture_sql { item.update!(position: 1) }
 
-    assert_locks_first statements, 2
-    assert_match ITEM_LOCK, locking_reads(statements)[0]
-    assert_match POSITION_RANGE, locking_reads(statements)[1]
+    assert_locks_first statements, 3
+    assert_match HEAD_LOCK, locking_reads(statements)[0]
+    assert_match ITEM_LOCK, locking_reads(statements)[1]
+    assert_match POSITION_RANGE, locking_reads(statements)[2]
     refute_empty plain_reads(statements), "the uniqueness validation reads"
     assert_equal @items.values_at(3, 0, 1, 2).map(&:id), list_ids
   end
@@ -167,7 +174,7 @@ class LockFirstOrderTest < LockFirstTestCase
     item.position = 1
     statements = capture_sql { item.save!(validate: false) }
 
-    assert_locks_first statements, 2
+    assert_locks_first statements, 3
     assert_equal @items.values_at(3, 0, 1, 2).map(&:id), list_ids
   end
 
@@ -187,16 +194,18 @@ class LockFirstOrderTest < LockFirstTestCase
   def test_create_at_a_position_locks_the_items_from_that_position_on
     statements = capture_sql { LockedTodoItem.create!(todo_list_id: 1, name: "new", position: 2) }
 
-    assert_locks_first statements, 1
-    assert_match POSITION_RANGE, locking_reads(statements)[0]
+    assert_locks_first statements, 2
+    assert_match HEAD_LOCK, locking_reads(statements)[0]
+    assert_match POSITION_RANGE, locking_reads(statements)[1]
     assert_equal [1, 2, 3, 4, 5], list_positions
   end
 
   def test_create_at_the_top_locks_the_list
     statements = capture_sql { LockedTopTodoItem.create!(todo_list_id: 1) }
 
-    assert_locks_first statements, 1
-    refute_match POSITION_RANGE, locking_reads(statements)[0]
+    assert_locks_first statements, 2
+    assert_match HEAD_LOCK, locking_reads(statements)[0]
+    refute_match POSITION_RANGE, locking_reads(statements)[1]
     assert_equal [1, 2, 3, 4, 5], list_positions
   end
 
@@ -212,29 +221,30 @@ class LockFirstOrderTest < LockFirstTestCase
     item = LockedTodoItem.find(@items[3].id)
     statements = capture_sql { item.insert_at(2) }
 
-    # The item, then the items between the two positions, then with_lock, which reloads the item. The saves inside
-    # insert_at lock nothing more.
-    assert_locks_first statements, 3
-    assert_match ITEM_LOCK, locking_reads(statements)[0]
-    assert_match POSITION_RANGE, locking_reads(statements)[1]
+    # The list head, the item, then the items between the two positions, then with_lock, which reloads the item.
+    # The saves inside insert_at lock nothing more.
+    assert_locks_first statements, 4
+    assert_match HEAD_LOCK, locking_reads(statements)[0]
+    assert_match ITEM_LOCK, locking_reads(statements)[1]
+    assert_match POSITION_RANGE, locking_reads(statements)[2]
     assert_equal @items.values_at(0, 3, 1, 2).map(&:id), list_ids
   end
 
   def test_move_to_top_and_move_to_bottom_lock_first
     item = LockedTodoItem.find(@items[1].id)
 
-    assert_locks_first capture_sql { item.move_to_bottom }, 3
+    assert_locks_first capture_sql { item.move_to_bottom }, 4
     assert_equal @items.values_at(0, 2, 3, 1).map(&:id), list_ids
-    assert_locks_first capture_sql { item.move_to_top }, 3
+    assert_locks_first capture_sql { item.move_to_top }, 4
     assert_equal @items.values_at(1, 0, 2, 3).map(&:id), list_ids
   end
 
   def test_move_higher_and_move_lower_lock_the_neighbour_and_the_item_first
     item = LockedTodoItem.find(@items[1].id)
 
-    assert_locks_first capture_sql { item.move_higher }, 2
+    assert_locks_first capture_sql { item.move_higher }, 3
     assert_equal @items.values_at(1, 0, 2, 3).map(&:id), list_ids
-    assert_locks_first capture_sql { item.move_lower }, 2
+    assert_locks_first capture_sql { item.move_lower }, 3
     assert_equal @items.values_at(0, 1, 2, 3).map(&:id), list_ids
   end
 
@@ -242,7 +252,10 @@ class LockFirstOrderTest < LockFirstTestCase
     item = LockedTodoItem.find(@items[1].id)
     statements = capture_sql { item.update!(todo_list_id: 2) }
 
-    assert_locks_first statements, 2
+    # The head of the old list, the head of the new list, the item, the items below it in the old list.
+    assert_locks_first statements, 4
+    assert_match HEAD_LOCK, locking_reads(statements)[0]
+    assert_match HEAD_LOCK, locking_reads(statements)[1]
     assert_equal 2, item.reload.todo_list_id
     assert_equal 2, item.position
     assert_equal [1, 2, 3], list_positions
@@ -252,7 +265,7 @@ class LockFirstOrderTest < LockFirstTestCase
     item = LockedTodoItem.find(@items[1].id)
     statements = capture_sql { item.update!(todo_list_id: 2, position: 1) }
 
-    assert_locks_first statements, 3
+    assert_locks_first statements, 5
     assert_equal [item.id], LockedTodoItem.where(todo_list_id: 2, position: 1).pluck(:id)
     assert_equal [1, 2], LockedTodoItem.where(todo_list_id: 2).order(:position).pluck(:position)
     assert_equal [1, 2, 3], list_positions
@@ -265,7 +278,7 @@ class LockFirstOrderTest < LockFirstTestCase
 
     statements = capture_sql { first.update!(kind: "b") }
 
-    assert_locks_first statements, 2
+    assert_locks_first statements, 4
     assert_equal [1, 2], LockedArrayScopeTodoItem.where(todo_list_id: 3, kind: "b").order(:position).pluck(:position)
     assert_equal [1], LockedArrayScopeTodoItem.where(todo_list_id: 3, kind: "a").pluck(:position)
   end
@@ -275,9 +288,9 @@ class LockFirstOrderTest < LockFirstTestCase
 
     (1..3).each { |counter| LockedCompositeTodoItem.create!(first_id: counter, second_id: counter, todo_list_id: 1) }
 
-    assert_locks_first capture_sql { LockedCompositeTodoItem.find([3, 3]).insert_at(1) }, 3
+    assert_locks_first capture_sql { LockedCompositeTodoItem.find([3, 3]).insert_at(1) }, 4
     assert_equal [3, 1, 2], LockedCompositeTodoItem.order(:position).pluck(:first_id)
-    assert_locks_first capture_sql { LockedCompositeTodoItem.find([3, 3]).destroy! }, 2
+    assert_locks_first capture_sql { LockedCompositeTodoItem.find([3, 3]).destroy! }, 3
     assert_equal [1, 2], LockedCompositeTodoItem.order(:position).pluck(:position)
   end
 
@@ -323,6 +336,27 @@ class LockFirstConcurrencyTest < LockFirstTestCase
 
     assert_equal @items.values_at(2, 3, 4, 5).map(&:id), list_ids
     assert_equal [1, 2, 3, 4], list_positions
+  end
+
+  # The first destroy stops right after its first locking read. Every change locks the first item of the list
+  # before anything else, so two changes to one list cannot deadlock on its rows. When a destroy locked its own
+  # row first, the destroy of the item above it took this item's index record with its lock of the rows below,
+  # and then waited for this row, while this destroy's DELETE waited for that index record: a deadlock.
+  def test_two_destroys_at_once_when_the_lower_one_holds_only_its_first_lock
+    race(hold_after: /\ASELECT .* FOR UPDATE\z/m, first: -> { LockedTodoItem.find(@items[1].id).destroy! },
+         second: -> { LockedTodoItem.find(@items[0].id).destroy! })
+
+    assert_equal @items.values_at(2, 3, 4, 5).map(&:id), list_ids
+    assert_equal [1, 2, 3, 4], list_positions
+  end
+
+  # The other order of the locks in a destroy (the rows from the item down, then the item) deadlocks here.
+  def test_destroy_that_holds_only_its_first_lock_and_a_move_at_once
+    race(hold_after: /\ASELECT .* FOR UPDATE\z/m, first: -> { LockedTodoItem.find(@items[1].id).destroy! },
+         second: -> { LockedTodoItem.find(@items[4].id).move_to_top })
+
+    assert_equal @items.values_at(4, 0, 2, 3, 5).map(&:id), list_ids
+    assert_equal [1, 2, 3, 4, 5], list_positions
   end
 
   def test_two_moves_at_once

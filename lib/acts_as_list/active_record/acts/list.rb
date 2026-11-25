@@ -422,7 +422,10 @@ module ActiveRecord
         #
         # Each method below locks the rows that the gem is going to update, before the gem's first plain read.
         # They are the rows, and the order, that its UPDATE and DELETE statements lock anyway: the item, then the
-        # items that change position. Nothing else is locked.
+        # items that change position. Before them, each one locks the first item of the list (lock_list_head): two
+        # changes to one list then take their locks one after the other, and cannot deadlock on the list. Without it,
+        # either order of the item and the items below it deadlocks with some other change: the item first with a
+        # destroy just above it, the items below first with a move.
         #
         # The locking reads select columns only. They do not load a record: a model's after_find and
         # after_initialize callbacks can read, and that read would come before the locks that follow.
@@ -434,6 +437,7 @@ module ActiveRecord
           return with_lock(&block) unless lock_first?
 
           acts_as_list_class.transaction do
+            lock_list_head
             current_position = lock_item_and_read_position
             if current_position.nil?
               lock_list_rows(list_rows_from(position))
@@ -448,6 +452,7 @@ module ActiveRecord
         def with_item_and_neighbour_locked_first(neighbour, &block)
           return yield unless lock_first?
 
+          lock_list_head
           lock_list_rows(neighbour)
           lock_item_and_read_position
           with_list_rows_locked(&block)
@@ -467,6 +472,7 @@ module ActiveRecord
 
         # destroy: lock the item, then the items below it, which move up.
         def lock_first_before_destroy
+          lock_list_head
           position = lock_item_and_read_position
           lock_list_rows(acts_as_list_list.where("#{quoted_position_column_with_table_name} > ?", position)) if position
         end
@@ -493,8 +499,13 @@ module ActiveRecord
         end
 
         def lock_first_for_save
-          return lock_list_rows(list_rows_moved_by_insert) if new_record?
+          if new_record?
+            rows = list_rows_moved_by_insert
+            lock_list_head if rows
+            return lock_list_rows(rows)
+          end
 
+          lock_list_heads_for_save
           lock_item_and_read_position
           old_position = position_in_database
           new_position = self[position_column]
@@ -541,6 +552,17 @@ module ActiveRecord
         def list_rows_between(list, one_position, other_position)
           low, high = [one_position, other_position].minmax
           list.where("#{quoted_position_column_with_table_name} >= ?", low).where("#{quoted_position_column_with_table_name} <= ?", high)
+        end
+
+        # The first item of the list, as the list's lock. An empty list has none: nothing in it moves.
+        def lock_list_head(list = acts_as_list_list)
+          list.reorder(acts_as_list_order_argument(:asc)).limit(1).lock.pluck(*Array(self.class.primary_key))
+        end
+
+        # A save that changes the scope changes two lists: the old one first, then the new one.
+        def lock_list_heads_for_save
+          lock_list_head(acts_as_list_list_before_scope_change) if scope_changed?
+          lock_list_head
         end
 
         # In the order of the positions: the order in which the UPDATE that moves them reads them.
