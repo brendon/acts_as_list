@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## v1.2.7 - 2026-11-25
+
 ### Changed
 - Modernised the gemspec: the file list is now built with `Dir.glob` instead of `git ls-files`, so the gem can be built without git, and the unused `executables` directive is gone. [\#445](https://github.com/brendon/acts_as_list/issues/445)
 - The gem package no longer includes `Rakefile`, `init.rb` or `.gemtest`, none of which are used by an installed gem.
